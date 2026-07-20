@@ -1,0 +1,32 @@
+# Node
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+frontend/.env.production
+
+# .NET
+backend/**/bin/
+backend/**/obj/
+backend/.vs/
+
+# IDE
+.vscode/
+.idea/
+*.user
+*.suo
+
+# Operating system
+.DS_Store
+Thumbs.db
+
+# Local databases
+*.db
+*.db-shm
+*.db-wal
+
+# Logs
+*.log
+
+# Secrets
+appsettings.Development.local.json
