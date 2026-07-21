@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using OnXPortfolio.Infrastructure.Persistence;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -16,6 +19,14 @@ builder.Services.AddCors(options =>
             .AllowAnyMethod();
     });
 });
+
+var connectionString =
+    builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException(
+        "The DefaultConnection connection string is missing.");
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlite(connectionString));
 
 var app = builder.Build();
 
