@@ -1,6 +1,38 @@
 @OnXPortfolio.Api_HostAddress = http://localhost:5288
 
-GET {{OnXPortfolio.Api_HostAddress}}/weatherforecast/
+### Get all vendors
+GET {{OnXPortfolio.Api_HostAddress}}/api/vendors
 Accept: application/json
 
 ###
+
+### Get all events
+GET {{OnXPortfolio.Api_HostAddress}}/api/events
+Accept: application/json
+
+###
+
+### Search events
+GET {{OnXPortfolio.Api_HostAddress}}/api/events?search=Cisco
+Accept: application/json
+
+###
+
+### Filter events by stage
+GET {{OnXPortfolio.Api_HostAddress}}/api/events?stage=Planning
+Accept: application/json
+
+###
+
+### Create event
+POST {{OnXPortfolio.Api_HostAddress}}/api/events
+Content-Type: application/json
+
+{
+  "description": "Microsoft AI Readiness Briefing",
+  "eventDate": "2026-12-05",
+  "stage": "Exploring",
+  "budgetCad": 8500,
+  "notes": "Initial discovery event.",
+  "vendorId": "22222222-2222-2222-2222-222222222222"
+}
