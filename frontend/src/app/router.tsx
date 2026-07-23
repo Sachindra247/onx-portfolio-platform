@@ -1,7 +1,7 @@
 import { createBrowserRouter } from "react-router-dom";
 import AppLayout from "../components/layout/AppLayout";
 import EventsPage from "../pages/EventsPage";
-import HomePage from "../pages/HomePage";
+import HomePage from "../pages/HomePage.tsx";
 import NotFoundPage from "../pages/NotFoundPage";
 
 const baseName = import.meta.env.BASE_URL.replace(/\/$/, "");

@@ -1,9 +1,15 @@
 # Node
-frontend/node_modules/
+node_modules/
+**/node_modules/
 frontend/dist/
+
+# Local environment overrides
+.env
+.env.local
+.env.*.local
 frontend/.env
 frontend/.env.local
-frontend/.env.production
+frontend/.env.production.local
 
 # .NET
 backend/**/bin/
@@ -28,5 +34,6 @@ Thumbs.db
 # Logs
 *.log
 
-# Secrets
+# Local secrets
 appsettings.Development.local.json
+**/appsettings.Development.local.json
