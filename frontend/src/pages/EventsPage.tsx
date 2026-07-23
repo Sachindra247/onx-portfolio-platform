@@ -10,19 +10,28 @@ import {
 } from "../api/eventsApi";
 import EventFilters from "../components/events/EventFilters";
 import EventFormModal from "../components/events/EventFormModal";
+import EventHighlights from "../components/events/EventHighlights";
+import EventPagination from "../components/events/EventPagination";
+import EventPortfolioCharts from "../components/events/EventPortfolioCharts";
 import EventStats from "../components/events/EventStats";
 import EventTable from "../components/events/EventTable";
+import EventVendorGroups from "../components/events/EventVendorGroups";
+import ConfirmDialog from "../components/feedback/ConfirmDialog";
+import { useToast } from "../components/feedback/ToastProvider";
 import type {
   EventDto,
   EventFormValues,
   EventSortField,
   EventStage,
+  EventViewMode,
   SortDirection,
   VendorDto,
 } from "../types/events";
 import { mapFormToRequest } from "../utils/eventFormatting";
 
 export default function EventsPage() {
+  const { showToast } = useToast();
+
   const [events, setEvents] = useState<EventDto[]>([]);
   const [vendors, setVendors] = useState<VendorDto[]>([]);
 
@@ -38,11 +47,22 @@ export default function EventsPage() {
   const [sortDirection, setSortDirection] =
     useState<SortDirection>("ascending");
 
+  const [viewMode, setViewMode] = useState<EventViewMode>("table");
+
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<EventDto | null>(null);
 
   const [isSaving, setIsSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+
+  const [eventPendingDelete, setEventPendingDelete] = useState<EventDto | null>(
+    null,
+  );
+
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const loadPageData = useCallback(async () => {
     setIsLoading(true);
@@ -125,6 +145,30 @@ export default function EventsPage() {
     });
   }, [events, search, sortDirection, sortField, stage, vendorId]);
 
+  const paginatedEvents = useMemo(() => {
+    const startingIndex = (page - 1) * pageSize;
+
+    return filteredAndSortedEvents.slice(
+      startingIndex,
+      startingIndex + pageSize,
+    );
+  }, [filteredAndSortedEvents, page, pageSize]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [search, stage, vendorId, pageSize, viewMode]);
+
+  useEffect(() => {
+    const pageCount = Math.max(
+      1,
+      Math.ceil(filteredAndSortedEvents.length / pageSize),
+    );
+
+    if (page > pageCount) {
+      setPage(pageCount);
+    }
+  }, [filteredAndSortedEvents.length, page, pageSize]);
+
   function handleSort(field: EventSortField) {
     if (field === sortField) {
       setSortDirection((currentDirection) =>
@@ -177,10 +221,14 @@ export default function EventsPage() {
               : portfolioEvent,
           ),
         );
+
+        showToast(`"${updatedEvent.description}" was updated.`, "success");
       } else {
         const newEvent = await createEvent(request);
 
         setEvents((currentEvents) => [...currentEvents, newEvent]);
+
+        showToast(`"${newEvent.description}" was added.`, "success");
       }
 
       setModalIsOpen(false);
@@ -192,24 +240,33 @@ export default function EventsPage() {
     }
   }
 
-  async function handleDelete(portfolioEvent: EventDto) {
-    const confirmed = window.confirm(
-      `Delete "${portfolioEvent.description}"?\n\n` +
-        "This action cannot be undone.",
-    );
+  function requestDelete(portfolioEvent: EventDto) {
+    setEventPendingDelete(portfolioEvent);
+  }
 
-    if (!confirmed) {
+  async function confirmDelete() {
+    if (!eventPendingDelete) {
       return;
     }
 
+    setIsDeleting(true);
+
     try {
-      await deleteEvent(portfolioEvent.id);
+      await deleteEvent(eventPendingDelete.id);
 
       setEvents((currentEvents) =>
-        currentEvents.filter((event) => event.id !== portfolioEvent.id),
+        currentEvents.filter(
+          (portfolioEvent) => portfolioEvent.id !== eventPendingDelete.id,
+        ),
       );
+
+      showToast(`"${eventPendingDelete.description}" was deleted.`, "success");
+
+      setEventPendingDelete(null);
     } catch (error) {
-      window.alert(getApiErrorMessage(error));
+      showToast(getApiErrorMessage(error), "error");
+    } finally {
+      setIsDeleting(false);
     }
   }
 
@@ -217,6 +274,12 @@ export default function EventsPage() {
     setSearch("");
     setStage("");
     setVendorId("");
+    setPage(1);
+  }
+
+  function handlePageSizeChange(nextPageSize: number) {
+    setPageSize(nextPageSize);
+    setPage(1);
   }
 
   return (
@@ -256,6 +319,7 @@ export default function EventsPage() {
           />
 
           <h2>Loading events</h2>
+
           <p>Retrieving the current portfolio from the API...</p>
         </div>
       )}
@@ -265,6 +329,7 @@ export default function EventsPage() {
           <AlertCircle size={31} aria-hidden="true" />
 
           <h2>Unable to load events</h2>
+
           <p>{loadError}</p>
 
           <button
@@ -282,6 +347,10 @@ export default function EventsPage() {
         <>
           <EventStats events={events} />
 
+          <EventPortfolioCharts events={events} />
+
+          <EventHighlights events={events} onEdit={openEditModal} />
+
           <section className="event-table-card">
             <EventFilters
               search={search}
@@ -290,20 +359,39 @@ export default function EventsPage() {
               vendors={vendors}
               resultCount={filteredAndSortedEvents.length}
               totalCount={events.length}
+              viewMode={viewMode}
               onSearchChange={setSearch}
               onStageChange={setStage}
               onVendorChange={setVendorId}
+              onViewModeChange={setViewMode}
               onReset={resetFilters}
             />
 
-            <EventTable
-              events={filteredAndSortedEvents}
-              sortField={sortField}
-              sortDirection={sortDirection}
-              onSort={handleSort}
-              onEdit={openEditModal}
-              onDelete={(portfolioEvent) => void handleDelete(portfolioEvent)}
-            />
+            {viewMode === "table" ? (
+              <>
+                <EventTable
+                  events={paginatedEvents}
+                  sortField={sortField}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                  onEdit={openEditModal}
+                  onDelete={requestDelete}
+                />
+
+                <EventPagination
+                  page={page}
+                  pageSize={pageSize}
+                  totalItems={filteredAndSortedEvents.length}
+                  onPageChange={setPage}
+                  onPageSizeChange={handlePageSizeChange}
+                />
+              </>
+            ) : (
+              <EventVendorGroups
+                events={filteredAndSortedEvents}
+                onEdit={openEditModal}
+              />
+            )}
           </section>
         </>
       )}
@@ -316,6 +404,24 @@ export default function EventsPage() {
         serverError={formError}
         onClose={closeModal}
         onSubmit={handleFormSubmit}
+      />
+
+      <ConfirmDialog
+        isOpen={eventPendingDelete !== null}
+        title="Delete event?"
+        description={
+          eventPendingDelete
+            ? `"${eventPendingDelete.description}" will be permanently removed from the Events portfolio.`
+            : ""
+        }
+        confirmLabel="Delete event"
+        isConfirming={isDeleting}
+        onCancel={() => {
+          if (!isDeleting) {
+            setEventPendingDelete(null);
+          }
+        }}
+        onConfirm={() => void confirmDelete()}
       />
     </section>
   );

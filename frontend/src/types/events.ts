@@ -53,3 +53,10 @@ export type EventSortField =
   | "budgetCad";
 
 export type SortDirection = "ascending" | "descending";
+
+export type EventViewMode = "table" | "vendor";
+
+export interface PaginationState {
+  page: number;
+  pageSize: number;
+}

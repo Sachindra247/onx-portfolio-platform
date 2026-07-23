@@ -1,9 +1,12 @@
-import { RotateCcw, Search } from "lucide-react";
+import { LayoutGrid, List, RotateCcw, Search } from "lucide-react";
+
 import {
   eventStages,
   type EventStage,
+  type EventViewMode,
   type VendorDto,
 } from "../../types/events";
+
 import { formatEventStage } from "../../utils/eventFormatting";
 
 interface EventFiltersProps {
@@ -13,9 +16,11 @@ interface EventFiltersProps {
   vendors: VendorDto[];
   resultCount: number;
   totalCount: number;
+  viewMode: EventViewMode;
   onSearchChange: (value: string) => void;
   onStageChange: (value: EventStage | "") => void;
   onVendorChange: (value: string) => void;
+  onViewModeChange: (viewMode: EventViewMode) => void;
   onReset: () => void;
 }
 
@@ -26,9 +31,11 @@ export default function EventFilters({
   vendors,
   resultCount,
   totalCount,
+  viewMode,
   onSearchChange,
   onStageChange,
   onVendorChange,
+  onViewModeChange,
   onReset,
 }: EventFiltersProps) {
   const filtersAreActive =
@@ -39,6 +46,7 @@ export default function EventFilters({
       <div className="event-toolbar__heading">
         <div>
           <h2>All Events</h2>
+
           <p>
             Showing {resultCount} of {totalCount} events
           </p>
@@ -71,7 +79,7 @@ export default function EventFilters({
             <option value="">All stages</option>
 
             {eventStages.map((eventStage) => (
-              <option value={eventStage} key={eventStage}>
+              <option key={eventStage} value={eventStage}>
                 {formatEventStage(eventStage)}
               </option>
             ))}
@@ -88,12 +96,38 @@ export default function EventFilters({
             <option value="">All vendors</option>
 
             {vendors.map((vendor) => (
-              <option value={vendor.id} key={vendor.id}>
+              <option key={vendor.id} value={vendor.id}>
                 {vendor.name}
               </option>
             ))}
           </select>
         </label>
+
+        <div
+          className="view-toggle"
+          role="group"
+          aria-label="Event display mode"
+        >
+          <button
+            type="button"
+            className={viewMode === "table" ? "is-active" : ""}
+            aria-label="Table view"
+            aria-pressed={viewMode === "table"}
+            onClick={() => onViewModeChange("table")}
+          >
+            <List size={15} aria-hidden="true" />
+          </button>
+
+          <button
+            type="button"
+            className={viewMode === "vendor" ? "is-active" : ""}
+            aria-label="Group by vendor"
+            aria-pressed={viewMode === "vendor"}
+            onClick={() => onViewModeChange("vendor")}
+          >
+            <LayoutGrid size={15} aria-hidden="true" />
+          </button>
+        </div>
 
         {filtersAreActive && (
           <button className="toolbar-button" type="button" onClick={onReset}>

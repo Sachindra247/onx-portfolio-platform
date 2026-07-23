@@ -1,18 +1,16 @@
-import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
+import React from "react";
+import ReactDOM from "react-dom/client";
+
 import { RouterProvider } from "react-router-dom";
+import { ToastProvider } from "./components/feedback/ToastProvider";
 import { router } from "./app/router";
 import "./styles/tokens.css";
 import "./styles/app.css";
 
-const rootElement = document.getElementById("root");
-
-if (!rootElement) {
-  throw new Error("Unable to find the root element.");
-}
-
-createRoot(rootElement).render(
-  <StrictMode>
-    <RouterProvider router={router} />
-  </StrictMode>,
+ReactDOM.createRoot(document.getElementById("root")!).render(
+  <React.StrictMode>
+    <ToastProvider>
+      <RouterProvider router={router} />
+    </ToastProvider>
+  </React.StrictMode>,
 );
