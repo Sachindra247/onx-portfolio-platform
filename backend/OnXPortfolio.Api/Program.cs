@@ -1,7 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using OnXPortfolio.Infrastructure.Persistence;
 using System.Text.Json.Serialization;
-using OnXPortfolio.Domain.Entities;
+using OnXPortfolio.Domain.Vendors;
+//using OnXPortfolio.Domain.Entities;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,13 +35,14 @@ var connectionString =
         "The DefaultConnection connection string is missing.");
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite(connectionString));
+    options.UseNpgsql(connectionString));
 
 var app = builder.Build();
+
 using (var scope = app.Services.CreateScope())
 {
-    var dbContext =
-        scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var dbContext = scope.ServiceProvider
+        .GetRequiredService<AppDbContext>();
 
     await dbContext.Database.MigrateAsync();
 
@@ -50,32 +52,42 @@ using (var scope = app.Services.CreateScope())
             new Vendor
             {
                 Name = "Cisco",
-                IsActive = true,
+                IsActive = true
             },
             new Vendor
             {
                 Name = "Microsoft",
-                IsActive = true,
+                IsActive = true
             },
             new Vendor
             {
                 Name = "Dell Technologies",
-                IsActive = true,
+                IsActive = true
             },
             new Vendor
             {
                 Name = "VMware",
-                IsActive = true,
+                IsActive = true
             },
             new Vendor
             {
                 Name = "Nutanix",
-                IsActive = true,
+                IsActive = true
             }
         );
 
         await dbContext.SaveChangesAsync();
     }
+}
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext =
+        scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+    await dbContext.Database.MigrateAsync();
+
+
 }
 
 if (app.Environment.IsDevelopment())
