@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using OnXPortfolio.Infrastructure.Persistence;
 using System.Text.Json.Serialization;
+using OnXPortfolio.Domain.Entities;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,6 +43,39 @@ using (var scope = app.Services.CreateScope())
         scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
     await dbContext.Database.MigrateAsync();
+
+    if (!await dbContext.Vendors.AnyAsync())
+    {
+        dbContext.Vendors.AddRange(
+            new Vendor
+            {
+                Name = "Cisco",
+                IsActive = true,
+            },
+            new Vendor
+            {
+                Name = "Microsoft",
+                IsActive = true,
+            },
+            new Vendor
+            {
+                Name = "Dell Technologies",
+                IsActive = true,
+            },
+            new Vendor
+            {
+                Name = "VMware",
+                IsActive = true,
+            },
+            new Vendor
+            {
+                Name = "Nutanix",
+                IsActive = true,
+            }
+        );
+
+        await dbContext.SaveChangesAsync();
+    }
 }
 
 if (app.Environment.IsDevelopment())
