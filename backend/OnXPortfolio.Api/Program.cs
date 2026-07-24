@@ -37,7 +37,25 @@ var connectionString =
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 
+    const string FrontendCorsPolicy = "FrontendCors";
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(FrontendCorsPolicy, policy =>
+    {
+        policy
+            .WithOrigins(
+                "http://localhost:5173",
+                "https://onx-portfolio-platform.vercel.app"
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
+
+app.UseCors(FrontendCorsPolicy);
 
 using (var scope = app.Services.CreateScope())
 {
