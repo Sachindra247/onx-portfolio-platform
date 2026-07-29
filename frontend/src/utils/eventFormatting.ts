@@ -35,10 +35,6 @@ export function formatEventDate(value: string | null): string {
   return dateFormatter.format(parsedDate);
 }
 
-export function formatEventStage(stage: EventStage): string {
-  return stage === "InProgress" ? "In Progress" : stage;
-}
-
 export function getStageClassName(stage: EventStage): string {
   switch (stage) {
     case "Exploring":
@@ -78,4 +74,8 @@ export function mapFormToRequest(values: EventFormValues): EventRequest {
     notes: values.notes.trim() || null,
     vendorId: values.vendorId,
   };
+}
+
+export function formatEventStage(stage: EventStage): string {
+  return stage === "InProgress" ? "In Progress" : stage;
 }

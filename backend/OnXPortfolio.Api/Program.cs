@@ -1,12 +1,11 @@
 using Microsoft.EntityFrameworkCore;
+using OnXPortfolio.Domain.Vendors;
 using OnXPortfolio.Infrastructure.Persistence;
 using System.Text.Json.Serialization;
-using OnXPortfolio.Domain.Vendors;
-//using OnXPortfolio.Domain.Entities;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+const string FrontendCorsPolicy = "FrontendCors";
 
 builder.Services
     .AddControllers()
@@ -15,29 +14,8 @@ builder.Services
         options.JsonSerializerOptions.Converters.Add(
             new JsonStringEnumConverter());
     });
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+
 builder.Services.AddOpenApi();
-
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("DevelopmentFrontend", policy =>
-    {
-        policy
-            .WithOrigins("http://localhost:5173")
-            .AllowAnyHeader()
-            .AllowAnyMethod();
-    });
-});
-
-var connectionString =
-    builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? throw new InvalidOperationException(
-        "The DefaultConnection connection string is missing.");
-
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(connectionString));
-
-    const string FrontendCorsPolicy = "FrontendCors";
 
 builder.Services.AddCors(options =>
 {
@@ -53,16 +31,64 @@ builder.Services.AddCors(options =>
     });
 });
 
+var connectionString =
+    builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException(
+        "The DefaultConnection connection string is missing.");
+
+var databaseProvider =
+    builder.Configuration["DatabaseProvider"] ?? "Sqlite";
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+{
+    if (databaseProvider.Equals(
+            "Postgres",
+            StringComparison.OrdinalIgnoreCase))
+    {
+        options.UseNpgsql(connectionString);
+    }
+    else if (databaseProvider.Equals(
+                 "Sqlite",
+                 StringComparison.OrdinalIgnoreCase))
+    {
+        options.UseSqlite(connectionString);
+    }
+    else
+    {
+        throw new InvalidOperationException(
+            $"Unsupported database provider: {databaseProvider}");
+    }
+});
+
 var app = builder.Build();
 
 app.UseCors(FrontendCorsPolicy);
+
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+}
+
+app.UseHttpsRedirection();
+app.UseAuthorization();
+
+app.MapControllers();
 
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider
         .GetRequiredService<AppDbContext>();
 
+    if (databaseProvider.Equals(
+        "Sqlite",
+        StringComparison.OrdinalIgnoreCase))
+{
+    await dbContext.Database.EnsureCreatedAsync();
+}
+else
+{
     await dbContext.Database.MigrateAsync();
+}
 
     if (!await dbContext.Vendors.AnyAsync())
     {
@@ -96,40 +122,11 @@ using (var scope = app.Services.CreateScope())
 
         await dbContext.SaveChangesAsync();
     }
+
+    if (app.Environment.IsDevelopment())
+    {
+        await DatabaseSeeder.SeedAsync(dbContext);
+    }
 }
-
-using (var scope = app.Services.CreateScope())
-{
-    var dbContext =
-        scope.ServiceProvider.GetRequiredService<AppDbContext>();
-
-    await dbContext.Database.MigrateAsync();
-
-
-}
-
-if (app.Environment.IsDevelopment())
-{
-    using var scope = app.Services.CreateScope();
-
-    var dbContext = scope.ServiceProvider
-        .GetRequiredService<AppDbContext>();
-
-    await DatabaseSeeder.SeedAsync(dbContext);
-}
-
-app.UseCors("DevelopmentFrontend");
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-}
-
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
-app.MapControllers();
 
 app.Run();

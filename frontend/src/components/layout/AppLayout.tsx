@@ -1,6 +1,6 @@
 import { Outlet } from "react-router-dom";
 import AppRail from "./AppRail";
-import Launcher from "./Launcher";
+
 import TopBar from "./TopBar";
 
 export default function AppLayout() {
@@ -12,8 +12,6 @@ export default function AppLayout() {
         <TopBar />
 
         <div className="app-shell__body">
-          <Launcher />
-
           <main className="page-view">
             <Outlet />
           </main>

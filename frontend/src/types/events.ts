@@ -56,6 +56,13 @@ export type SortDirection = "ascending" | "descending";
 
 export type EventViewMode = "table" | "vendor";
 
+export type EventsSection =
+  | "overview"
+  | "events"
+  | "vendors"
+  | "upcoming"
+  | "completed";
+
 export interface PaginationState {
   page: number;
   pageSize: number;
