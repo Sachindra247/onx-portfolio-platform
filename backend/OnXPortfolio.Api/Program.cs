@@ -37,7 +37,9 @@ var connectionString =
         "The DefaultConnection connection string is missing.");
 
 var databaseProvider =
-    builder.Configuration["DatabaseProvider"] ?? "Sqlite";
+    builder.Configuration["DatabaseProvider"]
+    ?? throw new InvalidOperationException(
+        "The DatabaseProvider setting is missing.");
 
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
