@@ -92,38 +92,42 @@ else
     await dbContext.Database.MigrateAsync();
 }
 
-    if (!await dbContext.Vendors.AnyAsync())
-    {
-        dbContext.Vendors.AddRange(
-            new Vendor
-            {
-                Name = "Cisco",
-                IsActive = true
-            },
-            new Vendor
-            {
-                Name = "Microsoft",
-                IsActive = true
-            },
-            new Vendor
-            {
-                Name = "Dell Technologies",
-                IsActive = true
-            },
-            new Vendor
-            {
-                Name = "VMware",
-                IsActive = true
-            },
-            new Vendor
-            {
-                Name = "Nutanix",
-                IsActive = true
-            }
-        );
+  var vendorNames = new[]
+{
+    "Cisco",
+    "HPE",
+    "VMware (Broadcom)",
+    "IBM",
+    "Red Hat",
+    "Nutanix",
+    "Dell",
+    "Palo Alto Networks",
+    "Pure Storage",
+    "Cloudflare",
+    "Veeam"
+};
 
-        await dbContext.SaveChangesAsync();
-    }
+var existingVendorNames = await dbContext.Vendors
+    .Select(v => v.Name)
+    .ToListAsync();
+
+var existingVendorNameSet = existingVendorNames
+    .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+var missingVendors = vendorNames
+    .Where(name => !existingVendorNameSet.Contains(name))
+    .Select(name => new Vendor
+    {
+        Name = name,
+        IsActive = true
+    })
+    .ToList();
+
+if (missingVendors.Any())
+{
+    dbContext.Vendors.AddRange(missingVendors);
+    await dbContext.SaveChangesAsync();
+}
 
     if (app.Environment.IsDevelopment())
     {
