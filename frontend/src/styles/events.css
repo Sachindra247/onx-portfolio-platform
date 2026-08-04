@@ -640,10 +640,16 @@
     }
 }
 
-
 /* ==========================================================
    EVENTS APPLICATION LAYOUT
    ========================================================== */
+
+.events-page {
+    width: 100%;
+    min-width: 0;
+    min-height: 100%;
+    padding: 0;
+}
 
 .events-layout {
     display: flex;
@@ -680,9 +686,8 @@
     min-width: var(--launcher-width);
     flex: 0 0 var(--launcher-width);
     flex-direction: column;
-
+    align-self: stretch;
     overflow-y: auto;
-
     border-right: 1px solid var(--color-border);
     background: var(--color-surface);
 }
@@ -698,10 +703,10 @@
 
 .events-sidebar__items {
     display: flex;
-    flex: 1;
+    flex: 0 0 auto;
     flex-direction: column;
     gap: 4px;
-    padding: 0 10px 14px;
+    padding: 0 10px 8px;
 }
 
 /* ==========================================================
@@ -715,17 +720,13 @@
     align-items: center;
     gap: 9px;
     padding: 9px;
-
     border: 1px solid transparent;
     border-radius: var(--radius-medium);
-
     background: transparent;
     color: inherit;
     font: inherit;
     text-align: left;
-
     cursor: pointer;
-
     transition:
         border-color 140ms ease,
         background 140ms ease;
@@ -746,9 +747,7 @@
     height: 35px;
     flex: 0 0 35px;
     place-items: center;
-
     border-radius: 9px;
-
     background: var(--color-gold-100);
     color: var(--color-gold-700);
 }
@@ -761,21 +760,12 @@
     gap: 2px;
 }
 
-.events-sidebar-item__name,
-.events-sidebar-item__summary {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
 .events-sidebar-item__name {
+    overflow: hidden;
     font-size: 12px;
     font-weight: 700;
-}
-
-.events-sidebar-item__summary {
-    color: var(--color-muted);
-    font-size: 10px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .events-sidebar-item__indicator {
@@ -788,6 +778,57 @@
 
 .events-sidebar-item--active .events-sidebar-item__indicator {
     background: var(--color-gold-600);
+}
+
+/* ==========================================================
+   SIDEBAR ADD EVENT ACTION
+   ========================================================== */
+
+.events-sidebar__actions {
+    flex: 0 0 auto;
+    padding: 6px 10px 10px;
+    border-top: 0;
+    background: var(--color-surface);
+}
+
+.events-sidebar__add-button {
+    display: flex;
+    width: 100%;
+    min-height: 40px;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border: 1px solid transparent;
+    border-radius: var(--radius-medium);
+    background: var(--color-teal-900);
+    color: white;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+        background 140ms ease,
+        border-color 140ms ease,
+        transform 140ms ease;
+}
+
+.events-sidebar__add-button:hover:not(:disabled) {
+    background: var(--color-gold-600);
+    border-color: var(--color-gold-600);
+    color: var(--color-teal-900);
+    transform: translateY(-1px);
+}
+
+.events-sidebar__add-button:focus-visible {
+    outline: 2px solid var(--color-gold-600);
+    outline-offset: 2px;
+}
+
+.events-sidebar__add-button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
 }
 
 /* ==========================================================
@@ -823,36 +864,4 @@
     .events-workspace__content {
         padding: 20px;
     }
-}
-
-.events-page {
-    width: 100%;
-    min-width: 0;
-    min-height: 100%;
-    padding: 0;
-}
-
-.events-workspace {
-    display: flex;
-    width: 100%;
-    min-width: 0;
-    min-height: 100%;
-    align-items: stretch;
-}
-
-.events-workspace__content {
-    flex: 1;
-    min-width: 0;
-    padding: 30px;
-    background: var(--color-background);
-}
-
-.events-sidebar {
-    width: var(--launcher-width);
-    min-width: var(--launcher-width);
-    flex: 0 0 var(--launcher-width);
-    align-self: stretch;
-    overflow-y: auto;
-    border-right: 1px solid var(--color-border);
-    background: var(--color-surface);
 }

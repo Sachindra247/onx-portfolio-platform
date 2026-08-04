@@ -1,0 +1,2739 @@
+{
+  "certifications": [
+    {
+      "id": 1,
+      "person": "Mark Stonebanks",
+      "vendor": "HPE Networking",
+      "cert": "HPE Networking Architect",
+      "status": "Complete",
+      "completed": "2026-06-10",
+      "expiry": "2029-06-10",
+      "lead": "Raed Jabak / Michael Goldsmith",
+      "rebate": "Triple Platinum+",
+      "notes": "Need 1 more person"
+    },
+    {
+      "id": 2,
+      "person": "Alan Lee",
+      "vendor": "HPE Networking",
+      "cert": "HPE Networking Professional Switching",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-06-01",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": "Need 3 total"
+    },
+    {
+      "id": 3,
+      "person": "Mokhtar Mohamed",
+      "vendor": "HPE Networking",
+      "cert": "HPE Networking Professional Switching",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-12-01",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 4,
+      "person": "Mathew Claridge",
+      "vendor": "HPE Networking",
+      "cert": "HPE Networking Professional Switching",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2028-01-01",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 5,
+      "person": "Alan Lee",
+      "vendor": "HPE Networking",
+      "cert": "HPE Campus Access Professional",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 6,
+      "person": "Mokhtar Mohamed",
+      "vendor": "HPE Networking",
+      "cert": "HPE Campus Access Professional",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2028-07-01",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 7,
+      "person": "Ali Saeed",
+      "vendor": "HPE Networking",
+      "cert": "HPE Campus Access Professional",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2028-11-01",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 8,
+      "person": "Mark Stonebanks",
+      "vendor": "HPE Networking",
+      "cert": "Aruba Accredited SD-WAN Expert",
+      "status": "In Progress",
+      "completed": "",
+      "expiry": "",
+      "lead": "Raed Jabak",
+      "rebate": "Competency",
+      "notes": "Need 2 — self-paced 2 days + SSE sales 1hr"
+    },
+    {
+      "id": 9,
+      "person": "Alan Lee",
+      "vendor": "HPE Networking",
+      "cert": "Aruba Accredited SD-WAN Expert",
+      "status": "In Progress",
+      "completed": "",
+      "expiry": "",
+      "lead": "Raed Jabak",
+      "rebate": "Competency",
+      "notes": ""
+    },
+    {
+      "id": 10,
+      "person": "Alan Lee",
+      "vendor": "HPE Networking",
+      "cert": "Aruba Product Specialist — SSE",
+      "status": "In Progress",
+      "completed": "",
+      "expiry": "",
+      "lead": "Raed Jabak",
+      "rebate": "Competency",
+      "notes": "Need 2"
+    },
+    {
+      "id": 11,
+      "person": "Mark Stonebanks",
+      "vendor": "HPE Networking",
+      "cert": "Aruba Product Specialist — SSE",
+      "status": "In Progress",
+      "completed": "",
+      "expiry": "",
+      "lead": "Raed Jabak",
+      "rebate": "Competency",
+      "notes": ""
+    },
+    {
+      "id": 12,
+      "person": "Ethan Lazaro",
+      "vendor": "HPE Networking",
+      "cert": "HPE Sales Certified — Aruba Networking",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-06-01",
+      "lead": "Michael Goldsmith",
+      "rebate": "",
+      "notes": "Need 6"
+    },
+    {
+      "id": 13,
+      "person": "Sue Yasin",
+      "vendor": "HPE Networking",
+      "cert": "HPE Sales Certified — Aruba Networking",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-06-01",
+      "lead": "Michael Goldsmith",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 14,
+      "person": "Zach Schneider",
+      "vendor": "HPE Networking",
+      "cert": "HPE Sales Certified — Aruba Networking",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-06-01",
+      "lead": "Michael Goldsmith",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 15,
+      "person": "Jacob Kozak",
+      "vendor": "HPE Networking",
+      "cert": "HPE Sales Certified — Aruba Networking",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2026-12-01",
+      "lead": "Michael Goldsmith",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 16,
+      "person": "Ekaterini Salonikidou",
+      "vendor": "HPE Networking",
+      "cert": "HPE Sales Certified — Aruba Networking",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2026-12-20",
+      "lead": "Michael Goldsmith",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 17,
+      "person": "Tyson Schneider",
+      "vendor": "HPE Networking",
+      "cert": "HPE Sales Certified — Aruba Networking",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-04-01",
+      "lead": "Michael Goldsmith",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 18,
+      "person": "Stuart Foster",
+      "vendor": "HPE",
+      "cert": "MASE Storage V4 / Edge to Cloud",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-09-20",
+      "lead": "Raed Jabak / Michael Goldsmith",
+      "rebate": "Triple Platinum+",
+      "notes": "Meet all 3x Platinum centers cert requirements"
+    },
+    {
+      "id": 19,
+      "person": "Stuart Foster",
+      "vendor": "HPE",
+      "cert": "MASE Storage Architect",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2028-03-20",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 20,
+      "person": "Stuart Foster",
+      "vendor": "HPE",
+      "cert": "ASE Storage Solutions",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-09-20",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 21,
+      "person": "AJ Jabak",
+      "vendor": "HPE",
+      "cert": "ASE Compute Solutions (OneView ATP)",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-09-20",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 22,
+      "person": "AJ Jabak",
+      "vendor": "HPE",
+      "cert": "ASE Edge to Cloud",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2026-11-14",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 23,
+      "person": "Matt Claridge",
+      "vendor": "HPE",
+      "cert": "ASE Compute Solutions (OneView ATP)",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2028-05-01",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 24,
+      "person": "Marc Mousseau",
+      "vendor": "HPE",
+      "cert": "ASE Edge to Cloud",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2028-06-01",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 25,
+      "person": "Michael Goldsmith",
+      "vendor": "HPE",
+      "cert": "ASE Edge to Cloud",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-12-01",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 26,
+      "person": "M Rehan Hussain",
+      "vendor": "HPE",
+      "cert": "ASE Compute Solutions (OneView ATP)",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2028-02-28",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 27,
+      "person": "M Rahim",
+      "vendor": "HPE",
+      "cert": "ASE Compute Solutions (OneView ATP)",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2028-02-22",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 28,
+      "person": "Stuart Foster",
+      "vendor": "HPE",
+      "cert": "Competency — VMware",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-09-20",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 29,
+      "person": "Stuart Foster",
+      "vendor": "HPE",
+      "cert": "Competency — Backup (required for MASE)",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-09-20",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 30,
+      "person": "M Rahim",
+      "vendor": "HPE",
+      "cert": "Competency — HPE Morpheus VM Essentials",
+      "status": "Complete",
+      "completed": "2026-05-28",
+      "expiry": "2027-05-01",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 31,
+      "person": "Stuart Foster",
+      "vendor": "HPE",
+      "cert": "Competency — HPE Morpheus VM Essentials",
+      "status": "Complete",
+      "completed": "2026-05-28",
+      "expiry": "2027-05-01",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 32,
+      "person": "Zach Schneider",
+      "vendor": "HPE",
+      "cert": "Competency — HPE Greenlake",
+      "status": "Complete",
+      "completed": "2026-05-28",
+      "expiry": "2027-05-01",
+      "lead": "Raed Jabak",
+      "rebate": "10% Greenlake Flex",
+      "notes": ""
+    },
+    {
+      "id": 33,
+      "person": "Jacob Kozak",
+      "vendor": "HPE",
+      "cert": "HPE Sales Certified — Compute Solutions",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-03-01",
+      "lead": "Michael Goldsmith",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 34,
+      "person": "Ekaterini Salonikidou",
+      "vendor": "HPE",
+      "cert": "HPE Sales Certified — Compute Solutions",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-03-20",
+      "lead": "Michael Goldsmith",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 35,
+      "person": "Sue Yasin",
+      "vendor": "HPE",
+      "cert": "HPE Sales Certified — Compute Solutions",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-04-01",
+      "lead": "Michael Goldsmith",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 36,
+      "person": "Zach Schneider",
+      "vendor": "HPE",
+      "cert": "HPE Sales Certified — Compute Solutions",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-03-10",
+      "lead": "Michael Goldsmith",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 37,
+      "person": "Ethan Lazaro",
+      "vendor": "HPE",
+      "cert": "HPE Sales Certified — Compute Solutions",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-04-01",
+      "lead": "Michael Goldsmith",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 38,
+      "person": "Johannes Kim",
+      "vendor": "HPE",
+      "cert": "HPE Sales Certified — Compute Solutions",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-03-25",
+      "lead": "Michael Goldsmith",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 39,
+      "person": "Zach Schneider",
+      "vendor": "HPE",
+      "cert": "HPE Sales Certified — Hybrid Cloud",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-03-10",
+      "lead": "Michael Goldsmith",
+      "rebate": "",
+      "notes": "Need 6"
+    },
+    {
+      "id": 40,
+      "person": "Jacob Kozak",
+      "vendor": "HPE",
+      "cert": "HPE Sales Certified — Hybrid Cloud",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-03-14",
+      "lead": "Michael Goldsmith",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 41,
+      "person": "Ekaterini Salonikidou",
+      "vendor": "HPE",
+      "cert": "HPE Sales Certified — Hybrid Cloud",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-03-20",
+      "lead": "Michael Goldsmith",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 42,
+      "person": "Sue Yasin",
+      "vendor": "HPE",
+      "cert": "HPE Sales Certified — Hybrid Cloud",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-04-01",
+      "lead": "Michael Goldsmith",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 43,
+      "person": "Tamara Sigrist",
+      "vendor": "HPE",
+      "cert": "HPE Sales Certified — Hybrid Cloud",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-03-05",
+      "lead": "Michael Goldsmith",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 44,
+      "person": "Tuyet Le",
+      "vendor": "HPE",
+      "cert": "HPE Sales Certified — Hybrid Cloud",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-03-05",
+      "lead": "Michael Goldsmith",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 45,
+      "person": "Liz Guglietti",
+      "vendor": "Dell",
+      "cert": "Sales — Servers",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2026-12-01",
+      "lead": "Michael Goldsmith / Raed Jabak",
+      "rebate": "Global Platinum",
+      "notes": ""
+    },
+    {
+      "id": 46,
+      "person": "Sarah Campbell",
+      "vendor": "Dell",
+      "cert": "Sales — Servers",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2026-12-20",
+      "lead": "Michael Goldsmith",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 47,
+      "person": "Raed Jabak",
+      "vendor": "Dell",
+      "cert": "Sales — Data Center",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2026-12-20",
+      "lead": "Michael Goldsmith",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 48,
+      "person": "AJ Jabak",
+      "vendor": "Dell",
+      "cert": "System Engineer — Storage",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2026-12-20",
+      "lead": "Michael Goldsmith",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 49,
+      "person": "Michael Goldsmith",
+      "vendor": "Dell",
+      "cert": "System Engineer — Storage",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2026-12-20",
+      "lead": "Michael Goldsmith",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 50,
+      "person": "AJ Jabak",
+      "vendor": "Dell",
+      "cert": "System Engineer — Server",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2026-12-20",
+      "lead": "Michael Goldsmith",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 51,
+      "person": "Michael Goldsmith",
+      "vendor": "Dell",
+      "cert": "System Engineer — Server",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2026-12-20",
+      "lead": "Michael Goldsmith",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 52,
+      "person": "Michael Goldsmith",
+      "vendor": "Dell",
+      "cert": "Marketing Credential",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2026-12-20",
+      "lead": "Michael Goldsmith",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 53,
+      "person": "Matt Claridge",
+      "vendor": "Dell",
+      "cert": "Certified Resource (TA)",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2026-11-10",
+      "lead": "Michael Goldsmith",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 54,
+      "person": "Zach Schneider",
+      "vendor": "Palo Alto Networks",
+      "cert": "Firewall Sales",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-05-01",
+      "lead": "Russel",
+      "rebate": "2% HW Firewall Spec",
+      "notes": ""
+    },
+    {
+      "id": 55,
+      "person": "Sabrina Jubran",
+      "vendor": "Palo Alto Networks",
+      "cert": "Firewall Sales",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-05-08",
+      "lead": "Russel",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 56,
+      "person": "Raed Jabak",
+      "vendor": "Palo Alto Networks",
+      "cert": "Firewall Sales",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-04-25",
+      "lead": "Russel",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 57,
+      "person": "Sheldon Smith",
+      "vendor": "Palo Alto Networks",
+      "cert": "Firewall Pre-Sales",
+      "status": "In Progress",
+      "completed": "",
+      "expiry": "",
+      "lead": "Russel",
+      "rebate": "",
+      "notes": "Need 1 by July 31, 2026 — URGENT"
+    },
+    {
+      "id": 58,
+      "person": "Matthew Claridge",
+      "vendor": "Palo Alto Networks",
+      "cert": "Firewall Pre-Sales",
+      "status": "In Progress",
+      "completed": "",
+      "expiry": "2026-06-12",
+      "lead": "Russel",
+      "rebate": "",
+      "notes": "Deadline July 31, 2026"
+    },
+    {
+      "id": 59,
+      "person": "Ekaterini Salonikidou",
+      "vendor": "Palo Alto Networks",
+      "cert": "SASE Sales",
+      "status": "In Progress",
+      "completed": "",
+      "expiry": "",
+      "lead": "Russel",
+      "rebate": "5% Prisma SASE",
+      "notes": ""
+    },
+    {
+      "id": 60,
+      "person": "Carson George",
+      "vendor": "Palo Alto Networks",
+      "cert": "SASE Sales",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-06-01",
+      "lead": "Russel",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 61,
+      "person": "Sabrina Jubran",
+      "vendor": "Palo Alto Networks",
+      "cert": "SASE Sales",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-06-08",
+      "lead": "Russel",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 62,
+      "person": "Zach Schneider",
+      "vendor": "Palo Alto Networks",
+      "cert": "SASE Sales",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-05-01",
+      "lead": "Russel",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 63,
+      "person": "Raed Jabak",
+      "vendor": "Palo Alto Networks",
+      "cert": "SASE Sales",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-04-25",
+      "lead": "Russel",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 64,
+      "person": "Tamara Sigrist",
+      "vendor": "Palo Alto Networks",
+      "cert": "SASE Sales",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-04-15",
+      "lead": "Russel",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 65,
+      "person": "Matthew Claridge",
+      "vendor": "Palo Alto Networks",
+      "cert": "SASE Pre-Sales",
+      "status": "Complete",
+      "completed": "2026-05-01",
+      "expiry": "2027-06-12",
+      "lead": "Russel",
+      "rebate": "",
+      "notes": "Need 2"
+    },
+    {
+      "id": 66,
+      "person": "Sheldon Smith",
+      "vendor": "Palo Alto Networks",
+      "cert": "SASE Pre-Sales",
+      "status": "In Progress",
+      "completed": "",
+      "expiry": "2026-06-12",
+      "lead": "Russel",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 67,
+      "person": "Tuyet Le",
+      "vendor": "Palo Alto Networks",
+      "cert": "Cortex XDR Sales",
+      "status": "In Progress",
+      "completed": "",
+      "expiry": "",
+      "lead": "Russel",
+      "rebate": "5% Cortex",
+      "notes": ""
+    },
+    {
+      "id": 68,
+      "person": "Raed Jabak",
+      "vendor": "Palo Alto Networks",
+      "cert": "Cortex XDR Sales",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-04-25",
+      "lead": "Russel",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 69,
+      "person": "Sabrina Jubran",
+      "vendor": "Palo Alto Networks",
+      "cert": "Cortex XDR Sales",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-05-08",
+      "lead": "Russel",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 70,
+      "person": "Tamara Sigrist",
+      "vendor": "Palo Alto Networks",
+      "cert": "Cortex XDR Sales",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-06-12",
+      "lead": "Russel",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 71,
+      "person": "Zach Schneider",
+      "vendor": "Palo Alto Networks",
+      "cert": "Cortex XDR Sales",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-05-01",
+      "lead": "Russel",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 72,
+      "person": "Matthew Claridge",
+      "vendor": "Palo Alto Networks",
+      "cert": "Cortex XDR Pre-Sales",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2026-06-12",
+      "lead": "Russel",
+      "rebate": "",
+      "notes": "Need 2"
+    },
+    {
+      "id": 73,
+      "person": "Sheldon Smith",
+      "vendor": "Palo Alto Networks",
+      "cert": "Cortex XDR Pre-Sales",
+      "status": "In Progress",
+      "completed": "",
+      "expiry": "2026-06-12",
+      "lead": "Russel",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 74,
+      "person": "Jawad Butt",
+      "vendor": "Nutanix",
+      "cert": "NAAI — Accredited Associate Infrastructure",
+      "status": "Complete",
+      "completed": "2025-01-20",
+      "expiry": "N/A",
+      "lead": "Jawad / Raed",
+      "rebate": "Champion Reseller",
+      "notes": "Need 3"
+    },
+    {
+      "id": 75,
+      "person": "Michael Goldsmith",
+      "vendor": "Nutanix",
+      "cert": "NAAI — Accredited Associate Infrastructure",
+      "status": "Complete",
+      "completed": "2025-01-10",
+      "expiry": "N/A",
+      "lead": "Jawad / Raed",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 76,
+      "person": "AJ Jabak",
+      "vendor": "Nutanix",
+      "cert": "NAAI — Accredited Associate Infrastructure",
+      "status": "Complete",
+      "completed": "2025-01-09",
+      "expiry": "N/A",
+      "lead": "Jawad / Raed",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 77,
+      "person": "Jawad Butt",
+      "vendor": "Nutanix",
+      "cert": "NAPI — Accredited Professional Infrastructure",
+      "status": "Complete",
+      "completed": "2025-01-19",
+      "expiry": "N/A",
+      "lead": "Jawad / Raed",
+      "rebate": "",
+      "notes": "Need 4"
+    },
+    {
+      "id": 78,
+      "person": "AJ Jabak",
+      "vendor": "Nutanix",
+      "cert": "NAPI — Accredited Professional Infrastructure",
+      "status": "Complete",
+      "completed": "2025-01-09",
+      "expiry": "N/A",
+      "lead": "Jawad / Raed",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 79,
+      "person": "Stuart Foster",
+      "vendor": "Nutanix",
+      "cert": "NAPI — Accredited Professional Infrastructure",
+      "status": "Complete",
+      "completed": "2025-01-22",
+      "expiry": "N/A",
+      "lead": "Jawad / Raed",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 80,
+      "person": "Michael Goldsmith",
+      "vendor": "Nutanix",
+      "cert": "NAPI — Accredited Professional Infrastructure",
+      "status": "Complete",
+      "completed": "2025-01-12",
+      "expiry": "N/A",
+      "lead": "Jawad / Raed",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 81,
+      "person": "Michael Boyne",
+      "vendor": "Nutanix",
+      "cert": "NCS Core 6.8",
+      "status": "Complete",
+      "completed": "2025-01-23",
+      "expiry": "2026-12-20",
+      "lead": "Jawad / Raed",
+      "rebate": "",
+      "notes": "Need 1"
+    },
+    {
+      "id": 82,
+      "person": "Michael Boyne",
+      "vendor": "Nutanix",
+      "cert": "NCP Multicloud",
+      "status": "Complete",
+      "completed": "2023-09-15",
+      "expiry": "2026-07-01",
+      "lead": "Jawad / Raed",
+      "rebate": "",
+      "notes": "Need 2"
+    },
+    {
+      "id": 83,
+      "person": "David Riesen",
+      "vendor": "Nutanix",
+      "cert": "NCP Multicloud",
+      "status": "Complete",
+      "completed": "2023-07-09",
+      "expiry": "2026-05-30",
+      "lead": "Jawad / Raed",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 84,
+      "person": "Vivek Dabas",
+      "vendor": "Nutanix",
+      "cert": "NCP Cloud Integration — Azure 6.7",
+      "status": "Complete",
+      "completed": "2024-08-05",
+      "expiry": "2027-05-01",
+      "lead": "Jawad / Raed",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 85,
+      "person": "Vivek Dabas",
+      "vendor": "Nutanix",
+      "cert": "NCP Cloud Integration — AWS 6.7",
+      "status": "Complete",
+      "completed": "2024-06-18",
+      "expiry": "2027-05-01",
+      "lead": "Jawad / Raed",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 86,
+      "person": "Zenon Coba",
+      "vendor": "Nutanix",
+      "cert": "NCSR — Nutanix Basics Partner",
+      "status": "Complete",
+      "completed": "2024-07-30",
+      "expiry": "N/A",
+      "lead": "Jawad / Raed",
+      "rebate": "",
+      "notes": "Need 3 more per tracker"
+    },
+    {
+      "id": 87,
+      "person": "Ben Burko",
+      "vendor": "Nutanix",
+      "cert": "NCSR — Nutanix Basics Partner",
+      "status": "Complete",
+      "completed": "2024-07-30",
+      "expiry": "N/A",
+      "lead": "Jawad / Raed",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 88,
+      "person": "John Du",
+      "vendor": "Nutanix",
+      "cert": "NCSR — Nutanix Basics Partner",
+      "status": "Complete",
+      "completed": "2024-07-30",
+      "expiry": "N/A",
+      "lead": "Jawad / Raed",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 89,
+      "person": "Elias Sidiropoulos",
+      "vendor": "Nutanix",
+      "cert": "NCSR — Nutanix Basics Partner",
+      "status": "Complete",
+      "completed": "2024-07-30",
+      "expiry": "N/A",
+      "lead": "Jawad / Raed",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 90,
+      "person": "Jacob Kozak",
+      "vendor": "Nutanix",
+      "cert": "NCSR — Nutanix Basics Partner",
+      "status": "Complete",
+      "completed": "2024-07-30",
+      "expiry": "N/A",
+      "lead": "Jawad / Raed",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 91,
+      "person": "Richard Rahil",
+      "vendor": "Nutanix",
+      "cert": "NCSR — Nutanix Basics Partner",
+      "status": "Complete",
+      "completed": "2024-07-30",
+      "expiry": "N/A",
+      "lead": "Jawad / Raed",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 92,
+      "person": "Ekaterini Salonikidou",
+      "vendor": "Nutanix",
+      "cert": "NCSR — Nutanix Basics Partner",
+      "status": "Complete",
+      "completed": "2024-07-30",
+      "expiry": "N/A",
+      "lead": "Jawad / Raed",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 93,
+      "person": "Mike Samara",
+      "vendor": "Nutanix",
+      "cert": "NCSR — Nutanix Basics Partner",
+      "status": "Complete",
+      "completed": "2024-07-30",
+      "expiry": "N/A",
+      "lead": "Jawad / Raed",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 94,
+      "person": "Paul Sassi",
+      "vendor": "Nutanix",
+      "cert": "NCSR — Nutanix Basics Partner",
+      "status": "Complete",
+      "completed": "2024-07-30",
+      "expiry": "N/A",
+      "lead": "Jawad / Raed",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 95,
+      "person": "Jawad Butt",
+      "vendor": "Nutanix",
+      "cert": "NCSR — Nutanix Basics Partner",
+      "status": "Complete",
+      "completed": "2024-07-30",
+      "expiry": "N/A",
+      "lead": "Jawad / Raed",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 96,
+      "person": "David Riesen",
+      "vendor": "Nutanix",
+      "cert": "NCSR — Nutanix Basics Partner",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-05-20",
+      "lead": "Jawad / Raed",
+      "rebate": "",
+      "notes": "Need 1 additional"
+    },
+    {
+      "id": 97,
+      "person": "AJ Jabak",
+      "vendor": "Pure Storage",
+      "cert": "Technical Sales Professional (FlashBlade Architect)",
+      "status": "TBD",
+      "completed": "",
+      "expiry": "",
+      "lead": "Raed Jabak / AJ",
+      "rebate": "Elite partner",
+      "notes": "Need 3 — exam TBD"
+    },
+    {
+      "id": 98,
+      "person": "Joey",
+      "vendor": "Pure Storage",
+      "cert": "Technical Sales Professional (FlashBlade Architect)",
+      "status": "TBD",
+      "completed": "",
+      "expiry": "",
+      "lead": "Raed Jabak / AJ",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 99,
+      "person": "Stuart Foster",
+      "vendor": "Pure Storage",
+      "cert": "Technical Sales Professional (FlashBlade Architect)",
+      "status": "TBD",
+      "completed": "",
+      "expiry": "",
+      "lead": "Raed Jabak / AJ",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 100,
+      "person": "Sheldon Smith",
+      "vendor": "Pure Storage",
+      "cert": "FAIS — FlashArray Implementation Specialist",
+      "status": "TBD",
+      "completed": "",
+      "expiry": "",
+      "lead": "Raed Jabak / AJ",
+      "rebate": "",
+      "notes": "Need 3"
+    },
+    {
+      "id": 101,
+      "person": "Mathew Claridge",
+      "vendor": "Pure Storage",
+      "cert": "FAIS — FlashArray Implementation Specialist",
+      "status": "TBD",
+      "completed": "",
+      "expiry": "",
+      "lead": "Raed Jabak / AJ",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 102,
+      "person": "Stuart Foster",
+      "vendor": "Pure Storage",
+      "cert": "FAIS — FlashArray Implementation Specialist",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "",
+      "lead": "Raed Jabak / AJ",
+      "rebate": "",
+      "notes": "Done"
+    },
+    {
+      "id": 103,
+      "person": "AJ Jabak",
+      "vendor": "Pure Storage",
+      "cert": "Technical Professional Accreditation",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2026-06-01",
+      "lead": "Raed Jabak / AJ",
+      "rebate": "",
+      "notes": "Need 8"
+    },
+    {
+      "id": 104,
+      "person": "Karl Goddard",
+      "vendor": "Pure Storage",
+      "cert": "Technical Professional Accreditation",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-01-01",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 105,
+      "person": "Jawad Butt",
+      "vendor": "Pure Storage",
+      "cert": "Technical Professional Accreditation",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2026-06-01",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 106,
+      "person": "Darryl Cameron",
+      "vendor": "Pure Storage",
+      "cert": "Technical Professional Accreditation",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2026-06-01",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 107,
+      "person": "Mathew Claridge",
+      "vendor": "Pure Storage",
+      "cert": "Technical Professional Accreditation",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2026-06-01",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 108,
+      "person": "Stuart Foster",
+      "vendor": "Pure Storage",
+      "cert": "Technical Professional Accreditation",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2026-06-01",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 109,
+      "person": "Alan Lee",
+      "vendor": "Pure Storage",
+      "cert": "Technical Professional Accreditation",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2026-06-01",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 110,
+      "person": "Tyson Schneider",
+      "vendor": "Pure Storage",
+      "cert": "Technical Professional Accreditation",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2025-12-01",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 111,
+      "person": "Tim Lam",
+      "vendor": "Pure Storage",
+      "cert": "Technical Professional Accreditation",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2026-06-01",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 112,
+      "person": "AJ Jabak",
+      "vendor": "Pure Storage",
+      "cert": "Sales Professional Accreditation",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2026-06-01",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": "Need 10"
+    },
+    {
+      "id": 113,
+      "person": "Jawad Butt",
+      "vendor": "Pure Storage",
+      "cert": "Sales Professional Accreditation",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2026-06-01",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 114,
+      "person": "Mathew Claridge",
+      "vendor": "Pure Storage",
+      "cert": "Sales Professional Accreditation",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2026-06-01",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 115,
+      "person": "Tanya Eades",
+      "vendor": "Pure Storage",
+      "cert": "Sales Professional Accreditation",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-01-01",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 116,
+      "person": "Sarah Campbell",
+      "vendor": "Pure Storage",
+      "cert": "Sales Professional Accreditation",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-01-01",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 117,
+      "person": "Tamara Sigrist",
+      "vendor": "Pure Storage",
+      "cert": "Sales Professional Accreditation",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-01-01",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 118,
+      "person": "Tuyet Le",
+      "vendor": "Pure Storage",
+      "cert": "Sales Professional Accreditation",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-01-01",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 119,
+      "person": "Johannes Kim",
+      "vendor": "Pure Storage",
+      "cert": "Sales Professional Accreditation",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2026-06-01",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 120,
+      "person": "Liz Guglietti",
+      "vendor": "Pure Storage",
+      "cert": "Sales Professional Accreditation",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-01-01",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 121,
+      "person": "Alan Lee",
+      "vendor": "Pure Storage",
+      "cert": "Sales Professional Accreditation",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2026-06-01",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 122,
+      "person": "Tyson Schneider",
+      "vendor": "Pure Storage",
+      "cert": "Sales Professional Accreditation",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-01-01",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 123,
+      "person": "AJ Jabak",
+      "vendor": "Pure Storage",
+      "cert": "Boot Camp",
+      "status": "Complete",
+      "completed": "2023-04-01",
+      "expiry": "2026-04-20",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": "Need 4"
+    },
+    {
+      "id": 124,
+      "person": "Tim Lam",
+      "vendor": "Pure Storage",
+      "cert": "Boot Camp",
+      "status": "Complete",
+      "completed": "2023-04-01",
+      "expiry": "2026-04-20",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 125,
+      "person": "Raed Jabak",
+      "vendor": "Pure Storage",
+      "cert": "Boot Camp",
+      "status": "Complete",
+      "completed": "2023-04-01",
+      "expiry": "2026-04-20",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 126,
+      "person": "Mathew Claridge",
+      "vendor": "Pure Storage",
+      "cert": "Boot Camp",
+      "status": "Complete",
+      "completed": "2023-04-01",
+      "expiry": "2026-04-20",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 127,
+      "person": "Alan Lee",
+      "vendor": "Pure Storage",
+      "cert": "Boot Camp",
+      "status": "Complete",
+      "completed": "2023-04-01",
+      "expiry": "2026-04-20",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 128,
+      "person": "Jawad Butt",
+      "vendor": "Pure Storage",
+      "cert": "Boot Camp",
+      "status": "Complete",
+      "completed": "2023-04-01",
+      "expiry": "2026-04-20",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 129,
+      "person": "George Carson",
+      "vendor": "VMware",
+      "cert": "Certified Expert VCF 9.x — Sales",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-10-10",
+      "lead": "Raed Jabak / Rob Payette",
+      "rebate": "Premier",
+      "notes": "Need 2 Certified Experts"
+    },
+    {
+      "id": 130,
+      "person": "Michael Boyne",
+      "vendor": "VMware",
+      "cert": "Certified Expert VCF 9.x — Sales",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-12-20",
+      "lead": "Raed Jabak / Rob Payette",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 131,
+      "person": "Raed Jabak",
+      "vendor": "VMware",
+      "cert": "Certified Expert VCF 9.x — Sales",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2028-01-15",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 132,
+      "person": "Tanya Eades",
+      "vendor": "VMware",
+      "cert": "Certified Expert VCF 9.x — Sales",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-10-01",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 133,
+      "person": "Liz Guglietti",
+      "vendor": "VMware",
+      "cert": "Certified Expert VCF 9.x — Sales",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-10-01",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 134,
+      "person": "Tamara Sigrist",
+      "vendor": "VMware",
+      "cert": "Certified Expert VCF 9.x — Sales",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-10-01",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 135,
+      "person": "Sima Pattanaik",
+      "vendor": "VMware",
+      "cert": "Certified Expert VCF 9.x — Sales",
+      "status": "Pending",
+      "completed": "",
+      "expiry": "",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 136,
+      "person": "Tuyet Le",
+      "vendor": "VMware",
+      "cert": "Certified Expert VCF 9.x — Sales",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-10-01",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 137,
+      "person": "Liz Guglietti",
+      "vendor": "VMware",
+      "cert": "Proven Professional VCF 9.x — Sales",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-09-20",
+      "lead": "Raed Jabak",
+      "rebate": "4% deferred margin",
+      "notes": "Need 4 Proven Professionals"
+    },
+    {
+      "id": 138,
+      "person": "Tamara Sigrist",
+      "vendor": "VMware",
+      "cert": "Proven Professional VCF 9.x — Sales",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-09-20",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 139,
+      "person": "Sima Pattanaik",
+      "vendor": "VMware",
+      "cert": "Proven Professional VCF 9.x — Sales",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-09-20",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 140,
+      "person": "Tuyet Le",
+      "vendor": "VMware",
+      "cert": "Proven Professional VCF 9.x — Sales",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-09-20",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 141,
+      "person": "George Carson",
+      "vendor": "VMware",
+      "cert": "Proven Professional VCF 9.x — Sales",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-09-20",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 142,
+      "person": "Michael Boyne",
+      "vendor": "VMware",
+      "cert": "Proven Professional VCF 9.x — Sales",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-12-20",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 143,
+      "person": "Raed Jabak",
+      "vendor": "VMware",
+      "cert": "Proven Professional VCF 9.x — Sales",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2028-01-15",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 144,
+      "person": "Tanya Eades",
+      "vendor": "VMware",
+      "cert": "Proven Professional VCF 9.x — Sales",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-09-20",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 145,
+      "person": "Rob Payette",
+      "vendor": "VMware",
+      "cert": "Certified Expert VCF 9.x — Pre-Sales",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-11-15",
+      "lead": "Rob Payette",
+      "rebate": "",
+      "notes": "Need 2 CE"
+    },
+    {
+      "id": 146,
+      "person": "Stuart Foster",
+      "vendor": "VMware",
+      "cert": "Certified Expert VCF 9.x — Pre-Sales",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-11-15",
+      "lead": "Rob Payette",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 147,
+      "person": "Rob Payette",
+      "vendor": "VMware",
+      "cert": "Proven Professional VCF 9.x — Pre-Sales",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-11-15",
+      "lead": "Rob Payette",
+      "rebate": "",
+      "notes": "Need 2 Proven"
+    },
+    {
+      "id": 148,
+      "person": "Stuart Foster",
+      "vendor": "VMware",
+      "cert": "Proven Professional VCF 9.x — Pre-Sales",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-11-15",
+      "lead": "Rob Payette",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 149,
+      "person": "Kadeem Mclean",
+      "vendor": "VMware",
+      "cert": "Certified Expert VCF 9.x — Implementation",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-12-01",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": "Need 1 CE Impl"
+    },
+    {
+      "id": 150,
+      "person": "Vivek Dabas",
+      "vendor": "VMware",
+      "cert": "Certified Expert VCF 9.x — Implementation",
+      "status": "Pending",
+      "completed": "",
+      "expiry": "",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 151,
+      "person": "David Riesen",
+      "vendor": "VMware",
+      "cert": "Proven Professional VCF 9.x — Implementation",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-11-15",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": "Need 2 Proven Impl"
+    },
+    {
+      "id": 152,
+      "person": "David Roy",
+      "vendor": "VMware",
+      "cert": "Proven Professional VCF 9.x — Implementation",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-12-08",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 153,
+      "person": "Vivek Dabas",
+      "vendor": "VMware",
+      "cert": "Proven Professional VCF 9.x — Implementation",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-11-20",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 154,
+      "person": "Kadeem Mclean",
+      "vendor": "VMware",
+      "cert": "Proven Professional VCF 9.x — Implementation",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-12-01",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 155,
+      "person": "Michael Boyne",
+      "vendor": "VMware",
+      "cert": "Certified Expert VCF 9.x — Architect",
+      "status": "Pending",
+      "completed": "",
+      "expiry": "",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": "Need 1 CE Architect"
+    },
+    {
+      "id": 156,
+      "person": "David Roy",
+      "vendor": "VMware",
+      "cert": "Proven Professional VCF 9.x — Architect",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-12-08",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": "Need 1 Proven Architect"
+    },
+    {
+      "id": 157,
+      "person": "Michael Boyne",
+      "vendor": "VMware",
+      "cert": "Proven Professional VCF 9.x — Architect",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2027-12-20",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 158,
+      "person": "Michael Boyne",
+      "vendor": "VMware",
+      "cert": "Knight — Sales CE + Architect CE + VCAP + Lab",
+      "status": "Pending",
+      "completed": "",
+      "expiry": "",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": "Nomination required"
+    },
+    {
+      "id": 159,
+      "person": "Jawad Butt",
+      "vendor": "Veeam",
+      "cert": "VMSP — Sales Professional",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2025-09-15",
+      "lead": "Raed Jabak / Jawad",
+      "rebate": "Platinum",
+      "notes": "Need 6"
+    },
+    {
+      "id": 160,
+      "person": "Sue Yasin",
+      "vendor": "Veeam",
+      "cert": "VMSP — Sales Professional",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2026-03-01",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 161,
+      "person": "Mike Samara",
+      "vendor": "Veeam",
+      "cert": "VMSP — Sales Professional",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2025-08-05",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 162,
+      "person": "Ada",
+      "vendor": "Veeam",
+      "cert": "VMSP — Sales Professional",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2025-12-20",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 163,
+      "person": "Cindy Mclean",
+      "vendor": "Veeam",
+      "cert": "VMSP — Sales Professional",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2026-01-15",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 164,
+      "person": "Tyson Schneider",
+      "vendor": "Veeam",
+      "cert": "VMSP — Sales Professional",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2026-03-01",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 165,
+      "person": "Ethan Lazaro",
+      "vendor": "Veeam",
+      "cert": "VMSP — Sales Professional",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2026-06-01",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 166,
+      "person": "Jawad Butt",
+      "vendor": "Veeam",
+      "cert": "VMTSP — Technical Sales Professional",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2025-09-15",
+      "lead": "Raed Jabak / Jawad",
+      "rebate": "",
+      "notes": "Need 6"
+    },
+    {
+      "id": 167,
+      "person": "AJ Jabak",
+      "vendor": "Veeam",
+      "cert": "VMTSP — Technical Sales Professional",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2025-11-01",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 168,
+      "person": "Dave Smith",
+      "vendor": "Veeam",
+      "cert": "VMTSP — Technical Sales Professional",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2026-05-01",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 169,
+      "person": "Sheldon Smith",
+      "vendor": "Veeam",
+      "cert": "VMTSP — Technical Sales Professional",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2026-03-15",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 170,
+      "person": "Stuart Foster",
+      "vendor": "Veeam",
+      "cert": "VMTSP — Technical Sales Professional",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2026-03-10",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 171,
+      "person": "Matthew Claridge",
+      "vendor": "Veeam",
+      "cert": "VMTSP — Technical Sales Professional",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2026-03-10",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 172,
+      "person": "Brendan Edwards",
+      "vendor": "Veeam",
+      "cert": "VMCE — Certified Engineer",
+      "status": "Complete",
+      "completed": "2024-07-01",
+      "expiry": "2026-05-20",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": "Need 2"
+    },
+    {
+      "id": 173,
+      "person": "David Riesen",
+      "vendor": "Veeam",
+      "cert": "VMCE — Certified Engineer",
+      "status": "Complete",
+      "completed": "2025-09-20",
+      "expiry": "2027-04-01",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 174,
+      "person": "Dave Smith",
+      "vendor": "Veeam",
+      "cert": "VMCE — Certified Engineer",
+      "status": "Complete",
+      "completed": "2022-11-01",
+      "expiry": "2025-08-01",
+      "lead": "Raed Jabak",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 175,
+      "person": "Russel",
+      "vendor": "Arctic Wolf",
+      "cert": "Sales Certification",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2026-12-31",
+      "lead": "Tim",
+      "rebate": "Silver",
+      "notes": "Need 9"
+    },
+    {
+      "id": 176,
+      "person": "Tanya Eades",
+      "vendor": "Arctic Wolf",
+      "cert": "Sales Certification",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2026-12-31",
+      "lead": "Tim",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 177,
+      "person": "Johannes Kim",
+      "vendor": "Arctic Wolf",
+      "cert": "Sales Certification",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2026-12-31",
+      "lead": "Tim",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 178,
+      "person": "Karl",
+      "vendor": "Arctic Wolf",
+      "cert": "Sales Certification",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2026-12-31",
+      "lead": "Tim",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 179,
+      "person": "Tim",
+      "vendor": "Arctic Wolf",
+      "cert": "Sales Certification",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2026-12-31",
+      "lead": "Tim",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 180,
+      "person": "Mark Stonebanks",
+      "vendor": "Arctic Wolf",
+      "cert": "Sales Certification",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2026-12-31",
+      "lead": "Tim",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 181,
+      "person": "Ali",
+      "vendor": "Arctic Wolf",
+      "cert": "Sales Certification",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2026-12-31",
+      "lead": "Tim",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 182,
+      "person": "Russel",
+      "vendor": "Arctic Wolf",
+      "cert": "Technical Certification",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2026-12-31",
+      "lead": "Tim",
+      "rebate": "",
+      "notes": "Need 5"
+    },
+    {
+      "id": 183,
+      "person": "Karl",
+      "vendor": "Arctic Wolf",
+      "cert": "Technical Certification",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2026-12-31",
+      "lead": "Tim",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 184,
+      "person": "Mark Stonebanks",
+      "vendor": "Arctic Wolf",
+      "cert": "Technical Certification",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2026-12-31",
+      "lead": "Tim",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 185,
+      "person": "Darryl Cameron",
+      "vendor": "Arctic Wolf",
+      "cert": "Technical Certification",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2026-12-31",
+      "lead": "Tim",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 186,
+      "person": "Ali",
+      "vendor": "Arctic Wolf",
+      "cert": "Technical Certification",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2026-12-31",
+      "lead": "Tim",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 187,
+      "person": "Glen",
+      "vendor": "Arctic Wolf",
+      "cert": "Technical Certification",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "2026-12-31",
+      "lead": "Tim",
+      "rebate": "",
+      "notes": ""
+    },
+    {
+      "id": 188,
+      "person": "Rob Payette",
+      "vendor": "IBM Hardware",
+      "cert": "Sales & Systems Engineer",
+      "status": "In Progress",
+      "completed": "",
+      "expiry": "",
+      "lead": "Rob Payette",
+      "rebate": "Partner",
+      "notes": "Need 3 total"
+    },
+    {
+      "id": 189,
+      "person": "Austin / CBTS",
+      "vendor": "RedHat",
+      "cert": "Managed by Austin (combined with CBTS)",
+      "status": "Complete",
+      "completed": "",
+      "expiry": "",
+      "lead": "Rob Payette",
+      "rebate": "Premier",
+      "notes": ""
+    }
+  ],
+  "vendorMeta": {
+    "HPE": {
+      "tier": "Triple Platinum Plus",
+      "lead": "Raed Jabak / Michael Goldsmith",
+      "color": "#2a78d6"
+    },
+    "HPE Networking": {
+      "tier": "Triple Platinum Plus",
+      "lead": "Raed Jabak / Michael Goldsmith",
+      "color": "#1baf7a"
+    },
+    "Cisco": {
+      "tier": "Managed (3–7%)",
+      "lead": "Russel / Phil",
+      "color": "#1A5FA8"
+    },
+    "Dell": {
+      "tier": "Global Platinum",
+      "lead": "Michael Goldsmith",
+      "color": "#008300"
+    },
+    "Palo Alto Networks": {
+      "tier": "Diamond Innovator",
+      "lead": "Russel",
+      "color": "#e34948"
+    },
+    "Nutanix": {
+      "tier": "Champion Reseller",
+      "lead": "Jawad / Raed",
+      "color": "#eda100"
+    },
+    "Pure Storage": {
+      "tier": "Elite",
+      "lead": "Raed Jabak / AJ",
+      "color": "#4a3aa7"
+    },
+    "VMware": {
+      "tier": "Premier",
+      "lead": "Raed Jabak / Rob Payette",
+      "color": "#eb6834"
+    },
+    "Veeam": {
+      "tier": "Platinum",
+      "lead": "Raed Jabak / Jawad",
+      "color": "#e87ba4"
+    },
+    "Arctic Wolf": {
+      "tier": "Silver",
+      "lead": "Tim",
+      "color": "#5F5E5A"
+    },
+    "IBM Hardware": {
+      "tier": "Partner",
+      "lead": "Rob Payette",
+      "color": "#2c2c2a"
+    },
+    "RedHat": {
+      "tier": "Premier",
+      "lead": "Rob Payette / Austin",
+      "color": "#C0392B"
+    },
+    "Cloudflare": {
+      "tier": "Power Plus",
+      "lead": "",
+      "color": "#E84E1B"
+    },
+    "Other": {
+      "tier": "",
+      "lead": "",
+      "color": "#888"
+    }
+  },
+  "rebates": [
+    {
+      "vendor": "HPE (Compute)",
+      "items": [
+        {
+          "label": "Standard — Synergy, Nutanix DX, Azure Stack",
+          "pct": "2%",
+          "note": ""
+        },
+        {
+          "label": "Focus — COMs (select compute)",
+          "pct": "9%",
+          "note": ""
+        },
+        {
+          "label": "Greenlake Flex competency",
+          "pct": "10%",
+          "note": "+10% if new logo"
+        },
+        {
+          "label": "Private Cloud AI competency",
+          "pct": "10%",
+          "note": "+10% if new logo"
+        }
+      ]
+    },
+    {
+      "vendor": "HPE Networking",
+      "items": [
+        {
+          "label": "Standard — Switching, Routing, Edge, Central",
+          "pct": "2.5%",
+          "note": ""
+        },
+        {
+          "label": "Focus — Switching NV/WB, WLAN, ClearPass, AirWave",
+          "pct": "6%",
+          "note": ""
+        },
+        {
+          "label": "Networking competency",
+          "pct": "10%",
+          "note": ""
+        }
+      ]
+    },
+    {
+      "vendor": "HPE Hybrid IT",
+      "items": [
+        {
+          "label": "Standard — Nimble, 3Par, Alletra",
+          "pct": "2%",
+          "note": ""
+        },
+        {
+          "label": "Focus — Simplivity, PCBE, Alletra MP B10K, Zerto",
+          "pct": "9%",
+          "note": ""
+        }
+      ]
+    },
+    {
+      "vendor": "Cisco",
+      "items": [
+        {
+          "label": "Standard partner rebate",
+          "pct": "3–7%",
+          "note": "Managed by Phil / Russel"
+        }
+      ]
+    },
+    {
+      "vendor": "Dell",
+      "items": [
+        {
+          "label": "Storage+",
+          "pct": "3.0%",
+          "note": "Base (from $1)"
+        },
+        {
+          "label": "Server+",
+          "pct": "2.0%",
+          "note": "Base"
+        },
+        {
+          "label": "Client+",
+          "pct": "0.7%",
+          "note": "Client Peripheral Gate applies"
+        },
+        {
+          "label": "Storage multiplier",
+          "pct": "×0.5",
+          "note": "Stacks on base"
+        },
+        {
+          "label": "Server multiplier",
+          "pct": "×3",
+          "note": "Stacks on base"
+        },
+        {
+          "label": "Client multiplier",
+          "pct": "×2",
+          "note": "Stacks on base"
+        },
+        {
+          "label": "ProSupport / ProSupport Plus ≥3yr",
+          "pct": "+1.5%",
+          "note": "Stacks on base + multiplier"
+        },
+        {
+          "label": "Professional Services",
+          "pct": "+3.5%",
+          "note": "Stacks on base + multiplier"
+        },
+        {
+          "label": "New Business Incentive (NBI)",
+          "pct": "4.0%",
+          "note": "Approved DR required; highest wins"
+        },
+        {
+          "label": "Competitive Swap / Compete Select",
+          "pct": "4.0%",
+          "note": "Highest wins; not stackable"
+        }
+      ]
+    },
+    {
+      "vendor": "Palo Alto Networks",
+      "items": [
+        {
+          "label": "Hardware Firewall Specialization",
+          "pct": "2%",
+          "note": "Requires 3 CDSS"
+        },
+        {
+          "label": "Software Firewall Specialization",
+          "pct": "5%",
+          "note": "Stackable"
+        },
+        {
+          "label": "Prisma SASE / Prisma Cloud",
+          "pct": "5%",
+          "note": "Stackable"
+        },
+        {
+          "label": "Cortex XDR / XSOAR / XSIAM",
+          "pct": "5%",
+          "note": "Stackable"
+        },
+        {
+          "label": "Cyber Risk Mgmt (Unit 42)",
+          "pct": "2%",
+          "note": ""
+        },
+        {
+          "label": "New customer (net-new $0 LTV)",
+          "pct": "+2%",
+          "note": "Opportunity rebate"
+        },
+        {
+          "label": "Tech Lift (SLR / Evaluation)",
+          "pct": "+2%",
+          "note": "Partner-delivered"
+        },
+        {
+          "label": "ASC Level 1 (PEPS renewals)",
+          "pct": "10%",
+          "note": ""
+        },
+        {
+          "label": "ASC Level 2 (PEPS renewals)",
+          "pct": "5%",
+          "note": ""
+        }
+      ]
+    },
+    {
+      "vendor": "Nutanix (Champion Reseller)",
+      "items": [
+        {
+          "label": "Surge Rebate — targeted new logo",
+          "pct": "16%",
+          "note": "$60K cap per deal, DR required"
+        },
+        {
+          "label": "Channel-led — Land + Expand",
+          "pct": "6%",
+          "note": ""
+        },
+        {
+          "label": "New Business Rebate",
+          "pct": "7%",
+          "note": ""
+        },
+        {
+          "label": "Outperformance — accelerated growth bonus",
+          "pct": "Up to 7%",
+          "note": "Sustained performance"
+        },
+        {
+          "label": "Surge Individual SPIF (sales + SE each)",
+          "pct": "4%",
+          "note": "Company opt-in + DR required"
+        },
+        {
+          "label": "New Logo Individual SPIF (each)",
+          "pct": "2%",
+          "note": "Public sector excluded"
+        },
+        {
+          "label": "Max total potential per deal",
+          "pct": "Up to 41%",
+          "note": "Company + individual SPIFs combined"
+        }
+      ]
+    },
+    {
+      "vendor": "Pure Storage (Elite)",
+      "items": [
+        {
+          "label": "Base rebate",
+          "pct": "1%",
+          "note": ""
+        },
+        {
+          "label": "Partner Sourced Deal",
+          "pct": "+1%",
+          "note": ""
+        },
+        {
+          "label": "New / Add-On Product",
+          "pct": "+2%",
+          "note": ""
+        },
+        {
+          "label": "Evergreen",
+          "pct": "4%",
+          "note": ""
+        }
+      ]
+    },
+    {
+      "vendor": "VMware (Premier)",
+      "items": [
+        {
+          "label": "Deferred margin on eligible subscriptions",
+          "pct": "4%",
+          "note": "VCF, ANS, Tanzu, vSphere Std/VVF — new, expand, migrate, renew"
+        },
+        {
+          "label": "ABC (Activity-Based Claims)",
+          "pct": "Variable",
+          "note": "Pre-approval required; GTM events, workshops"
+        }
+      ]
+    },
+    {
+      "vendor": "Veeam (Platinum)",
+      "items": [
+        {
+          "label": "Quarterly VAR rebate on new software",
+          "pct": "Variable",
+          "note": "Starts at 85% target; accelerates at 115%+"
+        },
+        {
+          "label": "Standard Platinum discount",
+          "pct": "10%",
+          "note": ""
+        },
+        {
+          "label": "Temp promos (stackable)",
+          "pct": "+5–15%",
+          "note": ""
+        },
+        {
+          "label": "Bounty — new logo ≥$200K TCV",
+          "pct": "3%",
+          "note": "Invite-only; min $200K deal; $1K per DR"
+        },
+        {
+          "label": "Bounty — new logo ≥$400K TCV",
+          "pct": "5%",
+          "note": ""
+        }
+      ]
+    },
+    {
+      "vendor": "Arctic Wolf (Silver)",
+      "items": [
+        {
+          "label": "Partner rebate",
+          "pct": "0%",
+          "note": "Revenue share may apply on managed services"
+        }
+      ]
+    }
+  ],
+  "gaps": [
+    {
+      "severity": "critical",
+      "vendor": "Palo Alto Networks",
+      "title": "Firewall Pre-Sales — need 1 confirmed",
+      "detail": "Sheldon Smith and Matthew Claridge in progress. Deadline July 31, 2026. Lead: Russel"
+    },
+    {
+      "severity": "critical",
+      "vendor": "HPE",
+      "title": "HPE Triple Platinum Plus — enablement plan sign-off",
+      "detail": "Must be completed by June 1, 2026. Need 2× additional Hybrid Cloud competencies and 1× additional Networking competency."
+    },
+    {
+      "severity": "high",
+      "vendor": "HPE Networking",
+      "title": "Networking Architect — need 1 more person",
+      "detail": "Only Mark Stonebanks holds this. Need 1 additional holder. Lead: Raed Jabak / Michael Goldsmith"
+    },
+    {
+      "severity": "high",
+      "vendor": "Palo Alto Networks",
+      "title": "SASE Pre-Sales — need 2 confirmed",
+      "detail": "Matthew Claridge (confirmed), Sheldon Smith (in progress). Confirm Sheldon completion. Lead: Russel"
+    },
+    {
+      "severity": "high",
+      "vendor": "Palo Alto Networks",
+      "title": "Cortex XDR Pre-Sales — need 2 confirmed",
+      "detail": "Matthew Claridge and Sheldon listed. Verify portal completions. Lead: Russel"
+    },
+    {
+      "severity": "high",
+      "vendor": "Pure Storage",
+      "title": "FlashBlade Architect Associate — need 3",
+      "detail": "AJ Jabak, Joey, Stuart Foster all TBD. Exam dates to be scheduled. Lead: Raed Jabak / AJ"
+    },
+    {
+      "severity": "high",
+      "vendor": "Pure Storage",
+      "title": "FAIS FlashArray Implementation — need 3",
+      "detail": "Stuart Foster confirmed. Sheldon Smith and Mathew Claridge TBD. Lead: Raed Jabak / AJ"
+    },
+    {
+      "severity": "medium",
+      "vendor": "HPE Networking",
+      "title": "Aruba SD-WAN Expert Competency — need 2",
+      "detail": "Mark Stonebanks and Alan Lee in progress. Self-paced (2 days) + SSE Sales (1hr). Lead: Raed Jabak"
+    },
+    {
+      "severity": "medium",
+      "vendor": "HPE Networking",
+      "title": "Aruba SSE Product Specialist — need 2",
+      "detail": "Alan Lee and Mark Stonebanks in progress. Lead: Raed Jabak"
+    },
+    {
+      "severity": "medium",
+      "vendor": "Pure Storage",
+      "title": "Technical Professional Accreditation — need 8",
+      "detail": "9 people listed with completions. Verify active portal count vs requirement. Lead: Raed Jabak"
+    },
+    {
+      "severity": "medium",
+      "vendor": "Pure Storage",
+      "title": "Sales Professional Accreditation — need 10",
+      "detail": "11 people listed. Verify portal count. Lead: Raed Jabak"
+    },
+    {
+      "severity": "medium",
+      "vendor": "Nutanix",
+      "title": "NCSR Basics — gap of -7 per tracker",
+      "detail": "10 holders listed but tracker shows shortfall. Reconcile with Champion portal. Lead: Jawad / Raed"
+    },
+    {
+      "severity": "medium",
+      "vendor": "Arctic Wolf",
+      "title": "Sales Certification — need 9",
+      "detail": "~8 names confirmed. Verify all 2026 completions in portal. Lead: Tim"
+    },
+    {
+      "severity": "medium",
+      "vendor": "IBM Hardware",
+      "title": "Sales & SE certifications — need 3",
+      "detail": "Currently in progress. Rob Payette leading. Contact IBM for exam scheduling."
+    },
+    {
+      "severity": "low",
+      "vendor": "Veeam",
+      "title": "VMSP — verify portal count vs need (6)",
+      "detail": "7 people listed, check all are active in portal. Lead: Raed / Jawad"
+    },
+    {
+      "severity": "low",
+      "vendor": "Veeam",
+      "title": "VMTSP — verify portal count vs need (6)",
+      "detail": "6 people listed (Jawad, AJ, Dave Smith, Sheldon, Stuart, Matthew). Confirm expiry dates. Lead: Raed / Jawad"
+    }
+  ]
+}

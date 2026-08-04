@@ -20,4 +20,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+  <EmbeddedResource Include="Persistence/SeedData/certification-prototype-data.json" />
+</ItemGroup>
+
 </Project>

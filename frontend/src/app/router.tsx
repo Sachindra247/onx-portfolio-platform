@@ -4,6 +4,7 @@ import EventsPage from "../pages/EventsPage";
 import HomePage from "../pages/HomePage.tsx";
 import NotFoundPage from "../pages/NotFoundPage";
 import EventsLayout from "../components/events/layout/EventsLayout";
+import CertificationsPage from "../pages/CertificationsPage";
 
 const baseName = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -26,6 +27,10 @@ export const router = createBrowserRouter(
               element: <EventsPage />,
             },
           ],
+        },
+        {
+          path: "certifications",
+          element: <CertificationsPage />,
         },
         {
           path: "*",

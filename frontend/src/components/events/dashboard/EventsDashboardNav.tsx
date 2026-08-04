@@ -3,6 +3,7 @@ import {
   CalendarDays,
   CheckCircle2,
   List,
+  Plus,
   Users,
 } from "lucide-react";
 
@@ -11,37 +12,34 @@ import type { EventsSection } from "../../../types/events";
 interface EventsDashboardNavProps {
   activeSection: EventsSection;
   onSectionChange: (section: EventsSection) => void;
+  onAddEvent: () => void;
+  addEventDisabled?: boolean;
 }
 
 const navigationItems = [
   {
     id: "overview" as const,
     name: "Overview",
-    summary: "Portfolio dashboard",
     icon: BarChart3,
   },
   {
     id: "events" as const,
     name: "All Events",
-    summary: "Browse and manage events",
     icon: List,
   },
   {
     id: "vendors" as const,
     name: "By Vendor",
-    summary: "View vendor activity",
     icon: Users,
   },
   {
     id: "upcoming" as const,
     name: "Upcoming",
-    summary: "Scheduled events",
     icon: CalendarDays,
   },
   {
     id: "completed" as const,
     name: "Completed",
-    summary: "Finished events",
     icon: CheckCircle2,
   },
 ];
@@ -49,10 +47,12 @@ const navigationItems = [
 export default function EventsDashboardNav({
   activeSection,
   onSectionChange,
+  onAddEvent,
+  addEventDisabled = false,
 }: EventsDashboardNavProps) {
   return (
     <aside className="events-sidebar" aria-label="Events navigation">
-      <div className="events-sidebar__heading"></div>
+      <div className="events-sidebar__heading" />
 
       <div className="events-sidebar__items">
         {navigationItems.map((item) => {
@@ -78,10 +78,6 @@ export default function EventsDashboardNav({
 
               <span className="events-sidebar-item__content">
                 <span className="events-sidebar-item__name">{item.name}</span>
-
-                <span className="events-sidebar-item__summary">
-                  {item.summary}
-                </span>
               </span>
 
               <span
@@ -91,6 +87,18 @@ export default function EventsDashboardNav({
             </button>
           );
         })}
+      </div>
+
+      <div className="events-sidebar__actions">
+        <button
+          type="button"
+          className="events-sidebar__add-button"
+          disabled={addEventDisabled}
+          onClick={onAddEvent}
+        >
+          <Plus size={17} aria-hidden="true" />
+          <span>Add Event</span>
+        </button>
       </div>
     </aside>
   );

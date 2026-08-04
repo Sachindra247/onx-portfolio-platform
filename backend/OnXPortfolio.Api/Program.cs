@@ -129,6 +129,8 @@ if (missingVendors.Any())
     await dbContext.SaveChangesAsync();
 }
 
+await CertificationPrototypeSeeder.SeedAsync(dbContext);
+
     if (app.Environment.IsDevelopment())
     {
         await DatabaseSeeder.SeedAsync(dbContext);

@@ -39,10 +39,11 @@ export const appModules: AppModule[] = [
     shortName: "Certifications",
     description:
       "Track certifications, vendor competencies and upcoming expirations.",
-    summary: "Planned for a future release",
+    summary: "View the certification portfolio",
+    path: "/certifications",
     icon: GraduationCap,
     accent: "blue",
-    status: "coming-soon",
+    status: "available",
   },
   {
     id: "rebates",

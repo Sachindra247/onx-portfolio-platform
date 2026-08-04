@@ -1,4 +1,4 @@
-import { AlertCircle, CalendarDays, Plus, RefreshCw } from "lucide-react";
+import { AlertCircle, RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   createEvent,
@@ -277,10 +277,12 @@ export default function EventsPage() {
         <EventsDashboardNav
           activeSection={activeSection}
           onSectionChange={setActiveSection}
+          onAddEvent={openCreateModal}
+          addEventDisabled={isLoading || vendors.length === 0}
         />
 
         <main className="events-workspace__content">
-          <header className="page-header">
+          {/* <header className="page-header">
             <div className="page-header__identity">
               <div className="page-header__icon module-accent module-accent--gold">
                 <CalendarDays size={25} aria-hidden="true" />
@@ -292,17 +294,7 @@ export default function EventsPage() {
                 <p>All vendors · FY2026 · CAD</p>
               </div>
             </div>
-
-            <button
-              className="primary-button"
-              type="button"
-              disabled={isLoading || vendors.length === 0}
-              onClick={openCreateModal}
-            >
-              <Plus size={17} aria-hidden="true" />
-              Add event
-            </button>
-          </header>
+          </header> */}
 
           {isLoading && (
             <div className="page-state" aria-live="polite">
