@@ -2,6 +2,15 @@ import { useEffect, useMemo, useState } from "react";
 import { AlertCircle, RefreshCw } from "lucide-react";
 import { exportCertificationsCsv } from "../utils/certificationExport";
 
+import VendorIntelligenceView from "../components/certifications/vendors/VendorIntelligenceView";
+
+import CertificationGapsView from "../components/certifications/gaps/CertificationGapsView";
+
+import ExpiringCertificationsView from "../components/certifications/expiring/ExpiringCertificationsView";
+
+import PeopleCoverageGrid from "../components/certifications/people/PeopleCoverageGrid";
+import { buildPeopleCoverage } from "../utils/personCoverage";
+
 import CertificationFilters from "../components/certifications/CertificationFilters";
 import CertificationPagination from "../components/certifications/CertificationPagination";
 import CertificationTable from "../components/certifications/CertificationTable";
@@ -37,8 +46,6 @@ import type {
 } from "../types/certifications";
 
 import { getCertificationSummary } from "../utils/certificationAnalytics";
-
-const prototypeGapCount = 15;
 
 export default function CertificationsPage() {
   const [activeSection, setActiveSection] =
@@ -94,9 +101,14 @@ export default function CertificationsPage() {
     };
   }, []);
 
+  const prototypeGapCount = useMemo(
+    () => getCertificationActionCount(certifications),
+    [certifications],
+  );
+
   const summary = useMemo(
     () => getCertificationSummary(certifications, prototypeGapCount),
-    [certifications],
+    [certifications, prototypeGapCount],
   );
 
   const vendorOptions = useMemo(
@@ -184,6 +196,11 @@ export default function CertificationsPage() {
       startIndex + pageSize,
     );
   }, [filteredAndSortedCertifications, page, pageSize]);
+
+  const peopleCoverage = useMemo(
+    () => buildPeopleCoverage(certifications),
+    [certifications],
+  );
 
   async function loadCertifications(signal?: AbortSignal) {
     setIsLoading(true);
@@ -459,19 +476,36 @@ export default function CertificationsPage() {
           )}
 
           {activeSection === "people" && (
-            <CertificationPlaceholder title="People & Coverage" />
+            <section className="certifications-section">
+              <PeopleCoverageGrid people={peopleCoverage} />
+            </section>
           )}
 
           {activeSection === "gaps" && (
-            <CertificationPlaceholder title="Gaps & Actions" />
+            <section className="certifications-section">
+              <CertificationGapsView
+                certifications={certifications}
+                onEdit={openEditCertification}
+              />
+            </section>
           )}
 
           {activeSection === "expiring" && (
-            <CertificationPlaceholder title="Expiring Certifications" />
+            <section className="certifications-section">
+              <ExpiringCertificationsView
+                certifications={certifications}
+                onEdit={openEditCertification}
+              />
+            </section>
           )}
 
           {activeSection === "vendors" && (
-            <CertificationPlaceholder title="Vendors & Partners" />
+            <section className="certifications-section">
+              <VendorIntelligenceView
+                certifications={certifications}
+                onEdit={openEditCertification}
+              />
+            </section>
           )}
         </>
       )}
@@ -507,21 +541,91 @@ export default function CertificationsPage() {
   );
 }
 
-interface CertificationPlaceholderProps {
-  title: string;
+function getCertificationActionCount(
+  certifications: CertificationDto[],
+): number {
+  const actionGroups = new Set<string>();
+
+  certifications.forEach((certification) => {
+    const isActionable =
+      certification.status === "Expired" ||
+      certification.status === "Pending" ||
+      certification.status === "Tbd" ||
+      isCertificationPastExpiry(certification.expiryDate) ||
+      isCertificationExpiringWithin30Days(certification.expiryDate);
+
+    if (!isActionable) {
+      return;
+    }
+
+    const key = [
+      certification.vendorName.trim().toLocaleLowerCase(),
+      certification.certificationName.trim().toLocaleLowerCase(),
+    ].join("|");
+
+    actionGroups.add(key);
+  });
+
+  return actionGroups.size;
 }
 
-function CertificationPlaceholder({ title }: CertificationPlaceholderProps) {
-  return (
-    <section className="certifications-section">
-      <div className="certifications-section-heading">{title}</div>
+function isCertificationPastExpiry(value: string | null): boolean {
+  const daysRemaining = getCertificationDaysRemaining(value);
 
-      <div className="certifications-placeholder">
-        Certification content will appear here.
-      </div>
-    </section>
+  return daysRemaining < 0;
+}
+
+function isCertificationExpiringWithin30Days(value: string | null): boolean {
+  const daysRemaining = getCertificationDaysRemaining(value);
+
+  return daysRemaining >= 0 && daysRemaining <= 30;
+}
+
+function getCertificationDaysRemaining(value: string | null): number {
+  if (!value) {
+    return Number.MAX_SAFE_INTEGER;
+  }
+
+  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+
+  if (!match) {
+    return Number.MAX_SAFE_INTEGER;
+  }
+
+  const expiryDate = new Date(
+    Number(match[1]),
+    Number(match[2]) - 1,
+    Number(match[3]),
+  );
+
+  const today = new Date();
+
+  const startOfToday = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate(),
+  );
+
+  return Math.ceil(
+    (expiryDate.getTime() - startOfToday.getTime()) / 86_400_000,
   );
 }
+
+// interface CertificationPlaceholderProps {
+//   title: string;
+// }
+
+// function CertificationPlaceholder({ title }: CertificationPlaceholderProps) {
+//   return (
+//     <section className="certifications-section">
+//       <div className="certifications-section-heading">{title}</div>
+
+//       <div className="certifications-placeholder">
+//         Certification content will appear here.
+//       </div>
+//     </section>
+//   );
+// }
 
 function sortCertifications(
   certifications: CertificationDto[],
