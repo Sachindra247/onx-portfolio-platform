@@ -62,9 +62,10 @@ export const appModules: AppModule[] = [
     shortName: "Vacations",
     description:
       "Coordinate vacation schedules, approvals and team availability.",
-    summary: "Planned for a future release",
+    summary: "Manage team leave and availability",
+    path: "/vacations",
     icon: Palmtree,
     accent: "purple",
-    status: "coming-soon",
+    status: "available",
   },
 ];

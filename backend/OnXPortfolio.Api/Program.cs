@@ -81,7 +81,7 @@ using (var scope = app.Services.CreateScope())
     var dbContext = scope.ServiceProvider
         .GetRequiredService<AppDbContext>();
 
-    if (databaseProvider.Equals(
+   if (databaseProvider.Equals(
         "Sqlite",
         StringComparison.OrdinalIgnoreCase))
 {
@@ -130,6 +130,8 @@ if (missingVendors.Any())
 }
 
 await CertificationPrototypeSeeder.SeedAsync(dbContext);
+
+await VacationPrototypeSeeder.SeedAsync(dbContext);
 
     if (app.Environment.IsDevelopment())
     {

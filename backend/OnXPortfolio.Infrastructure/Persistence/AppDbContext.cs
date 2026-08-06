@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using OnXPortfolio.Domain.Certifications;
 using OnXPortfolio.Domain.Events;
 using OnXPortfolio.Domain.Vendors;
+using OnXPortfolio.Domain.Vacations;
 
 namespace OnXPortfolio.Infrastructure.Persistence;
 
@@ -18,6 +19,9 @@ public sealed class AppDbContext : DbContext
 
     public DbSet<Certification> Certifications =>
         Set<Certification>();
+
+    public DbSet<LeaveRequest> LeaveRequests =>
+    Set<LeaveRequest>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

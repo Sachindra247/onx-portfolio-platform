@@ -1,0 +1,311 @@
+import { CalendarRange, Pencil, Search, Trash2 } from "lucide-react";
+import { useMemo, useState } from "react";
+
+import type {
+  LeaveRequestDto,
+  LeaveRequestStatus,
+  LeaveType,
+} from "../../../types/vacations";
+
+interface LeaveRequestsViewProps {
+  requests: LeaveRequestDto[];
+  isLoading: boolean;
+  error: string | null;
+  onRetry: () => void;
+  onEdit: (request: LeaveRequestDto) => void;
+  onDelete: (request: LeaveRequestDto) => void;
+}
+
+export default function LeaveRequestsView({
+  requests,
+  isLoading,
+  error,
+  onRetry,
+  onEdit,
+  onDelete,
+}: LeaveRequestsViewProps) {
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<LeaveRequestStatus | "">("");
+  const [typeFilter, setTypeFilter] = useState<LeaveType | "">("");
+
+  const filteredRequests = useMemo(() => {
+    const normalizedSearch = search.trim().toLocaleLowerCase();
+
+    return requests.filter((request) => {
+      const matchesSearch =
+        !normalizedSearch ||
+        request.employeeName.toLocaleLowerCase().includes(normalizedSearch) ||
+        request.leaveType.toLocaleLowerCase().includes(normalizedSearch) ||
+        request.approverName?.toLocaleLowerCase().includes(normalizedSearch) ||
+        request.reason?.toLocaleLowerCase().includes(normalizedSearch);
+
+      const matchesStatus = !statusFilter || request.status === statusFilter;
+
+      const matchesType = !typeFilter || request.leaveType === typeFilter;
+
+      return matchesSearch && matchesStatus && matchesType;
+    });
+  }, [requests, search, statusFilter, typeFilter]);
+
+  if (isLoading) {
+    return (
+      <div className="leave-requests-state">
+        <CalendarRange size={28} aria-hidden="true" />
+        <h3>Loading leave requests</h3>
+        <p>Please wait while the records load.</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="leave-requests-state">
+        <h3>Unable to load leave requests</h3>
+        <p>{error}</p>
+
+        <button type="button" onClick={onRetry}>
+          Try again
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="leave-requests-view">
+      <section className="leave-requests-toolbar">
+        <div className="leave-requests-search">
+          <Search size={16} aria-hidden="true" />
+
+          <input
+            type="search"
+            value={search}
+            placeholder="Search employee, leave type, approver, or reason..."
+            aria-label="Search leave requests"
+            onChange={(event) => setSearch(event.target.value)}
+          />
+        </div>
+
+        <select
+          value={typeFilter}
+          aria-label="Filter by leave type"
+          onChange={(event) =>
+            setTypeFilter(event.target.value as LeaveType | "")
+          }
+        >
+          <option value="">All leave types</option>
+          <option value="Vacation">Vacation</option>
+          <option value="Sick">Sick</option>
+          <option value="Parental">Parental</option>
+          <option value="Personal">Personal</option>
+          <option value="Bereavement">Bereavement</option>
+          <option value="Unpaid">Unpaid</option>
+          <option value="Other">Other</option>
+        </select>
+
+        <select
+          value={statusFilter}
+          aria-label="Filter by request status"
+          onChange={(event) =>
+            setStatusFilter(event.target.value as LeaveRequestStatus | "")
+          }
+        >
+          <option value="">All statuses</option>
+          <option value="Draft">Draft</option>
+          <option value="Pending">Pending</option>
+          <option value="Approved">Approved</option>
+          <option value="Rejected">Rejected</option>
+          <option value="Cancelled">Cancelled</option>
+        </select>
+
+        {(search || typeFilter || statusFilter) && (
+          <button
+            type="button"
+            className="leave-requests-toolbar__clear"
+            onClick={() => {
+              setSearch("");
+              setTypeFilter("");
+              setStatusFilter("");
+            }}
+          >
+            Clear filters
+          </button>
+        )}
+
+        <span className="leave-requests-toolbar__count">
+          {filteredRequests.length} of {requests.length} requests
+        </span>
+      </section>
+
+      <section className="leave-requests-card">
+        <header className="leave-requests-card__header">
+          <div>
+            <h2>Leave requests</h2>
+            <p>Review and manage team leave records</p>
+          </div>
+
+          <span>{filteredRequests.length} records</span>
+        </header>
+
+        {filteredRequests.length > 0 ? (
+          <div className="leave-requests-table-scroll">
+            <table className="leave-requests-table">
+              <thead>
+                <tr>
+                  <th>Employee</th>
+                  <th>Leave type</th>
+                  <th>Start</th>
+                  <th>End</th>
+                  <th>Working days</th>
+                  <th>Status</th>
+                  <th>Approver</th>
+                  <th>Reason</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {filteredRequests.map((request) => (
+                  <tr key={request.id}>
+                    <td>
+                      <strong>{request.employeeName}</strong>
+                    </td>
+
+                    <td>
+                      <span
+                        className={[
+                          "leave-type-badge",
+                          `leave-type-badge--${request.leaveType.toLocaleLowerCase()}`,
+                        ].join(" ")}
+                      >
+                        {formatLeaveType(request.leaveType)}
+                      </span>
+                    </td>
+
+                    <td>{formatDate(request.startDate)}</td>
+
+                    <td>{formatDate(request.endDate)}</td>
+
+                    <td>
+                      {countWorkingDays(request.startDate, request.endDate)}
+                    </td>
+
+                    <td>
+                      <span
+                        className={[
+                          "vacation-request-status",
+                          `vacation-request-status--${request.status.toLocaleLowerCase()}`,
+                        ].join(" ")}
+                      >
+                        {request.status}
+                      </span>
+                    </td>
+
+                    <td>{request.approverName ?? "—"}</td>
+
+                    <td>
+                      <span className="leave-request-reason">
+                        {request.reason ?? "—"}
+                      </span>
+                    </td>
+
+                    <td>
+                      <div className="leave-request-actions">
+                        <button
+                          type="button"
+                          aria-label={`Edit leave request for ${request.employeeName}`}
+                          onClick={() => onEdit(request)}
+                        >
+                          <Pencil size={14} aria-hidden="true" />
+                        </button>
+
+                        <button
+                          type="button"
+                          className="leave-request-actions__delete"
+                          aria-label={`Delete leave request for ${request.employeeName}`}
+                          onClick={() => onDelete(request)}
+                        >
+                          <Trash2 size={14} aria-hidden="true" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="leave-requests-state">
+            <CalendarRange size={30} aria-hidden="true" />
+
+            <h3>No leave requests found</h3>
+
+            <p>Add a leave request or change the current filters.</p>
+          </div>
+        )}
+      </section>
+    </div>
+  );
+}
+
+function formatLeaveType(leaveType: LeaveType): string {
+  switch (leaveType) {
+    case "Sick":
+      return "Sick Leave";
+    case "Parental":
+      return "Parental Leave";
+    case "Personal":
+      return "Personal Leave";
+    case "Unpaid":
+      return "Unpaid Leave";
+    default:
+      return leaveType;
+  }
+}
+
+function countWorkingDays(startValue: string, endValue: string): number {
+  const startDate = parseDate(startValue);
+  const endDate = parseDate(endValue);
+
+  if (!startDate || !endDate || endDate < startDate) {
+    return 0;
+  }
+
+  let count = 0;
+  const current = new Date(startDate);
+
+  while (current <= endDate) {
+    const day = current.getDay();
+
+    if (day !== 0 && day !== 6) {
+      count += 1;
+    }
+
+    current.setDate(current.getDate() + 1);
+  }
+
+  return count;
+}
+
+function formatDate(value: string): string {
+  const date = parseDate(value);
+
+  if (!date) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat("en-CA", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  }).format(date);
+}
+
+function parseDate(value: string): Date | null {
+  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+
+  if (!match) {
+    return null;
+  }
+
+  return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+}
