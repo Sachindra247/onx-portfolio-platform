@@ -22,8 +22,9 @@ const navigationItems = [
   },
   {
     label: "Certifications",
+    path: "/certifications",
     icon: GraduationCap,
-    available: false,
+    available: true,
   },
   {
     label: "Rebates",
@@ -32,8 +33,9 @@ const navigationItems = [
   },
   {
     label: "Vacations",
+    path: "/vacations",
     icon: Palmtree,
-    available: false,
+    available: true,
   },
 ];
 
@@ -58,6 +60,7 @@ export default function AppRail() {
                 disabled
               >
                 <Icon size={20} aria-hidden="true" />
+
                 <span className="app-rail__tooltip">
                   {item.label} — coming soon
                 </span>
@@ -78,6 +81,7 @@ export default function AppRail() {
               title={item.label}
             >
               <Icon size={20} aria-hidden="true" />
+
               <span className="app-rail__tooltip">{item.label}</span>
             </NavLink>
           );
