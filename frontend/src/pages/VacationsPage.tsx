@@ -2,6 +2,11 @@ import VacationsLayout from "../components/vacations/layout/VacationsLayout";
 
 import VacationOverview from "../components/vacations/overview/VacationOverview";
 
+import TeamVacationCalendar from "../components/vacations/calendar/TeamVacationCalendar";
+
+import PeopleBalancesView from "../components/vacations/people/PeopleBalancesView";
+import CoverageWarningsView from "../components/vacations/coverage/CoverageWarningsView";
+
 import { useCallback, useEffect, useState } from "react";
 
 import LeaveRequestsView from "../components/vacations/requests/LeaveRequestsView";
@@ -164,11 +169,10 @@ export default function VacationsPage() {
 
         {activeSection === "calendar" && (
           <section className="vacations-section">
-            <h2 className="vacations-section-heading">Team Calendar</h2>
-
-            <div className="vacations-placeholder">
-              <p>Monthly team vacation calendar will appear here.</p>
-            </div>
+            <TeamVacationCalendar
+              requests={leaveRequests}
+              onEdit={handleEditLeaveRequest}
+            />
           </section>
         )}
 
@@ -187,21 +191,13 @@ export default function VacationsPage() {
 
         {activeSection === "people" && (
           <section className="vacations-section">
-            <h2 className="vacations-section-heading">People &amp; Balances</h2>
-
-            <div className="vacations-placeholder">
-              <p>Team leave balances will appear here.</p>
-            </div>
+            <PeopleBalancesView requests={leaveRequests} />
           </section>
         )}
 
         {activeSection === "coverage" && (
           <section className="vacations-section">
-            <h2 className="vacations-section-heading">Coverage Warnings</h2>
-
-            <div className="vacations-placeholder">
-              <p>Team availability and overlap warnings will appear here.</p>
-            </div>
+            <CoverageWarningsView requests={leaveRequests} />
           </section>
         )}
       </VacationsLayout>
