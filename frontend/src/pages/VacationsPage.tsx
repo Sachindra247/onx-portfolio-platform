@@ -15,17 +15,28 @@ import LeaveRequestFormModal from "../components/vacations/requests/LeaveRequest
 import LeaveRequestDeleteModal from "../components/vacations/requests/LeaveRequestDeleteModal";
 
 import {
+  approveLeaveRequest,
   createLeaveRequest,
   deleteLeaveRequest,
   getLeaveRequests,
+  rejectLeaveRequest,
   updateLeaveRequest,
 } from "../api/vacationsApi";
+
+import { useAuth } from "../auth/AuthContext";
 
 import type { LeaveRequestDto, LeaveRequestPayload } from "../types/vacations";
 
 import type { VacationSection } from "../components/vacations/dashboard/VacationsDashboardNav";
 
 export default function VacationsPage() {
+  const { user } = useAuth();
+
+  const canReviewVacation = Boolean(
+    user?.isGlobalAdministrator ||
+    (user?.role === "Manager" && user?.vacationAccess === "Admin"),
+  );
+
   const [modalIsOpen, setModalIsOpen] = useState(false);
 
   const [selectedLeaveRequest, setSelectedLeaveRequest] =
@@ -153,6 +164,16 @@ export default function VacationsPage() {
     console.log("Export vacation CSV");
   }
 
+  async function handleApproveLeaveRequest(request: LeaveRequestDto) {
+    await approveLeaveRequest(request.id);
+    await loadLeaveRequests();
+  }
+
+  async function handleRejectLeaveRequest(request: LeaveRequestDto) {
+    await rejectLeaveRequest(request.id);
+    await loadLeaveRequests();
+  }
+
   return (
     <>
       <VacationsLayout
@@ -185,6 +206,9 @@ export default function VacationsPage() {
               onRetry={() => void loadLeaveRequests()}
               onEdit={handleEditLeaveRequest}
               onDelete={setLeaveRequestPendingDelete}
+              canReview={canReviewVacation}
+              onApprove={handleApproveLeaveRequest}
+              onReject={handleRejectLeaveRequest}
             />
           </section>
         )}

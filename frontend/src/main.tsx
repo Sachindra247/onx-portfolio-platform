@@ -7,11 +7,14 @@ import { router } from "./app/router";
 import "./styles/tokens.css";
 import "./styles/app.css";
 import "./styles/events.css";
+import { AuthProvider } from "./auth/AuthContext";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <ToastProvider>
-      <RouterProvider router={router} />
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
     </ToastProvider>
   </React.StrictMode>,
 );

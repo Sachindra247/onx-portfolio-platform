@@ -800,6 +800,27 @@
     }
 }
 
+.leave-request-actions .leave-request-actions__approve,
+.leave-request-actions .leave-request-actions__reject {
+    width: auto;
+    min-width: 54px;
+    padding: 0 8px;
+    font-size: 8px;
+    font-weight: 800;
+}
+
+.leave-request-actions .leave-request-actions__approve {
+    border-color: #8fc5a4;
+    background: #edf8f1;
+    color: #28785d;
+}
+
+.leave-request-actions .leave-request-actions__reject {
+    border-color: #efb9b4;
+    background: #fde8e6;
+    color: #b8382f;
+}
+
 /* ==========================================================
    VACATION MODALS
    ========================================================== */

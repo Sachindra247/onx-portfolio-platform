@@ -44,5 +44,19 @@ public sealed class LeaveRequestConfiguration
         builder.HasIndex(request => request.EndDate);
 
         builder.HasIndex(request => request.Status);
+
+        builder.HasOne(request => request.EmployeeUser)
+    .WithMany()
+    .HasForeignKey(request => request.EmployeeUserId)
+    .OnDelete(DeleteBehavior.Restrict);
+
+builder.HasOne(request => request.ReviewedByUser)
+    .WithMany()
+    .HasForeignKey(request => request.ReviewedByUserId)
+    .OnDelete(DeleteBehavior.Restrict);
+
+builder.HasIndex(request => request.EmployeeUserId);
+
+builder.HasIndex(request => request.ReviewedByUserId);
     }
 }

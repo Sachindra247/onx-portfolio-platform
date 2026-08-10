@@ -1,4 +1,5 @@
 using OnXPortfolio.Domain.Common;
+using OnXPortfolio.Domain.Users;
 
 namespace OnXPortfolio.Domain.Vacations;
 
@@ -21,4 +22,14 @@ public sealed class LeaveRequest : AuditableEntity
     public string? ApproverName { get; set; }
 
     public string? Notes { get; set; }
+
+    public Guid? EmployeeUserId { get; set; }
+
+public ApplicationUser? EmployeeUser { get; set; }
+
+public Guid? ReviewedByUserId { get; set; }
+
+public ApplicationUser? ReviewedByUser { get; set; }
+
+public DateTimeOffset? ReviewedAtUtc { get; set; }
 }

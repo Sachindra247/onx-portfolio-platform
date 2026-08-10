@@ -11,9 +11,18 @@ interface LeaveRequestsViewProps {
   requests: LeaveRequestDto[];
   isLoading: boolean;
   error: string | null;
+
   onRetry: () => void;
+
   onEdit: (request: LeaveRequestDto) => void;
+
   onDelete: (request: LeaveRequestDto) => void;
+
+  canReview: boolean;
+
+  onApprove: (request: LeaveRequestDto) => Promise<void>;
+
+  onReject: (request: LeaveRequestDto) => Promise<void>;
 }
 
 export default function LeaveRequestsView({
@@ -23,10 +32,19 @@ export default function LeaveRequestsView({
   onRetry,
   onEdit,
   onDelete,
+  canReview,
+  onApprove,
+  onReject,
 }: LeaveRequestsViewProps) {
   const [search, setSearch] = useState("");
+
   const [statusFilter, setStatusFilter] = useState<LeaveRequestStatus | "">("");
+
   const [typeFilter, setTypeFilter] = useState<LeaveType | "">("");
+
+  const [reviewingRequestId, setReviewingRequestId] = useState<string | null>(
+    null,
+  );
 
   const filteredRequests = useMemo(() => {
     const normalizedSearch = search.trim().toLocaleLowerCase();
@@ -47,11 +65,41 @@ export default function LeaveRequestsView({
     });
   }, [requests, search, statusFilter, typeFilter]);
 
+  async function handleApprove(request: LeaveRequestDto) {
+    if (reviewingRequestId) {
+      return;
+    }
+
+    setReviewingRequestId(request.id);
+
+    try {
+      await onApprove(request);
+    } finally {
+      setReviewingRequestId(null);
+    }
+  }
+
+  async function handleReject(request: LeaveRequestDto) {
+    if (reviewingRequestId) {
+      return;
+    }
+
+    setReviewingRequestId(request.id);
+
+    try {
+      await onReject(request);
+    } finally {
+      setReviewingRequestId(null);
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="leave-requests-state">
         <CalendarRange size={28} aria-hidden="true" />
+
         <h3>Loading leave requests</h3>
+
         <p>Please wait while the records load.</p>
       </div>
     );
@@ -61,6 +109,7 @@ export default function LeaveRequestsView({
     return (
       <div className="leave-requests-state">
         <h3>Unable to load leave requests</h3>
+
         <p>{error}</p>
 
         <button type="button" onClick={onRetry}>
@@ -93,12 +142,19 @@ export default function LeaveRequestsView({
           }
         >
           <option value="">All leave types</option>
+
           <option value="Vacation">Vacation</option>
+
           <option value="Sick">Sick</option>
+
           <option value="Parental">Parental</option>
+
           <option value="Personal">Personal</option>
+
           <option value="Bereavement">Bereavement</option>
+
           <option value="Unpaid">Unpaid</option>
+
           <option value="Other">Other</option>
         </select>
 
@@ -110,10 +166,15 @@ export default function LeaveRequestsView({
           }
         >
           <option value="">All statuses</option>
+
           <option value="Draft">Draft</option>
+
           <option value="Pending">Pending</option>
+
           <option value="Approved">Approved</option>
+
           <option value="Rejected">Rejected</option>
+
           <option value="Cancelled">Cancelled</option>
         </select>
 
@@ -140,6 +201,7 @@ export default function LeaveRequestsView({
         <header className="leave-requests-card__header">
           <div>
             <h2>Leave requests</h2>
+
             <p>Review and manage team leave records</p>
           </div>
 
@@ -152,84 +214,122 @@ export default function LeaveRequestsView({
               <thead>
                 <tr>
                   <th>Employee</th>
+
                   <th>Leave type</th>
+
                   <th>Start</th>
+
                   <th>End</th>
+
                   <th>Working days</th>
+
                   <th>Status</th>
+
                   <th>Approver</th>
+
                   <th>Reason</th>
+
                   <th>Actions</th>
                 </tr>
               </thead>
 
               <tbody>
-                {filteredRequests.map((request) => (
-                  <tr key={request.id}>
-                    <td>
-                      <strong>{request.employeeName}</strong>
-                    </td>
+                {filteredRequests.map((request) => {
+                  const isReviewing = reviewingRequestId === request.id;
 
-                    <td>
-                      <span
-                        className={[
-                          "leave-type-badge",
-                          `leave-type-badge--${request.leaveType.toLocaleLowerCase()}`,
-                        ].join(" ")}
-                      >
-                        {formatLeaveType(request.leaveType)}
-                      </span>
-                    </td>
+                  return (
+                    <tr key={request.id}>
+                      <td>
+                        <strong>{request.employeeName}</strong>
+                      </td>
 
-                    <td>{formatDate(request.startDate)}</td>
-
-                    <td>{formatDate(request.endDate)}</td>
-
-                    <td>
-                      {countWorkingDays(request.startDate, request.endDate)}
-                    </td>
-
-                    <td>
-                      <span
-                        className={[
-                          "vacation-request-status",
-                          `vacation-request-status--${request.status.toLocaleLowerCase()}`,
-                        ].join(" ")}
-                      >
-                        {request.status}
-                      </span>
-                    </td>
-
-                    <td>{request.approverName ?? "—"}</td>
-
-                    <td>
-                      <span className="leave-request-reason">
-                        {request.reason ?? "—"}
-                      </span>
-                    </td>
-
-                    <td>
-                      <div className="leave-request-actions">
-                        <button
-                          type="button"
-                          aria-label={`Edit leave request for ${request.employeeName}`}
-                          onClick={() => onEdit(request)}
+                      <td>
+                        <span
+                          className={[
+                            "leave-type-badge",
+                            `leave-type-badge--${request.leaveType.toLocaleLowerCase()}`,
+                          ].join(" ")}
                         >
-                          <Pencil size={14} aria-hidden="true" />
-                        </button>
+                          {formatLeaveType(request.leaveType)}
+                        </span>
+                      </td>
 
-                        <button
-                          type="button"
-                          className="leave-request-actions__delete"
-                          aria-label={`Delete leave request for ${request.employeeName}`}
-                          onClick={() => onDelete(request)}
+                      <td>{formatDate(request.startDate)}</td>
+
+                      <td>{formatDate(request.endDate)}</td>
+
+                      <td>
+                        {countWorkingDays(request.startDate, request.endDate)}
+                      </td>
+
+                      <td>
+                        <span
+                          className={[
+                            "vacation-request-status",
+                            `vacation-request-status--${request.status.toLocaleLowerCase()}`,
+                          ].join(" ")}
                         >
-                          <Trash2 size={14} aria-hidden="true" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                          {request.status}
+                        </span>
+                      </td>
+
+                      <td>{request.approverName ?? "—"}</td>
+
+                      <td>
+                        <span className="leave-request-reason">
+                          {request.reason ?? "—"}
+                        </span>
+                      </td>
+
+                      <td>
+                        <div className="leave-request-actions">
+                          {canReview && request.status === "Pending" && (
+                            <>
+                              <button
+                                type="button"
+                                className="leave-request-actions__approve"
+                                title="Approve request"
+                                disabled={isReviewing}
+                                onClick={() => void handleApprove(request)}
+                              >
+                                {isReviewing ? "..." : "Approve"}
+                              </button>
+
+                              <button
+                                type="button"
+                                className="leave-request-actions__reject"
+                                title="Reject request"
+                                disabled={isReviewing}
+                                onClick={() => void handleReject(request)}
+                              >
+                                {isReviewing ? "..." : "Reject"}
+                              </button>
+                            </>
+                          )}
+
+                          <button
+                            type="button"
+                            aria-label={`Edit leave request for ${request.employeeName}`}
+                            title="Edit request"
+                            onClick={() => onEdit(request)}
+                          >
+                            <Pencil size={14} aria-hidden="true" />
+                          </button>
+
+                          <button
+                            type="button"
+                            className="leave-request-actions__delete"
+                            aria-label={`Delete leave request for ${request.employeeName}`}
+                            title="Delete request"
+                            onClick={() => onDelete(request)}
+                          >
+                            <Trash2 size={14} aria-hidden="true" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -251,12 +351,16 @@ function formatLeaveType(leaveType: LeaveType): string {
   switch (leaveType) {
     case "Sick":
       return "Sick Leave";
+
     case "Parental":
       return "Parental Leave";
+
     case "Personal":
       return "Personal Leave";
+
     case "Unpaid":
       return "Unpaid Leave";
+
     default:
       return leaveType;
   }
@@ -264,6 +368,7 @@ function formatLeaveType(leaveType: LeaveType): string {
 
 function countWorkingDays(startValue: string, endValue: string): number {
   const startDate = parseDate(startValue);
+
   const endDate = parseDate(endValue);
 
   if (!startDate || !endDate || endDate < startDate) {
@@ -271,6 +376,7 @@ function countWorkingDays(startValue: string, endValue: string): number {
   }
 
   let count = 0;
+
   const current = new Date(startDate);
 
   while (current <= endDate) {

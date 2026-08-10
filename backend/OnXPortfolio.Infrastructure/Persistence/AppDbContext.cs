@@ -3,6 +3,7 @@ using OnXPortfolio.Domain.Certifications;
 using OnXPortfolio.Domain.Events;
 using OnXPortfolio.Domain.Vendors;
 using OnXPortfolio.Domain.Vacations;
+using OnXPortfolio.Domain.Users;
 
 namespace OnXPortfolio.Infrastructure.Persistence;
 
@@ -22,6 +23,12 @@ public sealed class AppDbContext : DbContext
 
     public DbSet<LeaveRequest> LeaveRequests =>
     Set<LeaveRequest>();
+
+    public DbSet<ApplicationUser> ApplicationUsers =>
+    Set<ApplicationUser>();
+
+public DbSet<ApplicationGroup> ApplicationGroups =>
+    Set<ApplicationGroup>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

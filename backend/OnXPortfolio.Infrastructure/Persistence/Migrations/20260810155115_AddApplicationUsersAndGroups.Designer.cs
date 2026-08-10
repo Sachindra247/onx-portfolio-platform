@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using OnXPortfolio.Infrastructure.Persistence;
@@ -11,9 +12,11 @@ using OnXPortfolio.Infrastructure.Persistence;
 namespace OnXPortfolio.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260810155115_AddApplicationUsersAndGroups")]
+    partial class AddApplicationUsersAndGroups
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -260,9 +263,6 @@ namespace OnXPortfolio.Infrastructure.Persistence.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("character varying(150)");
 
-                    b.Property<Guid?>("EmployeeUserId")
-                        .HasColumnType("uuid");
-
                     b.Property<DateOnly>("EndDate")
                         .HasColumnType("date");
 
@@ -279,12 +279,6 @@ namespace OnXPortfolio.Infrastructure.Persistence.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
-                    b.Property<DateTimeOffset?>("ReviewedAtUtc")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("ReviewedByUserId")
-                        .HasColumnType("uuid");
-
                     b.Property<DateOnly>("StartDate")
                         .HasColumnType("date");
 
@@ -300,11 +294,7 @@ namespace OnXPortfolio.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("EmployeeName");
 
-                    b.HasIndex("EmployeeUserId");
-
                     b.HasIndex("EndDate");
-
-                    b.HasIndex("ReviewedByUserId");
 
                     b.HasIndex("StartDate");
 
@@ -379,23 +369,6 @@ namespace OnXPortfolio.Infrastructure.Persistence.Migrations
                     b.Navigation("Group");
 
                     b.Navigation("Manager");
-                });
-
-            modelBuilder.Entity("OnXPortfolio.Domain.Vacations.LeaveRequest", b =>
-                {
-                    b.HasOne("OnXPortfolio.Domain.Users.ApplicationUser", "EmployeeUser")
-                        .WithMany()
-                        .HasForeignKey("EmployeeUserId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("OnXPortfolio.Domain.Users.ApplicationUser", "ReviewedByUser")
-                        .WithMany()
-                        .HasForeignKey("ReviewedByUserId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("EmployeeUser");
-
-                    b.Navigation("ReviewedByUser");
                 });
 
             modelBuilder.Entity("OnXPortfolio.Domain.Users.ApplicationGroup", b =>

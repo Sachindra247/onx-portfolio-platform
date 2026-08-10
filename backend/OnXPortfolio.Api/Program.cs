@@ -3,6 +3,13 @@ using OnXPortfolio.Domain.Vendors;
 using OnXPortfolio.Infrastructure.Persistence;
 using System.Text.Json.Serialization;
 
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
+using OnXPortfolio.Api.Auth;
+using OnXPortfolio.Domain.Users;
+
 var builder = WebApplication.CreateBuilder(args);
 
 const string FrontendCorsPolicy = "FrontendCors";
@@ -30,6 +37,61 @@ builder.Services.AddCors(options =>
             .AllowAnyMethod();
     });
 });
+
+builder.Services.AddScoped<
+    IPasswordHasher<ApplicationUser>,
+    PasswordHasher<ApplicationUser>>();
+
+builder.Services.AddScoped<
+    JwtTokenService>();
+
+    var jwtIssuer =
+    builder.Configuration["Jwt:Issuer"]
+    ?? throw new InvalidOperationException(
+        "Jwt:Issuer is missing.");
+
+var jwtAudience =
+    builder.Configuration["Jwt:Audience"]
+    ?? throw new InvalidOperationException(
+        "Jwt:Audience is missing.");
+
+var jwtSigningKey =
+    builder.Configuration["Jwt:SigningKey"]
+    ?? throw new InvalidOperationException(
+        "Jwt:SigningKey is missing.");
+
+builder.Services
+    .AddAuthentication(
+        JwtBearerDefaults
+            .AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters =
+            new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidIssuer = jwtIssuer,
+
+                ValidateAudience = true,
+                ValidAudience = jwtAudience,
+
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey =
+                    new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(
+                            jwtSigningKey)),
+
+                ValidateLifetime = true,
+                ClockSkew =
+                    TimeSpan.FromMinutes(1)
+            };
+    });
+
+builder.Services.AddAuthorization();
+
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddScoped<CurrentUserService>();
 
 var connectionString =
     builder.Configuration.GetConnectionString("DefaultConnection")
@@ -72,6 +134,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
@@ -132,6 +195,20 @@ if (missingVendors.Any())
 await CertificationPrototypeSeeder.SeedAsync(dbContext);
 
 await VacationPrototypeSeeder.SeedAsync(dbContext);
+
+await ApplicationUserSeeder.SeedAsync(dbContext);
+
+await VacationUserLinkSeeder.SeedAsync(
+    dbContext);
+
+var passwordHasher =
+    scope.ServiceProvider.GetRequiredService<
+        IPasswordHasher<ApplicationUser>>();
+
+await BetaAuthenticationSeeder.SeedAsync(
+    dbContext,
+    builder.Configuration,
+    passwordHasher);
 
     if (app.Environment.IsDevelopment())
     {
