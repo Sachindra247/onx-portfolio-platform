@@ -29,7 +29,21 @@ public static class BetaAuthenticationSeeder
                 Password =
                     configuration[
                         "BetaAuth:SachindraPassword"]
-            }
+            },
+            new
+    {
+        Email = "sabrina.jubran@onx.com",
+        Password =
+            configuration[
+                "BetaAuth:SabrinaPassword"]
+    },
+    new
+    {
+        Email = "raed.jabak@onx.com",
+        Password =
+            configuration[
+                "BetaAuth:RaedPassword"]
+    }
         };
 
         foreach (var credential in credentials)
