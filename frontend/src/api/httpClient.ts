@@ -1,5 +1,7 @@
 import axios from "axios";
 
+import { getStoredAccessToken } from "../auth/authStorage";
+
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
 if (!apiBaseUrl) {
@@ -16,3 +18,31 @@ export const httpClient = axios.create({
   },
   timeout: 15_000,
 });
+
+httpClient.interceptors.request.use(
+  (config) => {
+    const token = getStoredAccessToken();
+
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    return config;
+  },
+  (error) => Promise.reject(error),
+);
+
+httpClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem("onx-portfolio-access-token");
+
+      if (window.location.pathname !== "/login") {
+        window.location.href = "/login";
+      }
+    }
+
+    return Promise.reject(error);
+  },
+);

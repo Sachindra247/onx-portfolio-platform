@@ -29,6 +29,8 @@ import {
 
 import { getVendors } from "../api/vendorsApi";
 
+import { useAuth } from "../auth/AuthContext";
+
 import CertificationCharts from "../components/certifications/dashboard/CertificationCharts";
 import CertificationStats from "../components/certifications/dashboard/CertificationStats";
 import CertificationVendorCards from "../components/certifications/dashboard/CertificationVendorCards";
@@ -100,6 +102,12 @@ export default function CertificationsPage() {
       controller.abort();
     };
   }, []);
+
+  const { user } = useAuth();
+
+  const canManageCertifications = Boolean(
+    user?.isGlobalAdministrator || user?.certificationsAccess === "Admin",
+  );
 
   const prototypeGapCount = useMemo(
     () => getCertificationActionCount(certifications),
@@ -233,8 +241,11 @@ export default function CertificationsPage() {
   }
 
   function openAddCertificationModal() {
-    setSelectedCertification(null);
+    if (!canManageCertifications) {
+      return;
+    }
     setFormError(null);
+    setSelectedCertification(null);
     setModalIsOpen(true);
   }
 
@@ -279,12 +290,20 @@ export default function CertificationsPage() {
   }
 
   function openEditCertification(certification: CertificationDto) {
+    if (!canManageCertifications) {
+      return;
+    }
+
     setSelectedCertification(certification);
     setFormError(null);
     setModalIsOpen(true);
   }
 
   function requestDeleteCertification(certification: CertificationDto) {
+    if (!canManageCertifications) {
+      return;
+    }
+
     setCertificationPendingDelete(certification);
   }
 
@@ -337,6 +356,9 @@ export default function CertificationsPage() {
   }
 
   async function confirmDeleteCertification() {
+    if (!canManageCertifications || !certificationPendingDelete) {
+      return;
+    }
     if (!certificationPendingDelete) {
       return;
     }
@@ -370,6 +392,7 @@ export default function CertificationsPage() {
       onSectionChange={setActiveSection}
       onAddCertification={openAddCertificationModal}
       onExportCsv={handleExportCsv}
+      canManageCertifications={canManageCertifications}
       exportDisabled={certifications.length === 0}
       gapCount={summary.gapCount}
       expiringCount={summary.expiringWithin90Days}
@@ -460,6 +483,7 @@ export default function CertificationsPage() {
                   sortField={sortField}
                   sortDirection={sortDirection}
                   onSort={handleSort}
+                  canManage={canManageCertifications}
                   onEdit={openEditCertification}
                   onDelete={requestDeleteCertification}
                 />
@@ -485,6 +509,7 @@ export default function CertificationsPage() {
             <section className="certifications-section">
               <CertificationGapsView
                 certifications={certifications}
+                canManage={canManageCertifications}
                 onEdit={openEditCertification}
               />
             </section>
@@ -494,6 +519,7 @@ export default function CertificationsPage() {
             <section className="certifications-section">
               <ExpiringCertificationsView
                 certifications={certifications}
+                canManage={canManageCertifications}
                 onEdit={openEditCertification}
               />
             </section>
@@ -503,40 +529,43 @@ export default function CertificationsPage() {
             <section className="certifications-section">
               <VendorIntelligenceView
                 certifications={certifications}
+                canManage={canManageCertifications}
                 onEdit={openEditCertification}
               />
             </section>
           )}
         </>
       )}
-
-      <CertificationFormModal
-        isOpen={modalIsOpen}
-        certification={selectedCertification}
-        vendors={vendors}
-        isSaving={isSaving}
-        serverError={formError}
-        onClose={closeCertificationModal}
-        onSubmit={handleCertificationSubmit}
-      />
-
-      <ConfirmDialog
-        isOpen={certificationPendingDelete !== null}
-        title="Delete certification?"
-        description={
-          certificationPendingDelete
-            ? `"${certificationPendingDelete.certificationName}" for ${certificationPendingDelete.personName} will be permanently removed.`
-            : ""
-        }
-        confirmLabel="Delete certification"
-        isConfirming={isDeleting}
-        onCancel={() => {
-          if (!isDeleting) {
-            setCertificationPendingDelete(null);
+      {canManageCertifications && modalIsOpen && (
+        <CertificationFormModal
+          isOpen={modalIsOpen}
+          certification={selectedCertification}
+          vendors={vendors}
+          isSaving={isSaving}
+          serverError={formError}
+          onClose={closeCertificationModal}
+          onSubmit={handleCertificationSubmit}
+        />
+      )}
+      {canManageCertifications && (
+        <ConfirmDialog
+          isOpen={certificationPendingDelete !== null}
+          title="Delete certification?"
+          description={
+            certificationPendingDelete
+              ? `"${certificationPendingDelete.certificationName}" for ${certificationPendingDelete.personName} will be permanently removed.`
+              : ""
           }
-        }}
-        onConfirm={() => void confirmDeleteCertification()}
-      />
+          confirmLabel="Delete certification"
+          isConfirming={isDeleting}
+          onCancel={() => {
+            if (!isDeleting) {
+              setCertificationPendingDelete(null);
+            }
+          }}
+          onConfirm={() => void confirmDeleteCertification()}
+        />
+      )}
     </CertificationsLayout>
   );
 }

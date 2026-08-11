@@ -15,12 +15,14 @@ import { buildVendorAnalytics } from "../../../utils/vendorAnalytics";
 import { formatCertificationStatus } from "../../../utils/certificationAnalytics";
 
 interface VendorIntelligenceViewProps {
+  canManage: boolean;
   certifications: CertificationDto[];
   onEdit: (certification: CertificationDto) => void;
 }
 
 export default function VendorIntelligenceView({
   certifications,
+  canManage,
   onEdit,
 }: VendorIntelligenceViewProps) {
   const [search, setSearch] = useState("");
@@ -282,14 +284,15 @@ export default function VendorIntelligenceView({
                           </span>
                           <span>Expiry: {formatDate(record.expiryDate)}</span>
                         </div>
-
-                        <button
-                          type="button"
-                          aria-label={`Edit ${record.certificationName}`}
-                          onClick={() => onEdit(record)}
-                        >
-                          <Pencil size={14} aria-hidden="true" />
-                        </button>
+                        {canManage && (
+                          <button
+                            type="button"
+                            aria-label={`Edit ${record.certificationName}`}
+                            onClick={() => onEdit(record)}
+                          >
+                            <Pencil size={14} aria-hidden="true" />
+                          </button>
+                        )}
                       </div>
                     ))}
                   </div>

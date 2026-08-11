@@ -32,6 +32,8 @@ import type {
 import { mapFormToRequest } from "../utils/eventFormatting";
 import EventCalendar from "../components/events/calendar/EventCalendar";
 
+import { useAuth } from "../auth/AuthContext";
+
 export default function EventsPage() {
   const { showToast } = useToast();
 
@@ -84,6 +86,12 @@ export default function EventsPage() {
       setIsLoading(false);
     }
   }, []);
+
+  const { user } = useAuth();
+
+  const canManageEvents = Boolean(
+    user?.isGlobalAdministrator || user?.eventsAccess === "Admin",
+  );
 
   useEffect(() => {
     void loadPageData();
@@ -173,12 +181,20 @@ export default function EventsPage() {
   }
 
   function openCreateModal() {
+    if (!canManageEvents) {
+      return;
+    }
+
     setSelectedEvent(null);
     setFormError(null);
     setModalIsOpen(true);
   }
 
   function openEditModal(portfolioEvent: EventDto) {
+    if (!canManageEvents) {
+      return;
+    }
+
     setSelectedEvent(portfolioEvent);
     setFormError(null);
     setModalIsOpen(true);
@@ -195,6 +211,10 @@ export default function EventsPage() {
   }
 
   async function handleFormSubmit(values: EventFormValues) {
+    if (!canManageEvents) {
+      return;
+    }
+
     setIsSaving(true);
     setFormError(null);
 
@@ -231,11 +251,15 @@ export default function EventsPage() {
   }
 
   function requestDelete(portfolioEvent: EventDto) {
+    if (!canManageEvents) {
+      return;
+    }
+
     setEventPendingDelete(portfolioEvent);
   }
 
   async function confirmDelete() {
-    if (!eventPendingDelete) {
+    if (!canManageEvents || !eventPendingDelete) {
       return;
     }
 
@@ -278,6 +302,7 @@ export default function EventsPage() {
           activeSection={activeSection}
           onSectionChange={setActiveSection}
           onAddEvent={openCreateModal}
+          canManageEvents={canManageEvents}
           addEventDisabled={isLoading || vendors.length === 0}
         />
 
@@ -336,7 +361,11 @@ export default function EventsPage() {
 
                   <EventStats events={events} />
                   <EventPortfolioCharts events={events} />
-                  <EventHighlights events={events} onEdit={openEditModal} />
+                  <EventHighlights
+                    events={events}
+                    canManage={canManageEvents}
+                    onEdit={openEditModal}
+                  />
                 </div>
               )}
 
@@ -367,6 +396,7 @@ export default function EventsPage() {
                           sortField={sortField}
                           sortDirection={sortDirection}
                           onSort={handleSort}
+                          canManage={canManageEvents}
                           onEdit={openEditModal}
                           onDelete={requestDelete}
                         />
@@ -382,6 +412,7 @@ export default function EventsPage() {
                     ) : (
                       <EventVendorGroups
                         events={filteredAndSortedEvents}
+                        canManage={canManageEvents}
                         onEdit={openEditModal}
                       />
                     )}
@@ -393,7 +424,11 @@ export default function EventsPage() {
                 <div className="events-dashboard__section">
                   <SectionHeading title="Events by Vendor" />
 
-                  <EventVendorGroups events={events} onEdit={openEditModal} />
+                  <EventVendorGroups
+                    events={events}
+                    canManage={canManageEvents}
+                    onEdit={openEditModal}
+                  />
                 </div>
               )}
 
@@ -407,6 +442,7 @@ export default function EventsPage() {
                       sortField={sortField}
                       sortDirection={sortDirection}
                       onSort={handleSort}
+                      canManage={canManageEvents}
                       onEdit={openEditModal}
                       onDelete={requestDelete}
                     />
@@ -424,6 +460,7 @@ export default function EventsPage() {
                       sortField={sortField}
                       sortDirection={sortDirection}
                       onSort={handleSort}
+                      canManage={canManageEvents}
                       onEdit={openEditModal}
                       onDelete={requestDelete}
                     />
@@ -434,34 +471,36 @@ export default function EventsPage() {
           )}
         </main>
       </div>
-
-      <EventFormModal
-        isOpen={modalIsOpen}
-        event={selectedEvent}
-        vendors={vendors}
-        isSaving={isSaving}
-        serverError={formError}
-        onClose={closeModal}
-        onSubmit={handleFormSubmit}
-      />
-
-      <ConfirmDialog
-        isOpen={eventPendingDelete !== null}
-        title="Delete event?"
-        description={
-          eventPendingDelete
-            ? `"${eventPendingDelete.description}" will be permanently removed from the Events portfolio.`
-            : ""
-        }
-        confirmLabel="Delete event"
-        isConfirming={isDeleting}
-        onCancel={() => {
-          if (!isDeleting) {
-            setEventPendingDelete(null);
+      {canManageEvents && (
+        <EventFormModal
+          isOpen={modalIsOpen}
+          event={selectedEvent}
+          vendors={vendors}
+          isSaving={isSaving}
+          serverError={formError}
+          onClose={closeModal}
+          onSubmit={handleFormSubmit}
+        />
+      )}
+      {canManageEvents && (
+        <ConfirmDialog
+          isOpen={eventPendingDelete !== null}
+          title="Delete event?"
+          description={
+            eventPendingDelete
+              ? `"${eventPendingDelete.description}" will be permanently removed from the Events portfolio.`
+              : ""
           }
-        }}
-        onConfirm={() => void confirmDelete()}
-      />
+          confirmLabel="Delete event"
+          isConfirming={isDeleting}
+          onCancel={() => {
+            if (!isDeleting) {
+              setEventPendingDelete(null);
+            }
+          }}
+          onConfirm={() => void confirmDelete()}
+        />
+      )}
     </section>
   );
 }

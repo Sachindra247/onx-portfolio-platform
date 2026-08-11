@@ -10,6 +10,7 @@ import { useMemo } from "react";
 import type { CertificationDto } from "../../../types/certifications";
 
 interface CertificationGapsViewProps {
+  canManage: boolean;
   certifications: CertificationDto[];
   onEdit: (certification: CertificationDto) => void;
 }
@@ -31,6 +32,7 @@ interface CertificationAction {
 
 export default function CertificationGapsView({
   certifications,
+  canManage,
   onEdit,
 }: CertificationGapsViewProps) {
   const actions = useMemo(
@@ -108,7 +110,12 @@ export default function CertificationGapsView({
         {priorityAlerts.length > 0 ? (
           <div className="certification-priority-grid">
             {priorityAlerts.map((action) => (
-              <PriorityAlert key={action.id} action={action} onEdit={onEdit} />
+              <PriorityAlert
+                key={action.id}
+                action={action}
+                onEdit={onEdit}
+                canManage={canManage}
+              />
             ))}
           </div>
         ) : (
@@ -137,7 +144,12 @@ export default function CertificationGapsView({
         {actions.length > 0 ? (
           <div className="certification-open-actions__list">
             {actions.map((action) => (
-              <OpenActionRow key={action.id} action={action} onEdit={onEdit} />
+              <OpenActionRow
+                key={action.id}
+                action={action}
+                onEdit={onEdit}
+                canManage={canManage}
+              />
             ))}
           </div>
         ) : (
@@ -153,10 +165,11 @@ export default function CertificationGapsView({
 
 interface ActionProps {
   action: CertificationAction;
+  canManage: boolean;
   onEdit: (certification: CertificationDto) => void;
 }
 
-function PriorityAlert({ action, onEdit }: ActionProps) {
+function PriorityAlert({ action, canManage, onEdit }: ActionProps) {
   const Icon = action.priority === "critical" ? CircleAlert : AlertTriangle;
 
   return (
@@ -197,17 +210,18 @@ function PriorityAlert({ action, onEdit }: ActionProps) {
 
       <div className="certification-priority-alert__footer">
         <span>Lead: {action.practiceLead ?? "Not assigned"}</span>
-
-        <button type="button" onClick={() => onEdit(action.records[0])}>
-          <Pencil size={14} aria-hidden="true" />
-          Review
-        </button>
+        {canManage && (
+          <button type="button" onClick={() => onEdit(action.records[0])}>
+            <Pencil size={14} aria-hidden="true" />
+            Review
+          </button>
+        )}
       </div>
     </article>
   );
 }
 
-function OpenActionRow({ action, onEdit }: ActionProps) {
+function OpenActionRow({ action, canManage, onEdit }: ActionProps) {
   return (
     <article
       className={[
@@ -239,16 +253,17 @@ function OpenActionRow({ action, onEdit }: ActionProps) {
 
         <small>Lead: {action.practiceLead ?? "Not assigned"}</small>
       </div>
-
-      <button
-        type="button"
-        className="certification-open-action__edit"
-        aria-label={`Review ${action.certificationName}`}
-        onClick={() => onEdit(action.records[0])}
-      >
-        <Pencil size={14} aria-hidden="true" />
-        Edit
-      </button>
+      {canManage && (
+        <button
+          type="button"
+          className="certification-open-action__edit"
+          aria-label={`Review ${action.certificationName}`}
+          onClick={() => onEdit(action.records[0])}
+        >
+          <Pencil size={14} aria-hidden="true" />
+          Edit
+        </button>
+      )}
     </article>
   );
 }

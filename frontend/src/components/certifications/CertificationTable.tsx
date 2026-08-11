@@ -13,6 +13,7 @@ interface CertificationTableProps {
   sortField: CertificationSortField;
   sortDirection: SortDirection;
   onSort: (field: CertificationSortField) => void;
+  canManage: boolean;
   onEdit: (certification: CertificationDto) => void;
   onDelete: (certification: CertificationDto) => void;
 }
@@ -30,7 +31,9 @@ export default function CertificationTable({
   sortField,
   sortDirection,
   onSort,
+  canManage,
   onEdit,
+
   onDelete,
 }: CertificationTableProps) {
   if (certifications.length === 0) {
@@ -103,7 +106,9 @@ export default function CertificationTable({
               onSort={onSort}
             />
 
-            <th className="certification-table__actions-heading">Actions</th>
+            {canManage && (
+              <th className="certification-table__actions-heading">Actions</th>
+            )}
           </tr>
         </thead>
 
@@ -156,26 +161,28 @@ export default function CertificationTable({
               <td>{certification.practiceLead ?? "—"}</td>
 
               <td>
-                <div className="certification-table__actions">
-                  <button
-                    type="button"
-                    aria-label={`Edit ${certification.certificationName}`}
-                    title="Edit certification"
-                    onClick={() => onEdit(certification)}
-                  >
-                    <Pencil size={15} aria-hidden="true" />
-                  </button>
+                {canManage && (
+                  <div className="certification-table__actions">
+                    <button
+                      type="button"
+                      aria-label={`Edit ${certification.certificationName}`}
+                      title="Edit certification"
+                      onClick={() => onEdit(certification)}
+                    >
+                      <Pencil size={15} aria-hidden="true" />
+                    </button>
 
-                  <button
-                    type="button"
-                    className="certification-table__delete"
-                    aria-label={`Delete ${certification.certificationName}`}
-                    title="Delete certification"
-                    onClick={() => onDelete(certification)}
-                  >
-                    <Trash2 size={15} aria-hidden="true" />
-                  </button>
-                </div>
+                    <button
+                      type="button"
+                      className="certification-table__delete"
+                      aria-label={`Delete ${certification.certificationName}`}
+                      title="Delete certification"
+                      onClick={() => onDelete(certification)}
+                    >
+                      <Trash2 size={15} aria-hidden="true" />
+                    </button>
+                  </div>
+                )}
               </td>
             </tr>
           ))}

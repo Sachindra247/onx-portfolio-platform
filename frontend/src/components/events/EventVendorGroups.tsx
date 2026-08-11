@@ -1,20 +1,27 @@
 import { Building2, Pencil } from "lucide-react";
+
 import type { EventDto } from "../../types/events";
+
 import {
   formatBudget,
   formatEventDate,
   formatEventStage,
   getStageClassName,
 } from "../../utils/eventFormatting";
+
 import { groupEventsByVendor } from "../../utils/eventAnalytics";
 
 interface EventVendorGroupsProps {
   events: EventDto[];
+
+  canManage: boolean;
+
   onEdit: (event: EventDto) => void;
 }
 
 export default function EventVendorGroups({
   events,
+  canManage,
   onEdit,
 }: EventVendorGroupsProps) {
   const vendorGroups = groupEventsByVendor(events);
@@ -23,6 +30,7 @@ export default function EventVendorGroups({
     return (
       <div className="event-table-empty">
         <h3>No events found</h3>
+
         <p>Try changing or clearing the current filters.</p>
       </div>
     );
@@ -79,13 +87,16 @@ export default function EventVendorGroups({
                     {formatBudget(event.budgetCad)}
                   </span>
 
-                  <button
-                    type="button"
-                    aria-label={`Edit ${event.description}`}
-                    onClick={() => onEdit(event)}
-                  >
-                    <Pencil size={15} aria-hidden="true" />
-                  </button>
+                  {canManage && (
+                    <button
+                      type="button"
+                      aria-label={`Edit ${event.description}`}
+                      title="Edit event"
+                      onClick={() => onEdit(event)}
+                    >
+                      <Pencil size={15} aria-hidden="true" />
+                    </button>
+                  )}
                 </article>
               ))}
             </div>

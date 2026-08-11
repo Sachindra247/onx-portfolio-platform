@@ -11,8 +11,13 @@ import type { EventsSection } from "../../../types/events";
 
 interface EventsDashboardNavProps {
   activeSection: EventsSection;
+
   onSectionChange: (section: EventsSection) => void;
+
   onAddEvent: () => void;
+
+  canManageEvents: boolean;
+
   addEventDisabled?: boolean;
 }
 
@@ -48,15 +53,15 @@ export default function EventsDashboardNav({
   activeSection,
   onSectionChange,
   onAddEvent,
+  canManageEvents,
   addEventDisabled = false,
 }: EventsDashboardNavProps) {
   return (
-    <aside className="events-sidebar" aria-label="Events navigation">
-      <div className="events-sidebar__heading" />
-
+    <aside className="events-sidebar">
       <div className="events-sidebar__items">
         {navigationItems.map((item) => {
           const Icon = item.icon;
+
           const isActive = activeSection === item.id;
 
           return (
@@ -89,17 +94,20 @@ export default function EventsDashboardNav({
         })}
       </div>
 
-      <div className="events-sidebar__actions">
-        <button
-          type="button"
-          className="events-sidebar__add-button"
-          disabled={addEventDisabled}
-          onClick={onAddEvent}
-        >
-          <Plus size={17} aria-hidden="true" />
-          <span>Add Event</span>
-        </button>
-      </div>
+      {canManageEvents && (
+        <div className="events-sidebar__actions">
+          <button
+            type="button"
+            className="events-sidebar__add-button"
+            disabled={addEventDisabled}
+            onClick={onAddEvent}
+          >
+            <Plus size={17} aria-hidden="true" />
+
+            <span>Add Event</span>
+          </button>
+        </div>
+      )}
     </aside>
   );
 }

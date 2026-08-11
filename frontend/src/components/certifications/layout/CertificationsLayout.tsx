@@ -9,6 +9,7 @@ interface CertificationsLayoutProps {
   onSectionChange: (section: CertificationsSection) => void;
   onAddCertification: () => void;
   onExportCsv: () => void;
+  canManageCertifications: boolean;
   addCertificationDisabled?: boolean;
   exportDisabled?: boolean;
   gapCount?: number;
@@ -21,6 +22,7 @@ export default function CertificationsLayout({
   onSectionChange,
   onAddCertification,
   onExportCsv,
+  canManageCertifications,
   addCertificationDisabled = false,
   exportDisabled = false,
   gapCount = 0,
@@ -35,6 +37,7 @@ export default function CertificationsLayout({
           onSectionChange={onSectionChange}
           onAddCertification={onAddCertification}
           onExportCsv={onExportCsv}
+          canManageCertifications={canManageCertifications}
           addCertificationDisabled={addCertificationDisabled}
           exportDisabled={exportDisabled}
           gapCount={gapCount}

@@ -7,11 +7,13 @@ import {
   Trash2,
 } from "lucide-react";
 import { useState } from "react";
+
 import type {
   EventDto,
   EventSortField,
   SortDirection,
 } from "../../types/events";
+
 import {
   formatBudget,
   formatEventDate,
@@ -23,8 +25,13 @@ interface EventTableProps {
   events: EventDto[];
   sortField: EventSortField;
   sortDirection: SortDirection;
+
   onSort: (field: EventSortField) => void;
+
+  canManage: boolean;
+
   onEdit: (event: EventDto) => void;
+
   onDelete: (event: EventDto) => void;
 }
 
@@ -33,6 +40,7 @@ interface SortButtonProps {
   label: string;
   currentField: EventSortField;
   direction: SortDirection;
+
   onSort: (field: EventSortField) => void;
 }
 
@@ -58,7 +66,8 @@ function SortButton({
       onClick={() => onSort(field)}
     >
       {label}
-      <Icon size={12} aria-hidden="true" />
+
+      <Icon size={13} aria-hidden="true" />
     </button>
   );
 }
@@ -68,6 +77,7 @@ export default function EventTable({
   sortField,
   sortDirection,
   onSort,
+  canManage,
   onEdit,
   onDelete,
 }: EventTableProps) {
@@ -77,6 +87,7 @@ export default function EventTable({
     return (
       <div className="event-table-empty">
         <h3>No events found</h3>
+
         <p>Try changing or clearing the current filters.</p>
       </div>
     );
@@ -87,15 +98,7 @@ export default function EventTable({
       <table className="event-table">
         <thead>
           <tr>
-            <th>
-              <SortButton
-                field="vendorName"
-                label="Vendor"
-                currentField={sortField}
-                direction={sortDirection}
-                onSort={onSort}
-              />
-            </th>
+            <th>Vendor</th>
 
             <th>
               <SortButton
@@ -139,9 +142,11 @@ export default function EventTable({
 
             <th>Notes</th>
 
-            <th>
-              <span className="sr-only">Actions</span>
-            </th>
+            {canManage && (
+              <th>
+                <span className="sr-only">Actions</span>
+              </th>
+            )}
           </tr>
         </thead>
 
@@ -191,48 +196,52 @@ export default function EventTable({
                   </span>
                 </td>
 
-                <td className="event-table__actions">
-                  <div className="row-menu">
-                    <button
-                      className="row-menu__trigger"
-                      type="button"
-                      aria-label={`Actions for ${portfolioEvent.description}`}
-                      aria-expanded={menuIsOpen}
-                      onClick={() =>
-                        setOpenMenuId(menuIsOpen ? null : portfolioEvent.id)
-                      }
-                    >
-                      <MoreHorizontal size={18} aria-hidden="true" />
-                    </button>
+                {canManage && (
+                  <td className="event-table__actions">
+                    <div className="row-menu">
+                      <button
+                        className="row-menu__trigger"
+                        type="button"
+                        aria-label={`Actions for ${portfolioEvent.description}`}
+                        aria-expanded={menuIsOpen}
+                        onClick={() =>
+                          setOpenMenuId(menuIsOpen ? null : portfolioEvent.id)
+                        }
+                      >
+                        <MoreHorizontal size={18} aria-hidden="true" />
+                      </button>
 
-                    {menuIsOpen && (
-                      <div className="row-menu__popover">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setOpenMenuId(null);
-                            onEdit(portfolioEvent);
-                          }}
-                        >
-                          <Pencil size={14} aria-hidden="true" />
-                          Edit
-                        </button>
+                      {menuIsOpen && (
+                        <div className="row-menu__popover">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setOpenMenuId(null);
 
-                        <button
-                          className="row-menu__delete"
-                          type="button"
-                          onClick={() => {
-                            setOpenMenuId(null);
-                            onDelete(portfolioEvent);
-                          }}
-                        >
-                          <Trash2 size={14} aria-hidden="true" />
-                          Delete
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </td>
+                              onEdit(portfolioEvent);
+                            }}
+                          >
+                            <Pencil size={14} aria-hidden="true" />
+                            Edit
+                          </button>
+
+                          <button
+                            className="row-menu__delete"
+                            type="button"
+                            onClick={() => {
+                              setOpenMenuId(null);
+
+                              onDelete(portfolioEvent);
+                            }}
+                          >
+                            <Trash2 size={14} aria-hidden="true" />
+                            Delete
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </td>
+                )}
               </tr>
             );
           })}

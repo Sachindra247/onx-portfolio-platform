@@ -23,6 +23,7 @@ import { buildExpiryAnalytics } from "../../../utils/expiryAnalytics";
 import { formatCertificationStatus } from "../../../utils/certificationAnalytics";
 
 interface ExpiringCertificationsViewProps {
+  canManage: boolean;
   certifications: CertificationDto[];
   onEdit: (certification: CertificationDto) => void;
 }
@@ -31,6 +32,7 @@ type ExpiryFilter = "" | ExpiryUrgency;
 
 export default function ExpiringCertificationsView({
   certifications,
+  canManage,
   onEdit,
 }: ExpiringCertificationsViewProps) {
   const [search, setSearch] = useState("");
@@ -336,15 +338,17 @@ export default function ExpiringCertificationsView({
                       </td>
 
                       <td>
-                        <button
-                          type="button"
-                          className="expiry-edit-button"
-                          aria-label={`Edit ${certification.certificationName}`}
-                          onClick={() => onEdit(certification)}
-                        >
-                          <Pencil size={14} aria-hidden="true" />
-                          Edit
-                        </button>
+                        {canManage && (
+                          <button
+                            type="button"
+                            className="expiry-edit-button"
+                            aria-label={`Edit ${certification.certificationName}`}
+                            onClick={() => onEdit(certification)}
+                          >
+                            <Pencil size={14} aria-hidden="true" />
+                            Edit
+                          </button>
+                        )}
                       </td>
                     </tr>
                   );
@@ -409,14 +413,15 @@ export default function ExpiringCertificationsView({
                           {formatDaysRemaining(item.daysRemaining)}
                         </strong>
                       </div>
-
-                      <button
-                        type="button"
-                        aria-label={`Edit ${item.certification.certificationName}`}
-                        onClick={() => onEdit(item.certification)}
-                      >
-                        <Pencil size={14} aria-hidden="true" />
-                      </button>
+                      {canManage && (
+                        <button
+                          type="button"
+                          aria-label={`Edit ${item.certification.certificationName}`}
+                          onClick={() => onEdit(item.certification)}
+                        >
+                          <Pencil size={14} aria-hidden="true" />
+                        </button>
+                      )}
                     </div>
                   ))}
                 </div>

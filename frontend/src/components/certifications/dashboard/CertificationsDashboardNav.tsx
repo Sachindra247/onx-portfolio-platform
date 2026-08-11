@@ -16,6 +16,7 @@ interface CertificationsDashboardNavProps {
   onSectionChange: (section: CertificationsSection) => void;
   onAddCertification: () => void;
   onExportCsv: () => void;
+  canManageCertifications: boolean;
   addCertificationDisabled?: boolean;
   exportDisabled?: boolean;
   gapCount?: number;
@@ -60,6 +61,7 @@ export default function CertificationsDashboardNav({
   onSectionChange,
   onAddCertification,
   onExportCsv,
+  canManageCertifications,
   addCertificationDisabled = false,
   exportDisabled = false,
   gapCount = 0,
@@ -129,15 +131,17 @@ export default function CertificationsDashboardNav({
       </div>
 
       <div className="certifications-sidebar__actions">
-        <button
-          type="button"
-          className="certifications-sidebar__add-button"
-          disabled={addCertificationDisabled}
-          onClick={onAddCertification}
-        >
-          <Plus size={17} aria-hidden="true" />
-          <span>Add Certification</span>
-        </button>
+        {canManageCertifications && (
+          <button
+            type="button"
+            className="certifications-sidebar__add-button"
+            disabled={addCertificationDisabled}
+            onClick={onAddCertification}
+          >
+            <Plus size={17} aria-hidden="true" />
+            <span>Add Certification</span>
+          </button>
+        )}
 
         <button
           type="button"
