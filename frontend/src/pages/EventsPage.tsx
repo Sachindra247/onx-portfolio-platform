@@ -1,11 +1,13 @@
 import { AlertCircle, RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
+  approveEvent,
   createEvent,
   deleteEvent,
   getApiErrorMessage,
   getEvents,
   getVendors,
+  rejectEvent,
   updateEvent,
 } from "../api/eventsApi";
 import EventFilters from "../components/events/EventFilters";
@@ -92,6 +94,8 @@ export default function EventsPage() {
   const canManageEvents = Boolean(
     user?.isGlobalAdministrator || user?.eventsAccess === "Admin",
   );
+
+  const canReviewEvents = Boolean(user?.isGlobalAdministrator);
 
   useEffect(() => {
     void loadPageData();
@@ -250,6 +254,38 @@ export default function EventsPage() {
     }
   }
 
+  async function handleApproveEvent(portfolioEvent: EventDto) {
+    try {
+      const updatedEvent = await approveEvent(portfolioEvent.id);
+
+      setEvents((currentEvents) =>
+        currentEvents.map((event) =>
+          event.id === updatedEvent.id ? updatedEvent : event,
+        ),
+      );
+
+      showToast(`"${updatedEvent.description}" was approved.`, "success");
+    } catch (error) {
+      showToast(getApiErrorMessage(error), "error");
+    }
+  }
+
+  async function handleRejectEvent(portfolioEvent: EventDto) {
+    try {
+      const updatedEvent = await rejectEvent(portfolioEvent.id);
+
+      setEvents((currentEvents) =>
+        currentEvents.map((event) =>
+          event.id === updatedEvent.id ? updatedEvent : event,
+        ),
+      );
+
+      showToast(`"${updatedEvent.description}" was rejected.`, "success");
+    } catch (error) {
+      showToast(getApiErrorMessage(error), "error");
+    }
+  }
+
   function requestDelete(portfolioEvent: EventDto) {
     if (!canManageEvents) {
       return;
@@ -397,6 +433,9 @@ export default function EventsPage() {
                           sortDirection={sortDirection}
                           onSort={handleSort}
                           canManage={canManageEvents}
+                          canReview={canReviewEvents}
+                          onApprove={handleApproveEvent}
+                          onReject={handleRejectEvent}
                           onEdit={openEditModal}
                           onDelete={requestDelete}
                         />
@@ -443,6 +482,9 @@ export default function EventsPage() {
                       sortDirection={sortDirection}
                       onSort={handleSort}
                       canManage={canManageEvents}
+                      canReview={canReviewEvents}
+                      onApprove={handleApproveEvent}
+                      onReject={handleRejectEvent}
                       onEdit={openEditModal}
                       onDelete={requestDelete}
                     />
@@ -461,6 +503,9 @@ export default function EventsPage() {
                       sortDirection={sortDirection}
                       onSort={handleSort}
                       canManage={canManageEvents}
+                      canReview={canReviewEvents}
+                      onApprove={handleApproveEvent}
+                      onReject={handleRejectEvent}
                       onEdit={openEditModal}
                       onDelete={requestDelete}
                     />

@@ -3,10 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OnXPortfolio.Api.Auth;
 using OnXPortfolio.Application.Events;
+using OnXPortfolio.Domain.Events;
 using OnXPortfolio.Domain.Users;
 using OnXPortfolio.Infrastructure.Persistence;
 using PortfolioEvent = OnXPortfolio.Domain.Events.Event;
-using OnXPortfolio.Domain.Events;
 
 namespace OnXPortfolio.Api.Controllers;
 
@@ -28,7 +28,8 @@ public sealed class EventsController : ControllerBase
 
     // =========================================================
     // GET ALL
-    // All authenticated internal users may view events.
+    // Normal users see approved events only.
+    // Events Admins and Global Admins can see all events.
     // =========================================================
 
     [HttpGet]
@@ -56,9 +57,19 @@ public sealed class EventsController : ControllerBase
             .AsNoTracking()
             .AsQueryable();
 
+        // Normal users should only see events
+        // that have been approved.
+        if (!CanManageEvents(currentUser))
+        {
+            query = query.Where(portfolioEvent =>
+                portfolioEvent.ApprovalStatus ==
+                    EventApprovalStatus.Approved);
+        }
+
         if (!string.IsNullOrWhiteSpace(search))
         {
-            var normalizedSearch = search.Trim();
+            var normalizedSearch =
+                search.Trim();
 
             query = query.Where(portfolioEvent =>
                 portfolioEvent.Description.Contains(
@@ -96,23 +107,62 @@ public sealed class EventsController : ControllerBase
             .Select(portfolioEvent =>
                 new EventDto
                 {
-                    Id = portfolioEvent.Id,
+                    Id =
+                        portfolioEvent.Id,
+
                     Description =
                         portfolioEvent.Description,
+
                     EventDate =
                         portfolioEvent.EventDate,
+
                     Stage =
                         portfolioEvent.Stage,
+
                     BudgetCad =
                         portfolioEvent.BudgetCad,
+
                     Notes =
                         portfolioEvent.Notes,
+
                     VendorId =
                         portfolioEvent.VendorId,
+
                     VendorName =
                         portfolioEvent.Vendor.Name,
+
+                    ApprovalStatus =
+                        portfolioEvent.ApprovalStatus,
+
+                    SubmittedByUserId =
+                        portfolioEvent.SubmittedByUserId,
+
+                    SubmittedByUserName =
+                        portfolioEvent.SubmittedByUser == null
+                            ? null
+                            : portfolioEvent.SubmittedByUser.FirstName +
+                              " " +
+                              portfolioEvent.SubmittedByUser.LastName,
+
+                    ReviewedByUserId =
+                        portfolioEvent.ReviewedByUserId,
+
+                    ReviewedByUserName =
+                        portfolioEvent.ReviewedByUser == null
+                            ? null
+                            : portfolioEvent.ReviewedByUser.FirstName +
+                              " " +
+                              portfolioEvent.ReviewedByUser.LastName,
+
+                    ReviewedAtUtc =
+                        portfolioEvent.ReviewedAtUtc,
+
+                    ReviewNotes =
+                        portfolioEvent.ReviewNotes,
+
                     CreatedAtUtc =
                         portfolioEvent.CreatedAtUtc,
+
                     UpdatedAtUtc =
                         portfolioEvent.UpdatedAtUtc
                 })
@@ -124,7 +174,7 @@ public sealed class EventsController : ControllerBase
 
     // =========================================================
     // GET ONE
-    // All authenticated internal users may view.
+    // Normal users may only retrieve approved events.
     // =========================================================
 
     [HttpGet("{id:guid}")]
@@ -133,6 +183,8 @@ public sealed class EventsController : ControllerBase
         StatusCodes.Status200OK)]
     [ProducesResponseType(
         StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(
+        StatusCodes.Status403Forbidden)]
     [ProducesResponseType(
         StatusCodes.Status404NotFound)]
     public async Task<ActionResult<EventDto>> GetEvent(
@@ -149,21 +201,40 @@ public sealed class EventsController : ControllerBase
         }
 
         var portfolioEvent =
-            await GetEventDtoAsync(
-                id,
-                cancellationToken);
+            await _dbContext.Events
+                .AsNoTracking()
+                .Include(eventRecord =>
+                    eventRecord.Vendor)
+                .Include(eventRecord =>
+                    eventRecord.SubmittedByUser)
+                .Include(eventRecord =>
+                    eventRecord.ReviewedByUser)
+                .SingleOrDefaultAsync(
+                    eventRecord =>
+                        eventRecord.Id == id,
+                    cancellationToken);
 
         if (portfolioEvent is null)
         {
             return NotFound();
         }
 
-        return Ok(portfolioEvent);
+        if (
+            !CanManageEvents(currentUser) &&
+            portfolioEvent.ApprovalStatus !=
+                EventApprovalStatus.Approved)
+        {
+            return Forbid();
+        }
+
+        return Ok(
+            MapToDto(portfolioEvent));
     }
 
     // =========================================================
     // CREATE
-    // Sabrina / Events Admin / Global Admin only.
+    // Events Admin / Global Admin only.
+    // New events always enter Pending approval.
     // =========================================================
 
     [HttpPost]
@@ -219,7 +290,8 @@ public sealed class EventsController : ControllerBase
         var portfolioEvent =
             new PortfolioEvent
             {
-                Id = Guid.NewGuid(),
+                Id =
+                    Guid.NewGuid(),
 
                 Description =
                     request.Description.Trim(),
@@ -239,6 +311,21 @@ public sealed class EventsController : ControllerBase
 
                 VendorId =
                     request.VendorId,
+
+                ApprovalStatus =
+                    EventApprovalStatus.Pending,
+
+                SubmittedByUserId =
+                    currentUser.Id,
+
+                ReviewedByUserId =
+                    null,
+
+                ReviewedAtUtc =
+                    null,
+
+                ReviewNotes =
+                    null,
 
                 CreatedAtUtc =
                     now,
@@ -269,7 +356,10 @@ public sealed class EventsController : ControllerBase
 
     // =========================================================
     // UPDATE
-    // Sabrina / Events Admin / Global Admin only.
+    // Events Admin / Global Admin only.
+    //
+    // Any meaningful edit sends the event back to Pending
+    // so the updated version can be reviewed again.
     // =========================================================
 
     [HttpPut("{id:guid}")]
@@ -306,8 +396,8 @@ public sealed class EventsController : ControllerBase
         var portfolioEvent =
             await _dbContext.Events
                 .SingleOrDefaultAsync(
-                    portfolioEvent =>
-                        portfolioEvent.Id == id,
+                    eventRecord =>
+                        eventRecord.Id == id,
                     cancellationToken);
 
         if (portfolioEvent is null)
@@ -353,6 +443,23 @@ public sealed class EventsController : ControllerBase
         portfolioEvent.VendorId =
             request.VendorId;
 
+        // Re-submit the updated event
+        // through the approval workflow.
+        portfolioEvent.ApprovalStatus =
+            EventApprovalStatus.Pending;
+
+        portfolioEvent.SubmittedByUserId =
+            currentUser.Id;
+
+        portfolioEvent.ReviewedByUserId =
+            null;
+
+        portfolioEvent.ReviewedAtUtc =
+            null;
+
+        portfolioEvent.ReviewNotes =
+            null;
+
         portfolioEvent.UpdatedAtUtc =
             DateTimeOffset.UtcNow;
 
@@ -369,7 +476,7 @@ public sealed class EventsController : ControllerBase
 
     // =========================================================
     // DELETE
-    // Sabrina / Events Admin / Global Admin only.
+    // Events Admin / Global Admin only.
     // =========================================================
 
     [HttpDelete("{id:guid}")]
@@ -402,8 +509,8 @@ public sealed class EventsController : ControllerBase
         var portfolioEvent =
             await _dbContext.Events
                 .SingleOrDefaultAsync(
-                    portfolioEvent =>
-                        portfolioEvent.Id == id,
+                    eventRecord =>
+                        eventRecord.Id == id,
                     cancellationToken);
 
         if (portfolioEvent is null)
@@ -418,6 +525,135 @@ public sealed class EventsController : ControllerBase
             cancellationToken);
 
         return NoContent();
+    }
+
+    // =========================================================
+    // APPROVE
+    // Global Admin only.
+    // =========================================================
+
+    [HttpPost("{id:guid}/approve")]
+    [ProducesResponseType(
+        typeof(EventDto),
+        StatusCodes.Status200OK)]
+    [ProducesResponseType(
+        StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(
+        StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(
+        StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(
+        StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<EventDto>> ApproveEvent(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        return await ReviewEvent(
+            id,
+            EventApprovalStatus.Approved,
+            cancellationToken);
+    }
+
+    // =========================================================
+    // REJECT
+    // Global Admin only.
+    // =========================================================
+
+    [HttpPost("{id:guid}/reject")]
+    [ProducesResponseType(
+        typeof(EventDto),
+        StatusCodes.Status200OK)]
+    [ProducesResponseType(
+        StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(
+        StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(
+        StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(
+        StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<EventDto>> RejectEvent(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        return await ReviewEvent(
+            id,
+            EventApprovalStatus.Rejected,
+            cancellationToken);
+    }
+
+    // =========================================================
+    // REVIEW INTERNAL
+    // =========================================================
+
+    private async Task<ActionResult<EventDto>> ReviewEvent(
+        Guid id,
+        EventApprovalStatus newStatus,
+        CancellationToken cancellationToken)
+    {
+        var currentUser =
+            await _currentUserService.GetUserAsync(
+                cancellationToken);
+
+        if (currentUser is null)
+        {
+            return Unauthorized();
+        }
+
+        // Only Global Site Administrators
+        // can approve or reject events.
+        if (!currentUser.IsGlobalAdministrator)
+        {
+            return Forbid();
+        }
+
+        var portfolioEvent =
+            await _dbContext.Events
+                .SingleOrDefaultAsync(
+                    eventRecord =>
+                        eventRecord.Id == id,
+                    cancellationToken);
+
+        if (portfolioEvent is null)
+        {
+            return NotFound();
+        }
+
+        if (
+            portfolioEvent.ApprovalStatus !=
+                EventApprovalStatus.Pending)
+        {
+            return BadRequest(
+                new
+                {
+                    message =
+                        "Only pending events can be reviewed."
+                });
+        }
+
+        var now =
+            DateTimeOffset.UtcNow;
+
+        portfolioEvent.ApprovalStatus =
+            newStatus;
+
+        portfolioEvent.ReviewedByUserId =
+            currentUser.Id;
+
+        portfolioEvent.ReviewedAtUtc =
+            now;
+
+        portfolioEvent.UpdatedAtUtc =
+            now;
+
+        await _dbContext.SaveChangesAsync(
+            cancellationToken);
+
+        var reviewedEvent =
+            await GetEventDtoAsync(
+                id,
+                cancellationToken);
+
+        return Ok(reviewedEvent);
     }
 
     // =========================================================
@@ -443,33 +679,139 @@ public sealed class EventsController : ControllerBase
     {
         return await _dbContext.Events
             .AsNoTracking()
-            .Where(portfolioEvent =>
-                portfolioEvent.Id == id)
-            .Select(portfolioEvent =>
+            .Where(eventRecord =>
+                eventRecord.Id == id)
+            .Select(eventRecord =>
                 new EventDto
                 {
-                    Id = portfolioEvent.Id,
+                    Id =
+                        eventRecord.Id,
+
                     Description =
-                        portfolioEvent.Description,
+                        eventRecord.Description,
+
                     EventDate =
-                        portfolioEvent.EventDate,
+                        eventRecord.EventDate,
+
                     Stage =
-                        portfolioEvent.Stage,
+                        eventRecord.Stage,
+
                     BudgetCad =
-                        portfolioEvent.BudgetCad,
+                        eventRecord.BudgetCad,
+
                     Notes =
-                        portfolioEvent.Notes,
+                        eventRecord.Notes,
+
                     VendorId =
-                        portfolioEvent.VendorId,
+                        eventRecord.VendorId,
+
                     VendorName =
-                        portfolioEvent.Vendor.Name,
+                        eventRecord.Vendor.Name,
+
+                    ApprovalStatus =
+                        eventRecord.ApprovalStatus,
+
+                    SubmittedByUserId =
+                        eventRecord.SubmittedByUserId,
+
+                    SubmittedByUserName =
+                        eventRecord.SubmittedByUser == null
+                            ? null
+                            : eventRecord.SubmittedByUser.FirstName +
+                              " " +
+                              eventRecord.SubmittedByUser.LastName,
+
+                    ReviewedByUserId =
+                        eventRecord.ReviewedByUserId,
+
+                    ReviewedByUserName =
+                        eventRecord.ReviewedByUser == null
+                            ? null
+                            : eventRecord.ReviewedByUser.FirstName +
+                              " " +
+                              eventRecord.ReviewedByUser.LastName,
+
+                    ReviewedAtUtc =
+                        eventRecord.ReviewedAtUtc,
+
+                    ReviewNotes =
+                        eventRecord.ReviewNotes,
+
                     CreatedAtUtc =
-                        portfolioEvent.CreatedAtUtc,
+                        eventRecord.CreatedAtUtc,
+
                     UpdatedAtUtc =
-                        portfolioEvent.UpdatedAtUtc
+                        eventRecord.UpdatedAtUtc
                 })
             .SingleOrDefaultAsync(
                 cancellationToken);
+    }
+
+    // =========================================================
+    // DTO MAPPING
+    // Used by GET ONE after navigation properties are loaded.
+    // =========================================================
+
+    private static EventDto MapToDto(
+        PortfolioEvent eventRecord)
+    {
+        return new EventDto
+        {
+            Id =
+                eventRecord.Id,
+
+            Description =
+                eventRecord.Description,
+
+            EventDate =
+                eventRecord.EventDate,
+
+            Stage =
+                eventRecord.Stage,
+
+            BudgetCad =
+                eventRecord.BudgetCad,
+
+            Notes =
+                eventRecord.Notes,
+
+            VendorId =
+                eventRecord.VendorId,
+
+            VendorName =
+                eventRecord.Vendor.Name,
+
+            ApprovalStatus =
+                eventRecord.ApprovalStatus,
+
+            SubmittedByUserId =
+                eventRecord.SubmittedByUserId,
+
+            SubmittedByUserName =
+                eventRecord.SubmittedByUser == null
+                    ? null
+                    : $"{eventRecord.SubmittedByUser.FirstName} {eventRecord.SubmittedByUser.LastName}",
+
+            ReviewedByUserId =
+                eventRecord.ReviewedByUserId,
+
+            ReviewedByUserName =
+                eventRecord.ReviewedByUser == null
+                    ? null
+                    : $"{eventRecord.ReviewedByUser.FirstName} {eventRecord.ReviewedByUser.LastName}",
+
+            ReviewedAtUtc =
+                eventRecord.ReviewedAtUtc,
+
+            ReviewNotes =
+                eventRecord.ReviewNotes,
+
+            CreatedAtUtc =
+                eventRecord.CreatedAtUtc,
+
+            UpdatedAtUtc =
+                eventRecord.UpdatedAtUtc
+        };
     }
 
     // =========================================================

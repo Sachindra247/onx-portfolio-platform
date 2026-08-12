@@ -2,9 +2,11 @@ import {
   ArrowDown,
   ArrowUp,
   ArrowUpDown,
+  Check,
   MoreHorizontal,
   Pencil,
   Trash2,
+  X,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -29,10 +31,15 @@ interface EventTableProps {
   onSort: (field: EventSortField) => void;
 
   canManage: boolean;
+  canReview: boolean;
 
   onEdit: (event: EventDto) => void;
 
   onDelete: (event: EventDto) => void;
+
+  onApprove: (event: EventDto) => Promise<void>;
+
+  onReject: (event: EventDto) => Promise<void>;
 }
 
 interface SortButtonProps {
@@ -78,10 +85,43 @@ export default function EventTable({
   sortDirection,
   onSort,
   canManage,
+  canReview,
   onEdit,
   onDelete,
+  onApprove,
+  onReject,
 }: EventTableProps) {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+
+  const [reviewingEventId, setReviewingEventId] = useState<string | null>(null);
+
+  async function handleApprove(event: EventDto) {
+    if (reviewingEventId) {
+      return;
+    }
+
+    setReviewingEventId(event.id);
+
+    try {
+      await onApprove(event);
+    } finally {
+      setReviewingEventId(null);
+    }
+  }
+
+  async function handleReject(event: EventDto) {
+    if (reviewingEventId) {
+      return;
+    }
+
+    setReviewingEventId(event.id);
+
+    try {
+      await onReject(event);
+    } finally {
+      setReviewingEventId(null);
+    }
+  }
 
   if (events.length === 0) {
     return (
@@ -130,6 +170,8 @@ export default function EventTable({
               />
             </th>
 
+            <th>Approval</th>
+
             <th className="event-table__budget-header">
               <SortButton
                 field="budgetCad"
@@ -142,7 +184,7 @@ export default function EventTable({
 
             <th>Notes</th>
 
-            {canManage && (
+            {(canManage || canReview) && (
               <th>
                 <span className="sr-only">Actions</span>
               </th>
@@ -153,6 +195,8 @@ export default function EventTable({
         <tbody>
           {events.map((portfolioEvent) => {
             const menuIsOpen = openMenuId === portfolioEvent.id;
+
+            const isReviewing = reviewingEventId === portfolioEvent.id;
 
             return (
               <tr key={portfolioEvent.id}>
@@ -183,6 +227,17 @@ export default function EventTable({
                   </span>
                 </td>
 
+                <td>
+                  <span
+                    className={[
+                      "event-approval-badge",
+                      `event-approval-badge--${portfolioEvent.approvalStatus.toLocaleLowerCase()}`,
+                    ].join(" ")}
+                  >
+                    {portfolioEvent.approvalStatus}
+                  </span>
+                </td>
+
                 <td className="event-table__budget">
                   {formatBudget(portfolioEvent.budgetCad)}
                 </td>
@@ -196,7 +251,7 @@ export default function EventTable({
                   </span>
                 </td>
 
-                {canManage && (
+                {(canManage || canReview) && (
                   <td className="event-table__actions">
                     <div className="row-menu">
                       <button
@@ -213,30 +268,66 @@ export default function EventTable({
 
                       {menuIsOpen && (
                         <div className="row-menu__popover">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setOpenMenuId(null);
+                          {canReview &&
+                            portfolioEvent.approvalStatus === "Pending" && (
+                              <>
+                                <button
+                                  type="button"
+                                  disabled={isReviewing}
+                                  onClick={() => {
+                                    setOpenMenuId(null);
 
-                              onEdit(portfolioEvent);
-                            }}
-                          >
-                            <Pencil size={14} aria-hidden="true" />
-                            Edit
-                          </button>
+                                    void handleApprove(portfolioEvent);
+                                  }}
+                                >
+                                  <Check size={14} aria-hidden="true" />
+                                  Approve
+                                </button>
 
-                          <button
-                            className="row-menu__delete"
-                            type="button"
-                            onClick={() => {
-                              setOpenMenuId(null);
+                                <button
+                                  type="button"
+                                  className="row-menu__reject"
+                                  disabled={isReviewing}
+                                  onClick={() => {
+                                    setOpenMenuId(null);
 
-                              onDelete(portfolioEvent);
-                            }}
-                          >
-                            <Trash2 size={14} aria-hidden="true" />
-                            Delete
-                          </button>
+                                    void handleReject(portfolioEvent);
+                                  }}
+                                >
+                                  <X size={14} aria-hidden="true" />
+                                  Reject
+                                </button>
+                              </>
+                            )}
+
+                          {canManage && (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setOpenMenuId(null);
+
+                                  onEdit(portfolioEvent);
+                                }}
+                              >
+                                <Pencil size={14} aria-hidden="true" />
+                                Edit
+                              </button>
+
+                              <button
+                                className="row-menu__delete"
+                                type="button"
+                                onClick={() => {
+                                  setOpenMenuId(null);
+
+                                  onDelete(portfolioEvent);
+                                }}
+                              >
+                                <Trash2 size={14} aria-hidden="true" />
+                                Delete
+                              </button>
+                            </>
+                          )}
                         </div>
                       )}
                     </div>

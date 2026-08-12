@@ -840,6 +840,31 @@
     gap: 1.25rem;
 }
 
+.event-approval-badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 22px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.event-approval-badge--pending {
+    background: #fff4d6;
+    color: #8a6116;
+}
+
+.event-approval-badge--approved {
+    background: #e8f6ee;
+    color: #256447;
+}
+
+.event-approval-badge--rejected {
+    background: #fdebea;
+    color: #a73732;
+}
+
 /* ==========================================================
    RESPONSIVE
    ========================================================== */

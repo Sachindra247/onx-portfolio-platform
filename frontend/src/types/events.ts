@@ -8,6 +8,14 @@ export const eventStages = [
 
 export type EventStage = (typeof eventStages)[number];
 
+export const eventApprovalStatuses = [
+  "Pending",
+  "Approved",
+  "Rejected",
+] as const;
+
+export type EventApprovalStatus = (typeof eventApprovalStatuses)[number];
+
 export interface EventDto {
   id: string;
   description: string;
@@ -15,8 +23,21 @@ export interface EventDto {
   stage: EventStage;
   budgetCad: number;
   notes: string | null;
+
   vendorId: string;
   vendorName: string;
+
+  approvalStatus: EventApprovalStatus;
+
+  submittedByUserId: string | null;
+  submittedByUserName: string | null;
+
+  reviewedByUserId: string | null;
+  reviewedByUserName: string | null;
+
+  reviewedAtUtc: string | null;
+  reviewNotes: string | null;
+
   createdAtUtc: string;
   updatedAtUtc: string;
 }
