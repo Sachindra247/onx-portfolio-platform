@@ -657,6 +657,337 @@ public sealed class EventsController : ControllerBase
     }
 
     // =========================================================
+// REGISTER FOR EVENT
+// Any authenticated user may register for an
+// approved event.
+// =========================================================
+
+[HttpPost("{id:guid}/register")]
+[ProducesResponseType(
+    typeof(EventRegistrationDto),
+    StatusCodes.Status200OK)]
+[ProducesResponseType(
+    StatusCodes.Status400BadRequest)]
+[ProducesResponseType(
+    StatusCodes.Status401Unauthorized)]
+[ProducesResponseType(
+    StatusCodes.Status404NotFound)]
+public async Task<ActionResult<EventRegistrationDto>>
+    RegisterForEvent(
+        Guid id,
+        CancellationToken cancellationToken)
+{
+    var currentUser =
+        await _currentUserService.GetUserAsync(
+            cancellationToken);
+
+    if (currentUser is null)
+    {
+        return Unauthorized();
+    }
+
+    var portfolioEvent =
+        await _dbContext.Events
+            .AsNoTracking()
+            .SingleOrDefaultAsync(
+                eventRecord =>
+                    eventRecord.Id == id,
+                cancellationToken);
+
+    if (portfolioEvent is null)
+    {
+        return NotFound();
+    }
+
+    if (
+        portfolioEvent.ApprovalStatus !=
+            EventApprovalStatus.Approved)
+    {
+        return BadRequest(
+            new
+            {
+                message =
+                    "Only approved events are available for registration."
+            });
+    }
+
+    var existingRegistration =
+        await _dbContext.EventRegistrations
+            .SingleOrDefaultAsync(
+                registration =>
+                    registration.EventId == id &&
+                    registration.UserId ==
+                        currentUser.Id,
+                cancellationToken);
+
+    var now =
+        DateTimeOffset.UtcNow;
+
+    if (existingRegistration is null)
+    {
+        existingRegistration =
+            new EventRegistration
+            {
+                Id = Guid.NewGuid(),
+
+                EventId =
+                    id,
+
+                UserId =
+                    currentUser.Id,
+
+                Status =
+                    EventRegistrationStatus.Registered,
+
+                CreatedAtUtc =
+                    now,
+
+                UpdatedAtUtc =
+                    now
+            };
+
+        _dbContext.EventRegistrations.Add(
+            existingRegistration);
+    }
+    else
+    {
+        existingRegistration.Status =
+            EventRegistrationStatus.Registered;
+
+        existingRegistration.UpdatedAtUtc =
+            now;
+    }
+
+    await _dbContext.SaveChangesAsync(
+        cancellationToken);
+
+    return Ok(
+        MapRegistrationToDto(
+            existingRegistration));
+}
+
+// =========================================================
+// CANCEL REGISTRATION
+// Users may cancel their own registration.
+// We keep the record and mark it Cancelled.
+// =========================================================
+
+[HttpDelete("{id:guid}/register")]
+[ProducesResponseType(
+    StatusCodes.Status204NoContent)]
+[ProducesResponseType(
+    StatusCodes.Status401Unauthorized)]
+[ProducesResponseType(
+    StatusCodes.Status404NotFound)]
+public async Task<IActionResult>
+    CancelEventRegistration(
+        Guid id,
+        CancellationToken cancellationToken)
+{
+    var currentUser =
+        await _currentUserService.GetUserAsync(
+            cancellationToken);
+
+    if (currentUser is null)
+    {
+        return Unauthorized();
+    }
+
+    var eventExists =
+        await _dbContext.Events
+            .AnyAsync(
+                eventRecord =>
+                    eventRecord.Id == id,
+                cancellationToken);
+
+    if (!eventExists)
+    {
+        return NotFound();
+    }
+
+    var registration =
+        await _dbContext.EventRegistrations
+            .SingleOrDefaultAsync(
+                item =>
+                    item.EventId == id &&
+                    item.UserId ==
+                        currentUser.Id,
+                cancellationToken);
+
+    if (
+        registration is null ||
+        registration.Status ==
+            EventRegistrationStatus.Cancelled)
+    {
+        return NotFound(
+            new
+            {
+                message =
+                    "No active registration was found for this event."
+            });
+    }
+
+    registration.Status =
+        EventRegistrationStatus.Cancelled;
+
+    registration.UpdatedAtUtc =
+        DateTimeOffset.UtcNow;
+
+    await _dbContext.SaveChangesAsync(
+        cancellationToken);
+
+    return NoContent();
+}
+
+// =========================================================
+// MY REGISTRATION
+// Returns the signed-in user's RSVP status.
+// =========================================================
+
+[HttpGet("{id:guid}/registration")]
+[ProducesResponseType(
+    typeof(EventRegistrationDto),
+    StatusCodes.Status200OK)]
+[ProducesResponseType(
+    StatusCodes.Status401Unauthorized)]
+[ProducesResponseType(
+    StatusCodes.Status404NotFound)]
+public async Task<ActionResult<EventRegistrationDto>>
+    GetMyEventRegistration(
+        Guid id,
+        CancellationToken cancellationToken)
+{
+    var currentUser =
+        await _currentUserService.GetUserAsync(
+            cancellationToken);
+
+    if (currentUser is null)
+    {
+        return Unauthorized();
+    }
+
+    var portfolioEvent =
+        await _dbContext.Events
+            .AsNoTracking()
+            .SingleOrDefaultAsync(
+                eventRecord =>
+                    eventRecord.Id == id,
+                cancellationToken);
+
+    if (portfolioEvent is null)
+    {
+        return NotFound();
+    }
+
+    var registration =
+        await _dbContext.EventRegistrations
+            .AsNoTracking()
+            .SingleOrDefaultAsync(
+                item =>
+                    item.EventId == id &&
+                    item.UserId ==
+                        currentUser.Id,
+                cancellationToken);
+
+    if (registration is null)
+    {
+        return NotFound(
+            new
+            {
+                message =
+                    "You are not registered for this event."
+            });
+    }
+
+    return Ok(
+        MapRegistrationToDto(
+            registration));
+}
+
+// =========================================================
+// EVENT ATTENDEES
+// Events Admins and Global Admins may view attendees.
+// Cancelled registrations are excluded.
+// =========================================================
+
+[HttpGet("{id:guid}/registrations")]
+[ProducesResponseType(
+    typeof(IReadOnlyList<EventAttendeeDto>),
+    StatusCodes.Status200OK)]
+[ProducesResponseType(
+    StatusCodes.Status401Unauthorized)]
+[ProducesResponseType(
+    StatusCodes.Status403Forbidden)]
+[ProducesResponseType(
+    StatusCodes.Status404NotFound)]
+public async Task<
+    ActionResult<IReadOnlyList<EventAttendeeDto>>>
+    GetEventRegistrations(
+        Guid id,
+        CancellationToken cancellationToken)
+{
+    var currentUser =
+        await _currentUserService.GetUserAsync(
+            cancellationToken);
+
+    if (currentUser is null)
+    {
+        return Unauthorized();
+    }
+
+    if (!CanManageEvents(currentUser))
+    {
+        return Forbid();
+    }
+
+    var eventExists =
+        await _dbContext.Events
+            .AsNoTracking()
+            .AnyAsync(
+                eventRecord =>
+                    eventRecord.Id == id,
+                cancellationToken);
+
+    if (!eventExists)
+    {
+        return NotFound();
+    }
+
+    var attendees =
+        await _dbContext.EventRegistrations
+            .AsNoTracking()
+            .Where(registration =>
+                registration.EventId == id &&
+                registration.Status ==
+                    EventRegistrationStatus.Registered)
+            .OrderBy(registration =>
+                registration.User.FirstName)
+            .ThenBy(registration =>
+                registration.User.LastName)
+            .Select(registration =>
+                new EventAttendeeDto
+                {
+                    UserId =
+                        registration.UserId,
+
+                    Name =
+                        registration.User.FirstName +
+                        " " +
+                        registration.User.LastName,
+
+                    Email =
+                        registration.User.Email,
+
+                    RegisteredAtUtc =
+                        registration.CreatedAtUtc
+                })
+            .ToListAsync(
+                cancellationToken);
+
+    return Ok(attendees);
+}
+
+    // =========================================================
     // AUTHORIZATION
     // =========================================================
 
@@ -817,6 +1148,29 @@ public sealed class EventsController : ControllerBase
     // =========================================================
     // GENERAL HELPER
     // =========================================================
+
+private static EventRegistrationDto
+    MapRegistrationToDto(
+        EventRegistration registration)
+{
+    return new EventRegistrationDto
+    {
+        EventId =
+            registration.EventId,
+
+        UserId =
+            registration.UserId,
+
+        Status =
+            registration.Status,
+
+        CreatedAtUtc =
+            registration.CreatedAtUtc,
+
+        UpdatedAtUtc =
+            registration.UpdatedAtUtc
+    };
+}
 
     private static string? NormalizeOptionalText(
         string? value)

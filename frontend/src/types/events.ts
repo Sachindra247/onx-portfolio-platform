@@ -42,6 +42,27 @@ export interface EventDto {
   updatedAtUtc: string;
 }
 
+export const eventRegistrationStatuses = ["Registered", "Cancelled"] as const;
+
+export type EventRegistrationStatus =
+  (typeof eventRegistrationStatuses)[number];
+
+export interface EventRegistrationDto {
+  eventId: string;
+  userId: string;
+  status: EventRegistrationStatus;
+  isRegistered: boolean;
+  createdAtUtc: string;
+  updatedAtUtc: string;
+}
+
+export interface EventAttendeeDto {
+  userId: string;
+  name: string;
+  email: string;
+  registeredAtUtc: string;
+}
+
 export interface VendorDto {
   id: string;
   name: string;

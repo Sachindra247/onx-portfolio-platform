@@ -1,15 +1,24 @@
 import { AlertCircle, RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+
 import {
   approveEvent,
+  cancelEventRegistration,
   createEvent,
   deleteEvent,
   getApiErrorMessage,
+  getEventRegistrations,
   getEvents,
+  getMyEventRegistration,
   getVendors,
+  registerForEvent,
   rejectEvent,
   updateEvent,
 } from "../api/eventsApi";
+
+import { useAuth } from "../auth/AuthContext";
+
+import EventDetailsModal from "../components/events/EventDetailsModal";
 import EventFilters from "../components/events/EventFilters";
 import EventFormModal from "../components/events/EventFormModal";
 import EventHighlights from "../components/events/EventHighlights";
@@ -18,12 +27,17 @@ import EventPortfolioCharts from "../components/events/EventPortfolioCharts";
 import EventStats from "../components/events/EventStats";
 import EventTable from "../components/events/EventTable";
 import EventVendorGroups from "../components/events/EventVendorGroups";
+import EventCalendar from "../components/events/calendar/EventCalendar";
 import EventsDashboardNav from "../components/events/dashboard/EventsDashboardNav";
+
 import ConfirmDialog from "../components/feedback/ConfirmDialog";
 import { useToast } from "../components/feedback/ToastProvider";
+
 import type {
+  EventAttendeeDto,
   EventDto,
   EventFormValues,
+  EventRegistrationDto,
   EventSortField,
   EventStage,
   EventsSection,
@@ -31,44 +45,105 @@ import type {
   SortDirection,
   VendorDto,
 } from "../types/events";
-import { mapFormToRequest } from "../utils/eventFormatting";
-import EventCalendar from "../components/events/calendar/EventCalendar";
 
-import { useAuth } from "../auth/AuthContext";
+import { mapFormToRequest } from "../utils/eventFormatting";
 
 export default function EventsPage() {
   const { showToast } = useToast();
 
+  const { user } = useAuth();
+
+  // =========================================================
+  // MAIN EVENT DATA
+  // =========================================================
+
   const [events, setEvents] = useState<EventDto[]>([]);
+
   const [vendors, setVendors] = useState<VendorDto[]>([]);
 
   const [isLoading, setIsLoading] = useState(true);
+
   const [loadError, setLoadError] = useState<string | null>(null);
 
+  // =========================================================
+  // FILTERING / SORTING
+  // =========================================================
+
   const [search, setSearch] = useState("");
+
   const [stage, setStage] = useState<EventStage | "">("");
+
   const [vendorId, setVendorId] = useState("");
 
   const [sortField, setSortField] = useState<EventSortField>("eventDate");
+
   const [sortDirection, setSortDirection] =
     useState<SortDirection>("ascending");
 
   const [viewMode, setViewMode] = useState<EventViewMode>("table");
+
   const [activeSection, setActiveSection] = useState<EventsSection>("overview");
 
+  // =========================================================
+  // PAGINATION
+  // =========================================================
+
   const [page, setPage] = useState(1);
+
   const [pageSize, setPageSize] = useState(10);
 
+  // =========================================================
+  // CREATE / EDIT MODAL
+  // =========================================================
+
   const [modalIsOpen, setModalIsOpen] = useState(false);
+
   const [selectedEvent, setSelectedEvent] = useState<EventDto | null>(null);
 
   const [isSaving, setIsSaving] = useState(false);
+
   const [formError, setFormError] = useState<string | null>(null);
+
+  // =========================================================
+  // DELETE
+  // =========================================================
 
   const [eventPendingDelete, setEventPendingDelete] = useState<EventDto | null>(
     null,
   );
+
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // =========================================================
+  // EVENT DETAILS / RSVP
+  // =========================================================
+
+  const [detailsEvent, setDetailsEvent] = useState<EventDto | null>(null);
+
+  const [eventRegistration, setEventRegistration] =
+    useState<EventRegistrationDto | null>(null);
+
+  const [attendees, setAttendees] = useState<EventAttendeeDto[]>([]);
+
+  const [isRegistrationLoading, setIsRegistrationLoading] = useState(false);
+
+  const [isRegistrationSaving, setIsRegistrationSaving] = useState(false);
+
+  const [attendeesLoading, setAttendeesLoading] = useState(false);
+
+  // =========================================================
+  // PERMISSIONS
+  // =========================================================
+
+  const canManageEvents = Boolean(
+    user?.isGlobalAdministrator || user?.eventsAccess === "Admin",
+  );
+
+  const canReviewEvents = Boolean(user?.isGlobalAdministrator);
+
+  // =========================================================
+  // LOAD PAGE
+  // =========================================================
 
   const loadPageData = useCallback(async () => {
     setIsLoading(true);
@@ -81,6 +156,7 @@ export default function EventsPage() {
       ]);
 
       setEvents(loadedEvents);
+
       setVendors(loadedVendors);
     } catch (error) {
       setLoadError(getApiErrorMessage(error));
@@ -89,17 +165,13 @@ export default function EventsPage() {
     }
   }, []);
 
-  const { user } = useAuth();
-
-  const canManageEvents = Boolean(
-    user?.isGlobalAdministrator || user?.eventsAccess === "Admin",
-  );
-
-  const canReviewEvents = Boolean(user?.isGlobalAdministrator);
-
   useEffect(() => {
     void loadPageData();
   }, [loadPageData]);
+
+  // =========================================================
+  // FILTERED / SORTED EVENTS
+  // =========================================================
 
   const filteredAndSortedEvents = useMemo(() => {
     const normalizedSearch = search.trim().toLocaleLowerCase();
@@ -118,6 +190,7 @@ export default function EventsPage() {
           .includes(normalizedSearch);
 
       const matchesStage = stage === "" || portfolioEvent.stage === stage;
+
       const matchesVendor =
         vendorId === "" || portfolioEvent.vendorId === vendorId;
 
@@ -171,6 +244,10 @@ export default function EventsPage() {
     }
   }, [filteredAndSortedEvents.length, page, pageSize]);
 
+  // =========================================================
+  // SORT
+  // =========================================================
+
   function handleSort(field: EventSortField) {
     if (field === sortField) {
       setSortDirection((currentDirection) =>
@@ -184,6 +261,10 @@ export default function EventsPage() {
     setSortDirection("ascending");
   }
 
+  // =========================================================
+  // ADD EVENT
+  // =========================================================
+
   function openCreateModal() {
     if (!canManageEvents) {
       return;
@@ -194,12 +275,17 @@ export default function EventsPage() {
     setModalIsOpen(true);
   }
 
+  // =========================================================
+  // EDIT EVENT
+  // =========================================================
+
   function openEditModal(portfolioEvent: EventDto) {
     if (!canManageEvents) {
       return;
     }
 
     setSelectedEvent(portfolioEvent);
+
     setFormError(null);
     setModalIsOpen(true);
   }
@@ -236,13 +322,19 @@ export default function EventsPage() {
           ),
         );
 
-        showToast(`"${updatedEvent.description}" was updated.`, "success");
+        showToast(
+          `"${updatedEvent.description}" was updated and submitted for approval.`,
+          "success",
+        );
       } else {
         const newEvent = await createEvent(request);
 
         setEvents((currentEvents) => [...currentEvents, newEvent]);
 
-        showToast(`"${newEvent.description}" was added.`, "success");
+        showToast(
+          `"${newEvent.description}" was added and submitted for approval.`,
+          "success",
+        );
       }
 
       setModalIsOpen(false);
@@ -254,6 +346,10 @@ export default function EventsPage() {
     }
   }
 
+  // =========================================================
+  // APPROVAL
+  // =========================================================
+
   async function handleApproveEvent(portfolioEvent: EventDto) {
     try {
       const updatedEvent = await approveEvent(portfolioEvent.id);
@@ -263,6 +359,10 @@ export default function EventsPage() {
           event.id === updatedEvent.id ? updatedEvent : event,
         ),
       );
+
+      if (detailsEvent?.id === updatedEvent.id) {
+        setDetailsEvent(updatedEvent);
+      }
 
       showToast(`"${updatedEvent.description}" was approved.`, "success");
     } catch (error) {
@@ -280,11 +380,19 @@ export default function EventsPage() {
         ),
       );
 
+      if (detailsEvent?.id === updatedEvent.id) {
+        setDetailsEvent(updatedEvent);
+      }
+
       showToast(`"${updatedEvent.description}" was rejected.`, "success");
     } catch (error) {
       showToast(getApiErrorMessage(error), "error");
     }
   }
+
+  // =========================================================
+  // DELETE
+  // =========================================================
 
   function requestDelete(portfolioEvent: EventDto) {
     if (!canManageEvents) {
@@ -310,7 +418,12 @@ export default function EventsPage() {
         ),
       );
 
+      if (detailsEvent?.id === eventPendingDelete.id) {
+        setDetailsEvent(null);
+      }
+
       showToast(`"${eventPendingDelete.description}" was deleted.`, "success");
+
       setEventPendingDelete(null);
     } catch (error) {
       showToast(getApiErrorMessage(error), "error");
@@ -318,6 +431,120 @@ export default function EventsPage() {
       setIsDeleting(false);
     }
   }
+
+  // =========================================================
+  // EVENT DETAILS
+  // =========================================================
+
+  async function openEventDetails(portfolioEvent: EventDto) {
+    setDetailsEvent(portfolioEvent);
+
+    setEventRegistration(null);
+
+    setAttendees([]);
+
+    // Only approved events
+    // can actually have RSVP activity.
+    if (portfolioEvent.approvalStatus === "Approved") {
+      setIsRegistrationLoading(true);
+
+      try {
+        const registration = await getMyEventRegistration(portfolioEvent.id);
+
+        setEventRegistration(registration);
+      } catch (error) {
+        showToast(getApiErrorMessage(error), "error");
+      } finally {
+        setIsRegistrationLoading(false);
+      }
+    } else {
+      setIsRegistrationLoading(false);
+    }
+
+    if (canManageEvents) {
+      setAttendeesLoading(true);
+
+      try {
+        const records = await getEventRegistrations(portfolioEvent.id);
+
+        setAttendees(records);
+      } catch (error) {
+        showToast(getApiErrorMessage(error), "error");
+      } finally {
+        setAttendeesLoading(false);
+      }
+    }
+  }
+
+  function closeEventDetails() {
+    if (isRegistrationSaving) {
+      return;
+    }
+
+    setDetailsEvent(null);
+    setEventRegistration(null);
+    setAttendees([]);
+    setIsRegistrationLoading(false);
+    setAttendeesLoading(false);
+  }
+
+  // =========================================================
+  // RSVP
+  // =========================================================
+
+  async function handleRegisterForEvent(portfolioEvent: EventDto) {
+    setIsRegistrationSaving(true);
+
+    try {
+      const registration = await registerForEvent(portfolioEvent.id);
+
+      setEventRegistration(registration);
+
+      showToast(
+        `You are registered for "${portfolioEvent.description}".`,
+        "success",
+      );
+
+      if (canManageEvents) {
+        const records = await getEventRegistrations(portfolioEvent.id);
+
+        setAttendees(records);
+      }
+    } catch (error) {
+      showToast(getApiErrorMessage(error), "error");
+    } finally {
+      setIsRegistrationSaving(false);
+    }
+  }
+
+  async function handleCancelRegistration(portfolioEvent: EventDto) {
+    setIsRegistrationSaving(true);
+
+    try {
+      await cancelEventRegistration(portfolioEvent.id);
+
+      setEventRegistration(null);
+
+      showToast(
+        `Your registration for "${portfolioEvent.description}" was cancelled.`,
+        "success",
+      );
+
+      if (canManageEvents) {
+        const records = await getEventRegistrations(portfolioEvent.id);
+
+        setAttendees(records);
+      }
+    } catch (error) {
+      showToast(getApiErrorMessage(error), "error");
+    } finally {
+      setIsRegistrationSaving(false);
+    }
+  }
+
+  // =========================================================
+  // FILTER HELPERS
+  // =========================================================
 
   function resetFilters() {
     setSearch("");
@@ -328,8 +555,13 @@ export default function EventsPage() {
 
   function handlePageSizeChange(nextPageSize: number) {
     setPageSize(nextPageSize);
+
     setPage(1);
   }
+
+  // =========================================================
+  // RENDER
+  // =========================================================
 
   return (
     <section className="content-page events-page">
@@ -343,20 +575,6 @@ export default function EventsPage() {
         />
 
         <main className="events-workspace__content">
-          {/* <header className="page-header">
-            <div className="page-header__identity">
-              <div className="page-header__icon module-accent module-accent--gold">
-                <CalendarDays size={25} aria-hidden="true" />
-              </div>
-
-              <div>
-                <p className="page-header__eyebrow">Portfolio management</p>
-                <h1>Events Portfolio</h1>
-                <p>All vendors · FY2026 · CAD</p>
-              </div>
-            </div>
-          </header> */}
-
           {isLoading && (
             <div className="page-state" aria-live="polite">
               <RefreshCw
@@ -366,6 +584,7 @@ export default function EventsPage() {
               />
 
               <h2>Loading events</h2>
+
               <p>Retrieving the current portfolio from the API...</p>
             </div>
           )}
@@ -373,7 +592,9 @@ export default function EventsPage() {
           {!isLoading && loadError && (
             <div className="page-state page-state--error" role="alert">
               <AlertCircle size={31} aria-hidden="true" />
+
               <h2>Unable to load events</h2>
+
               <p>{loadError}</p>
 
               <button
@@ -393,10 +614,15 @@ export default function EventsPage() {
                 <div className="events-dashboard__section">
                   <SectionHeading title="Calendar & Overview" />
 
-                  <EventCalendar events={events} onEventClick={openEditModal} />
+                  <EventCalendar
+                    events={events}
+                    onEventClick={openEventDetails}
+                  />
 
                   <EventStats events={events} />
+
                   <EventPortfolioCharts events={events} />
+
                   <EventHighlights
                     events={events}
                     canManage={canManageEvents}
@@ -516,6 +742,36 @@ export default function EventsPage() {
           )}
         </main>
       </div>
+
+      {/* =====================================================
+          EVENT DETAILS / RSVP
+          Available to every authenticated user who can see
+          the event.
+         ===================================================== */}
+
+      <EventDetailsModal
+        event={detailsEvent}
+        isRegistered={eventRegistration?.isRegistered ?? false}
+        isRegistrationLoading={isRegistrationLoading}
+        isRegistrationSaving={isRegistrationSaving}
+        attendees={attendees}
+        attendeesLoading={attendeesLoading}
+        canManage={canManageEvents}
+        canViewAttendees={canManageEvents}
+        onClose={closeEventDetails}
+        onEdit={(portfolioEvent) => {
+          setDetailsEvent(null);
+
+          openEditModal(portfolioEvent);
+        }}
+        onRegister={handleRegisterForEvent}
+        onCancelRegistration={handleCancelRegistration}
+      />
+
+      {/* =====================================================
+          EVENT CREATE / EDIT
+         ===================================================== */}
+
       {canManageEvents && (
         <EventFormModal
           isOpen={modalIsOpen}
@@ -527,6 +783,11 @@ export default function EventsPage() {
           onSubmit={handleFormSubmit}
         />
       )}
+
+      {/* =====================================================
+          EVENT DELETE
+         ===================================================== */}
+
       {canManageEvents && (
         <ConfirmDialog
           isOpen={eventPendingDelete !== null}

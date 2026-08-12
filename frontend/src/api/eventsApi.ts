@@ -1,6 +1,12 @@
 import axios from "axios";
 
-import type { EventDto, EventRequest, VendorDto } from "../types/events";
+import type {
+  EventAttendeeDto,
+  EventDto,
+  EventRegistrationDto,
+  EventRequest,
+  VendorDto,
+} from "../types/events";
 
 import { httpClient } from "./httpClient";
 
@@ -51,10 +57,53 @@ export async function rejectEvent(id: string): Promise<EventDto> {
   return response.data;
 }
 
+export async function registerForEvent(
+  id: string,
+): Promise<EventRegistrationDto> {
+  const response = await httpClient.post<EventRegistrationDto>(
+    `/api/events/${id}/register`,
+  );
+
+  return response.data;
+}
+
+export async function cancelEventRegistration(id: string): Promise<void> {
+  await httpClient.delete(`/api/events/${id}/register`);
+}
+
+export async function getMyEventRegistration(
+  id: string,
+): Promise<EventRegistrationDto | null> {
+  try {
+    const response = await httpClient.get<EventRegistrationDto>(
+      `/api/events/${id}/registration`,
+    );
+
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      return null;
+    }
+
+    throw error;
+  }
+}
+
+export async function getEventRegistrations(
+  id: string,
+): Promise<EventAttendeeDto[]> {
+  const response = await httpClient.get<EventAttendeeDto[]>(
+    `/api/events/${id}/registrations`,
+  );
+
+  return response.data;
+}
+
 interface ProblemDetails {
   message?: string;
   title?: string;
   detail?: string;
+
   errors?: Record<string, string[]>;
 }
 
