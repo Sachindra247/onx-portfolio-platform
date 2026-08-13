@@ -987,6 +987,112 @@ public async Task<
     return Ok(attendees);
 }
 
+// =========================================================
+// MY REGISTERED EVENTS
+// Returns active event registrations for the signed-in user.
+// =========================================================
+
+[HttpGet("my-registrations")]
+[ProducesResponseType(
+    typeof(IReadOnlyList<EventDto>),
+    StatusCodes.Status200OK)]
+[ProducesResponseType(
+    StatusCodes.Status401Unauthorized)]
+public async Task<ActionResult<IReadOnlyList<EventDto>>>
+    GetMyRegisteredEvents(
+        CancellationToken cancellationToken)
+{
+    var currentUser =
+        await _currentUserService.GetUserAsync(
+            cancellationToken);
+
+    if (currentUser is null)
+    {
+        return Unauthorized();
+    }
+
+    var events =
+        await _dbContext.EventRegistrations
+            .AsNoTracking()
+            .Where(registration =>
+                registration.UserId ==
+                    currentUser.Id &&
+                registration.Status ==
+                    EventRegistrationStatus.Registered &&
+                registration.Event.ApprovalStatus ==
+                    EventApprovalStatus.Approved)
+            .OrderBy(registration =>
+                registration.Event.EventDate == null)
+            .ThenBy(registration =>
+                registration.Event.EventDate)
+            .Select(registration =>
+                new EventDto
+                {
+                    Id =
+                        registration.Event.Id,
+
+                    Description =
+                        registration.Event.Description,
+
+                    EventDate =
+                        registration.Event.EventDate,
+
+                    Stage =
+                        registration.Event.Stage,
+
+                    BudgetCad =
+                        registration.Event.BudgetCad,
+
+                    Notes =
+                        registration.Event.Notes,
+
+                    VendorId =
+                        registration.Event.VendorId,
+
+                    VendorName =
+                        registration.Event.Vendor.Name,
+
+                    ApprovalStatus =
+                        registration.Event.ApprovalStatus,
+
+                    SubmittedByUserId =
+                        registration.Event.SubmittedByUserId,
+
+                    SubmittedByUserName =
+                        registration.Event.SubmittedByUser == null
+                            ? null
+                            : registration.Event.SubmittedByUser.FirstName +
+                              " " +
+                              registration.Event.SubmittedByUser.LastName,
+
+                    ReviewedByUserId =
+                        registration.Event.ReviewedByUserId,
+
+                    ReviewedByUserName =
+                        registration.Event.ReviewedByUser == null
+                            ? null
+                            : registration.Event.ReviewedByUser.FirstName +
+                              " " +
+                              registration.Event.ReviewedByUser.LastName,
+
+                    ReviewedAtUtc =
+                        registration.Event.ReviewedAtUtc,
+
+                    ReviewNotes =
+                        registration.Event.ReviewNotes,
+
+                    CreatedAtUtc =
+                        registration.Event.CreatedAtUtc,
+
+                    UpdatedAtUtc =
+                        registration.Event.UpdatedAtUtc
+                })
+            .ToListAsync(
+                cancellationToken);
+
+    return Ok(events);
+}
+
     // =========================================================
     // AUTHORIZATION
     // =========================================================

@@ -107,6 +107,19 @@ interface ProblemDetails {
   errors?: Record<string, string[]>;
 }
 
+export async function getMyRegisteredEvents(
+  signal?: AbortSignal,
+): Promise<EventDto[]> {
+  const response = await httpClient.get<EventDto[]>(
+    "/api/events/my-registrations",
+    {
+      signal,
+    },
+  );
+
+  return response.data;
+}
+
 export function getApiErrorMessage(error: unknown): string {
   if (!axios.isAxiosError(error)) {
     return "An unexpected error occurred.";
