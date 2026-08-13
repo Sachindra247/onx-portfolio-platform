@@ -33,12 +33,11 @@ interface EventTableProps {
   canManage: boolean;
   canReview: boolean;
 
+  onView: (event: EventDto) => void;
   onEdit: (event: EventDto) => void;
-
   onDelete: (event: EventDto) => void;
 
   onApprove: (event: EventDto) => Promise<void>;
-
   onReject: (event: EventDto) => Promise<void>;
 }
 
@@ -86,6 +85,7 @@ export default function EventTable({
   onSort,
   canManage,
   canReview,
+  onView,
   onEdit,
   onDelete,
   onApprove,
@@ -207,9 +207,13 @@ export default function EventTable({
                 </td>
 
                 <td>
-                  <span className="event-description">
+                  <button
+                    type="button"
+                    className="event-description event-description--link"
+                    onClick={() => onView(portfolioEvent)}
+                  >
                     {portfolioEvent.description}
-                  </span>
+                  </button>
                 </td>
 
                 <td className="event-table__date">
@@ -231,7 +235,7 @@ export default function EventTable({
                   <span
                     className={[
                       "event-approval-badge",
-                      `event-approval-badge--${portfolioEvent.approvalStatus.toLocaleLowerCase()}`,
+                      `event-approval-badge--${portfolioEvent.approvalStatus.toLowerCase()}`,
                     ].join(" ")}
                   >
                     {portfolioEvent.approvalStatus}
@@ -268,6 +272,16 @@ export default function EventTable({
 
                       {menuIsOpen && (
                         <div className="row-menu__popover">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setOpenMenuId(null);
+                              onView(portfolioEvent);
+                            }}
+                          >
+                            View details
+                          </button>
+
                           {canReview &&
                             portfolioEvent.approvalStatus === "Pending" && (
                               <>

@@ -12,14 +12,13 @@ import {
 
 interface EventHighlightsProps {
   events: EventDto[];
-  canManage: boolean;
-  onEdit: (event: EventDto) => void;
+
+  onView: (event: EventDto) => void;
 }
 
 export default function EventHighlights({
   events,
-  canManage,
-  onEdit,
+  onView,
 }: EventHighlightsProps) {
   const upcomingEvents = getUpcomingEvents(events);
 
@@ -33,8 +32,7 @@ export default function EventHighlights({
         icon={<CalendarClock size={18} aria-hidden="true" />}
         events={upcomingEvents}
         emptyMessage="No upcoming events are currently scheduled."
-        canManage={canManage}
-        onEdit={onEdit}
+        onView={onView}
       />
 
       <HighlightCard
@@ -43,8 +41,7 @@ export default function EventHighlights({
         icon={<CheckCircle2 size={18} aria-hidden="true" />}
         events={completedEvents}
         emptyMessage="No completed events are available."
-        canManage={canManage}
-        onEdit={onEdit}
+        onView={onView}
       />
     </section>
   );
@@ -56,9 +53,8 @@ interface HighlightCardProps {
   icon: ReactNode;
   events: EventDto[];
   emptyMessage: string;
-  canManage: boolean;
 
-  onEdit: (event: EventDto) => void;
+  onView: (event: EventDto) => void;
 }
 
 function HighlightCard({
@@ -67,8 +63,7 @@ function HighlightCard({
   icon,
   events,
   emptyMessage,
-  canManage,
-  onEdit,
+  onView,
 }: HighlightCardProps) {
   return (
     <article className="event-highlight-card">
@@ -77,6 +72,7 @@ function HighlightCard({
 
         <div>
           <h2>{title}</h2>
+
           <p>{subtitle}</p>
         </div>
       </header>
@@ -85,25 +81,16 @@ function HighlightCard({
         <p className="event-highlight-card__empty">{emptyMessage}</p>
       ) : (
         <div className="event-highlight-list">
-          {events.map((event) =>
-            canManage ? (
-              <button
-                type="button"
-                className="event-highlight-item"
-                key={event.id}
-                onClick={() => onEdit(event)}
-              >
-                <HighlightContent event={event} />
-              </button>
-            ) : (
-              <div
-                className="event-highlight-item event-highlight-item--readonly"
-                key={event.id}
-              >
-                <HighlightContent event={event} />
-              </div>
-            ),
-          )}
+          {events.map((event) => (
+            <button
+              type="button"
+              className="event-highlight-item"
+              key={event.id}
+              onClick={() => onView(event)}
+            >
+              <HighlightContent event={event} />
+            </button>
+          ))}
         </div>
       )}
     </article>

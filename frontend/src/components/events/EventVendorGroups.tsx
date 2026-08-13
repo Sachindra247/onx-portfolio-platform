@@ -16,12 +16,15 @@ interface EventVendorGroupsProps {
 
   canManage: boolean;
 
+  onView: (event: EventDto) => void;
+
   onEdit: (event: EventDto) => void;
 }
 
 export default function EventVendorGroups({
   events,
   canManage,
+  onView,
   onEdit,
 }: EventVendorGroupsProps) {
   const vendorGroups = groupEventsByVendor(events);
@@ -68,11 +71,15 @@ export default function EventVendorGroups({
             <div className="vendor-group__events">
               {vendorEvents.map((event) => (
                 <article className="vendor-group-event" key={event.id}>
-                  <div className="vendor-group-event__main">
+                  <button
+                    type="button"
+                    className="vendor-group-event__main vendor-group-event__main--button"
+                    onClick={() => onView(event)}
+                  >
                     <strong>{event.description}</strong>
 
                     <span>{formatEventDate(event.eventDate)}</span>
-                  </div>
+                  </button>
 
                   <span
                     className={[

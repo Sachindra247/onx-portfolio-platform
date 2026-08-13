@@ -623,11 +623,7 @@ export default function EventsPage() {
 
                   <EventPortfolioCharts events={events} />
 
-                  <EventHighlights
-                    events={events}
-                    canManage={canManageEvents}
-                    onEdit={openEditModal}
-                  />
+                  <EventHighlights events={events} onView={openEventDetails} />
                 </div>
               )}
 
@@ -660,6 +656,7 @@ export default function EventsPage() {
                           onSort={handleSort}
                           canManage={canManageEvents}
                           canReview={canReviewEvents}
+                          onView={openEventDetails}
                           onApprove={handleApproveEvent}
                           onReject={handleRejectEvent}
                           onEdit={openEditModal}
@@ -678,6 +675,7 @@ export default function EventsPage() {
                       <EventVendorGroups
                         events={filteredAndSortedEvents}
                         canManage={canManageEvents}
+                        onView={openEventDetails}
                         onEdit={openEditModal}
                       />
                     )}
@@ -692,6 +690,7 @@ export default function EventsPage() {
                   <EventVendorGroups
                     events={events}
                     canManage={canManageEvents}
+                    onView={openEventDetails}
                     onEdit={openEditModal}
                   />
                 </div>
@@ -709,6 +708,7 @@ export default function EventsPage() {
                       onSort={handleSort}
                       canManage={canManageEvents}
                       canReview={canReviewEvents}
+                      onView={openEventDetails}
                       onApprove={handleApproveEvent}
                       onReject={handleRejectEvent}
                       onEdit={openEditModal}
@@ -730,6 +730,7 @@ export default function EventsPage() {
                       onSort={handleSort}
                       canManage={canManageEvents}
                       canReview={canReviewEvents}
+                      onView={openEventDetails}
                       onApprove={handleApproveEvent}
                       onReject={handleRejectEvent}
                       onEdit={openEditModal}
