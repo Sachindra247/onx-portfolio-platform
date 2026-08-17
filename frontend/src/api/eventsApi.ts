@@ -154,3 +154,11 @@ export function getApiErrorMessage(error: unknown): string {
     `The server returned status ${error.response.status}.`
   );
 }
+
+export async function createVendor(name: string): Promise<VendorDto> {
+  const response = await httpClient.post<VendorDto>("/api/vendors", {
+    name,
+  });
+
+  return response.data;
+}

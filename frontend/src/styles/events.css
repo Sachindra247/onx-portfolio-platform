@@ -1506,3 +1506,30 @@
         grid-column: 1 / -1;
     }
 }
+
+.event-form__add-vendor {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    gap: 5px;
+    margin-top: 7px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--color-teal-700);
+    font: inherit;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.event-form__add-vendor:hover {
+    text-decoration: underline;
+}
+
+.event-vendor-creator {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+    margin-top: 9px;
+}

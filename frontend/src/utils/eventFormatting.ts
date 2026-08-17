@@ -59,6 +59,8 @@ export function createEmptyEventForm(): EventFormValues {
     description: "",
     eventDate: "",
     stage: "Exploring",
+    venue: "",
+    businessPurpose: "",
     budgetCad: "",
     notes: "",
     vendorId: "",
@@ -68,10 +70,19 @@ export function createEmptyEventForm(): EventFormValues {
 export function mapFormToRequest(values: EventFormValues): EventRequest {
   return {
     description: values.description.trim(),
+
     eventDate: values.eventDate || null,
+
     stage: values.stage,
+
+    venue: values.venue.trim() || null,
+
+    businessPurpose: values.businessPurpose.trim(),
+
     budgetCad: Number(values.budgetCad),
+
     notes: values.notes.trim() || null,
+
     vendorId: values.vendorId,
   };
 }

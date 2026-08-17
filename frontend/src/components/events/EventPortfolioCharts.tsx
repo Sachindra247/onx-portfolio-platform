@@ -23,10 +23,12 @@ ChartJS.register(
 
 interface EventPortfolioChartsProps {
   events: EventDto[];
+  canManage: boolean;
 }
 
 export default function EventPortfolioCharts({
   events,
+  canManage,
 }: EventPortfolioChartsProps) {
   const stageSummary = getStageSummary(events);
   const vendorSummary = getVendorSummary(events).slice(0, 6);
@@ -91,63 +93,64 @@ export default function EventPortfolioCharts({
           />
         </div>
       </article>
+      {canManage && (
+        <article className="event-chart-card">
+          <header>
+            <div>
+              <h2>Budget by vendor</h2>
+              <p>Top six vendors by portfolio budget</p>
+            </div>
+          </header>
 
-      <article className="event-chart-card">
-        <header>
-          <div>
-            <h2>Budget by vendor</h2>
-            <p>Top six vendors by portfolio budget</p>
-          </div>
-        </header>
-
-        <div className="event-chart-card__canvas">
-          <Bar
-            data={vendorChartData}
-            options={{
-              responsive: true,
-              maintainAspectRatio: false,
-              indexAxis: "y",
-              plugins: {
-                legend: {
-                  display: false,
-                },
-                tooltip: {
-                  callbacks: {
-                    label(context) {
-                      const value =
-                        typeof context.raw === "number" ? context.raw : 0;
-
-                      return new Intl.NumberFormat("en-CA", {
-                        style: "currency",
-                        currency: "CAD",
-                        maximumFractionDigits: 0,
-                      }).format(value);
-                    },
-                  },
-                },
-              },
-              scales: {
-                x: {
-                  beginAtZero: true,
-                  ticks: {
-                    callback(value) {
-                      return new Intl.NumberFormat("en-CA", {
-                        notation: "compact",
-                        compactDisplay: "short",
-                      }).format(Number(value));
-                    },
-                  },
-                },
-                y: {
-                  grid: {
+          <div className="event-chart-card__canvas">
+            <Bar
+              data={vendorChartData}
+              options={{
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: "y",
+                plugins: {
+                  legend: {
                     display: false,
                   },
+                  tooltip: {
+                    callbacks: {
+                      label(context) {
+                        const value =
+                          typeof context.raw === "number" ? context.raw : 0;
+
+                        return new Intl.NumberFormat("en-CA", {
+                          style: "currency",
+                          currency: "CAD",
+                          maximumFractionDigits: 0,
+                        }).format(value);
+                      },
+                    },
+                  },
                 },
-              },
-            }}
-          />
-        </div>
-      </article>
+                scales: {
+                  x: {
+                    beginAtZero: true,
+                    ticks: {
+                      callback(value) {
+                        return new Intl.NumberFormat("en-CA", {
+                          notation: "compact",
+                          compactDisplay: "short",
+                        }).format(Number(value));
+                      },
+                    },
+                  },
+                  y: {
+                    grid: {
+                      display: false,
+                    },
+                  },
+                },
+              }}
+            />
+          </div>
+        </article>
+      )}
     </section>
   );
 }

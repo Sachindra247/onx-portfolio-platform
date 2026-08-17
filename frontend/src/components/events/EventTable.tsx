@@ -172,15 +172,17 @@ export default function EventTable({
 
             <th>Approval</th>
 
-            <th className="event-table__budget-header">
-              <SortButton
-                field="budgetCad"
-                label="Budget"
-                currentField={sortField}
-                direction={sortDirection}
-                onSort={onSort}
-              />
-            </th>
+            {canManage && (
+              <th className="event-table__budget-header">
+                <SortButton
+                  field="budgetCad"
+                  label="Budget"
+                  currentField={sortField}
+                  direction={sortDirection}
+                  onSort={onSort}
+                />
+              </th>
+            )}
 
             <th>Notes</th>
 
@@ -242,9 +244,11 @@ export default function EventTable({
                   </span>
                 </td>
 
-                <td className="event-table__budget">
-                  {formatBudget(portfolioEvent.budgetCad)}
-                </td>
+                {canManage && (
+                  <td className="event-table__budget">
+                    {formatBudget(portfolioEvent.budgetCad)}
+                  </td>
+                )}
 
                 <td>
                   <span

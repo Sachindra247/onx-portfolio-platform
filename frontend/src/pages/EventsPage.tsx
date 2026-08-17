@@ -14,6 +14,7 @@ import {
   registerForEvent,
   rejectEvent,
   updateEvent,
+  createVendor,
 } from "../api/eventsApi";
 
 import { useAuth } from "../auth/AuthContext";
@@ -542,6 +543,28 @@ export default function EventsPage() {
     }
   }
 
+  async function handleCreateVendor(name: string): Promise<VendorDto> {
+    try {
+      const vendor = await createVendor(name);
+
+      setVendors((currentVendors) =>
+        [...currentVendors, vendor].sort((a, b) =>
+          a.name.localeCompare(b.name),
+        ),
+      );
+
+      showToast(`"${vendor.name}" was added to the vendor list.`, "success");
+
+      return vendor;
+    } catch (error) {
+      const message = getApiErrorMessage(error);
+
+      showToast(message, "error");
+
+      throw new Error(message);
+    }
+  }
+
   // =========================================================
   // FILTER HELPERS
   // =========================================================
@@ -619,9 +642,12 @@ export default function EventsPage() {
                     onEventClick={openEventDetails}
                   />
 
-                  <EventStats events={events} />
+                  <EventStats events={events} canManage={canManageEvents} />
 
-                  <EventPortfolioCharts events={events} />
+                  <EventPortfolioCharts
+                    events={events}
+                    canManage={canManageEvents}
+                  />
 
                   <EventHighlights events={events} onView={openEventDetails} />
                 </div>
@@ -782,6 +808,7 @@ export default function EventsPage() {
           serverError={formError}
           onClose={closeModal}
           onSubmit={handleFormSubmit}
+          onCreateVendor={handleCreateVendor}
         />
       )}
 

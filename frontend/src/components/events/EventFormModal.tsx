@@ -1,11 +1,13 @@
-import { X } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
+
 import {
   eventStages,
   type EventDto,
   type EventFormValues,
   type VendorDto,
 } from "../../types/events";
+
 import {
   createEmptyEventForm,
   formatEventStage,
@@ -15,15 +17,20 @@ interface EventFormModalProps {
   isOpen: boolean;
   event: EventDto | null;
   vendors: VendorDto[];
+
   isSaving: boolean;
   serverError: string | null;
+
   onClose: () => void;
+
   onSubmit: (values: EventFormValues) => Promise<void>;
+
+  onCreateVendor: (name: string) => Promise<VendorDto>;
 }
 
 interface FormErrors {
   description?: string;
-  eventDate?: string;
+  businessPurpose?: string;
   budgetCad?: string;
   vendorId?: string;
 }
@@ -31,10 +38,19 @@ interface FormErrors {
 function mapEventToForm(event: EventDto): EventFormValues {
   return {
     description: event.description,
+
     eventDate: event.eventDate ?? "",
+
     stage: event.stage,
+
+    venue: event.venue ?? "",
+
+    businessPurpose: event.businessPurpose ?? "",
+
     budgetCad: event.budgetCad.toString(),
+
     notes: event.notes ?? "",
+
     vendorId: event.vendorId,
   };
 }
@@ -47,10 +63,21 @@ export default function EventFormModal({
   serverError,
   onClose,
   onSubmit,
+  onCreateVendor,
 }: EventFormModalProps) {
   const [values, setValues] = useState<EventFormValues>(createEmptyEventForm);
 
   const [errors, setErrors] = useState<FormErrors>({});
+
+  const [showVendorCreator, setShowVendorCreator] = useState(false);
+
+  const [newVendorName, setNewVendorName] = useState("");
+
+  const [isCreatingVendor, setIsCreatingVendor] = useState(false);
+
+  const [vendorCreationError, setVendorCreationError] = useState<string | null>(
+    null,
+  );
 
   useEffect(() => {
     if (!isOpen) {
@@ -67,6 +94,9 @@ export default function EventFormModal({
     );
 
     setErrors({});
+    setShowVendorCreator(false);
+    setNewVendorName("");
+    setVendorCreationError(null);
   }, [event, isOpen, vendors]);
 
   useEffect(() => {
@@ -75,19 +105,21 @@ export default function EventFormModal({
     }
 
     function handleKeyDown(keyboardEvent: KeyboardEvent) {
-      if (keyboardEvent.key === "Escape" && !isSaving) {
+      if (keyboardEvent.key === "Escape" && !isSaving && !isCreatingVendor) {
         onClose();
       }
     }
 
     document.addEventListener("keydown", handleKeyDown);
+
     document.body.style.overflow = "hidden";
 
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
+
       document.body.style.overflow = "";
     };
-  }, [isOpen, isSaving, onClose]);
+  }, [isOpen, isSaving, isCreatingVendor, onClose]);
 
   if (!isOpen) {
     return null;
@@ -110,6 +142,7 @@ export default function EventFormModal({
 
   function validateForm(): boolean {
     const nextErrors: FormErrors = {};
+
     const parsedBudget = Number(values.budgetCad);
 
     if (values.description.trim().length < 2) {
@@ -119,6 +152,11 @@ export default function EventFormModal({
 
     if (!values.vendorId) {
       nextErrors.vendorId = "Select a vendor.";
+    }
+
+    if (values.businessPurpose.trim().length < 2) {
+      nextErrors.businessPurpose =
+        "Enter the business purpose or objective for this event.";
     }
 
     if (
@@ -145,12 +183,45 @@ export default function EventFormModal({
     await onSubmit(values);
   }
 
+  async function handleCreateVendor() {
+    const name = newVendorName.trim();
+
+    if (name.length < 2) {
+      setVendorCreationError("Enter a vendor name.");
+
+      return;
+    }
+
+    setIsCreatingVendor(true);
+
+    setVendorCreationError(null);
+
+    try {
+      const createdVendor = await onCreateVendor(name);
+
+      updateField("vendorId", createdVendor.id);
+
+      setNewVendorName("");
+      setShowVendorCreator(false);
+    } catch (error) {
+      setVendorCreationError(
+        error instanceof Error ? error.message : "Unable to create the vendor.",
+      );
+    } finally {
+      setIsCreatingVendor(false);
+    }
+  }
+
   return (
     <div
       className="modal-backdrop"
       role="presentation"
       onMouseDown={(mouseEvent) => {
-        if (mouseEvent.target === mouseEvent.currentTarget && !isSaving) {
+        if (
+          mouseEvent.target === mouseEvent.currentTarget &&
+          !isSaving &&
+          !isCreatingVendor
+        ) {
           onClose();
         }
       }}
@@ -172,7 +243,7 @@ export default function EventFormModal({
             className="event-modal__close"
             type="button"
             aria-label="Close event form"
-            disabled={isSaving}
+            disabled={isSaving || isCreatingVendor}
             onClick={onClose}
           >
             <X size={19} aria-hidden="true" />
@@ -197,8 +268,8 @@ export default function EventFormModal({
               placeholder="Example: Cisco Partner Technology Summit"
               aria-invalid={Boolean(errors.description)}
               autoFocus
-              onChange={(inputEvent) =>
-                updateField("description", inputEvent.target.value)
+              onChange={(event) =>
+                updateField("description", event.target.value)
               }
             />
 
@@ -215,8 +286,8 @@ export default function EventFormModal({
                 id="event-vendor"
                 value={values.vendorId}
                 aria-invalid={Boolean(errors.vendorId)}
-                onChange={(selectEvent) =>
-                  updateField("vendorId", selectEvent.target.value)
+                onChange={(event) =>
+                  updateField("vendorId", event.target.value)
                 }
               >
                 <option value="">Select a vendor</option>
@@ -227,6 +298,41 @@ export default function EventFormModal({
                   </option>
                 ))}
               </select>
+
+              <button
+                className="event-form__add-vendor"
+                type="button"
+                onClick={() => setShowVendorCreator((current) => !current)}
+              >
+                <Plus size={14} aria-hidden="true" />
+                Add new vendor
+              </button>
+
+              {showVendorCreator && (
+                <div className="event-vendor-creator">
+                  <input
+                    type="text"
+                    maxLength={200}
+                    value={newVendorName}
+                    placeholder="Vendor name"
+                    disabled={isCreatingVendor}
+                    onChange={(event) => setNewVendorName(event.target.value)}
+                  />
+
+                  <button
+                    type="button"
+                    className="secondary-button"
+                    disabled={isCreatingVendor}
+                    onClick={() => void handleCreateVendor()}
+                  >
+                    {isCreatingVendor ? "Adding..." : "Add"}
+                  </button>
+                </div>
+              )}
+
+              {vendorCreationError && (
+                <span className="form-field__error">{vendorCreationError}</span>
+              )}
 
               {errors.vendorId && (
                 <span className="form-field__error">{errors.vendorId}</span>
@@ -239,10 +345,10 @@ export default function EventFormModal({
               <select
                 id="event-stage"
                 value={values.stage}
-                onChange={(selectEvent) =>
+                onChange={(event) =>
                   updateField(
                     "stage",
-                    selectEvent.target.value as EventFormValues["stage"],
+                    event.target.value as EventFormValues["stage"],
                   )
                 }
               >
@@ -261,9 +367,22 @@ export default function EventFormModal({
                 id="event-date"
                 type="date"
                 value={values.eventDate}
-                onChange={(inputEvent) =>
-                  updateField("eventDate", inputEvent.target.value)
+                onChange={(event) =>
+                  updateField("eventDate", event.target.value)
                 }
+              />
+            </div>
+
+            <div className="form-field">
+              <label htmlFor="event-venue">Venue</label>
+
+              <input
+                id="event-venue"
+                type="text"
+                maxLength={300}
+                value={values.venue}
+                placeholder="Example: Toronto Congress Centre"
+                onChange={(event) => updateField("venue", event.target.value)}
               />
             </div>
 
@@ -279,8 +398,8 @@ export default function EventFormModal({
                 value={values.budgetCad}
                 placeholder="0.00"
                 aria-invalid={Boolean(errors.budgetCad)}
-                onChange={(inputEvent) =>
-                  updateField("budgetCad", inputEvent.target.value)
+                onChange={(event) =>
+                  updateField("budgetCad", event.target.value)
                 }
               />
 
@@ -291,6 +410,34 @@ export default function EventFormModal({
           </div>
 
           <div className="form-field form-field--full">
+            <label htmlFor="event-business-purpose">
+              Business purpose / Event objective
+            </label>
+
+            <textarea
+              id="event-business-purpose"
+              maxLength={2000}
+              rows={4}
+              value={values.businessPurpose}
+              placeholder="Describe why the event is being planned and the intended business outcome..."
+              aria-invalid={Boolean(errors.businessPurpose)}
+              onChange={(event) =>
+                updateField("businessPurpose", event.target.value)
+              }
+            />
+
+            {errors.businessPurpose && (
+              <span className="form-field__error">
+                {errors.businessPurpose}
+              </span>
+            )}
+
+            <span className="form-field__hint">
+              {values.businessPurpose.length} / 2000
+            </span>
+          </div>
+
+          <div className="form-field form-field--full">
             <label htmlFor="event-notes">Notes</label>
 
             <textarea
@@ -298,10 +445,8 @@ export default function EventFormModal({
               maxLength={4000}
               rows={5}
               value={values.notes}
-              placeholder="Add planning details, venue information or other notes..."
-              onChange={(inputEvent) =>
-                updateField("notes", inputEvent.target.value)
-              }
+              placeholder="Add planning details or other notes..."
+              onChange={(event) => updateField("notes", event.target.value)}
             />
 
             <span className="form-field__hint">
@@ -313,7 +458,7 @@ export default function EventFormModal({
             <button
               className="secondary-button"
               type="button"
-              disabled={isSaving}
+              disabled={isSaving || isCreatingVendor}
               onClick={onClose}
             >
               Cancel
@@ -322,7 +467,7 @@ export default function EventFormModal({
             <button
               className="primary-button"
               type="submit"
-              disabled={isSaving}
+              disabled={isSaving || isCreatingVendor}
             >
               {isSaving ? "Saving..." : event ? "Save changes" : "Add event"}
             </button>

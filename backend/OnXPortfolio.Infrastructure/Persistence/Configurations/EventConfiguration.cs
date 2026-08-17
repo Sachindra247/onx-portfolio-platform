@@ -33,13 +33,21 @@ public sealed class EventConfiguration :
             .IsRequired();
 
         builder.Property(eventRecord =>
+                eventRecord.Venue)
+            .HasMaxLength(300);
+
+        builder.Property(eventRecord =>
+                eventRecord.BusinessPurpose)
+            .HasMaxLength(2000);
+
+        builder.Property(eventRecord =>
                 eventRecord.BudgetCad)
             .HasPrecision(18, 2)
             .IsRequired();
 
         builder.Property(eventRecord =>
                 eventRecord.Notes)
-            .HasMaxLength(2000);
+            .HasMaxLength(4000);
 
         builder.Property(eventRecord =>
                 eventRecord.ReviewNotes)

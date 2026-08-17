@@ -65,7 +65,7 @@ export default function EventVendorGroups({
                 </div>
               </div>
 
-              <strong>{formatBudget(totalBudget)}</strong>
+              {canManage && <strong>{formatBudget(totalBudget)}</strong>}
             </header>
 
             <div className="vendor-group__events">
@@ -90,9 +90,11 @@ export default function EventVendorGroups({
                     {formatEventStage(event.stage)}
                   </span>
 
-                  <span className="vendor-group-event__budget">
-                    {formatBudget(event.budgetCad)}
-                  </span>
+                  {canManage && (
+                    <span className="vendor-group-event__budget">
+                      {formatBudget(event.budgetCad)}
+                    </span>
+                  )}
 
                   {canManage && (
                     <button

@@ -21,7 +21,16 @@ export interface EventDto {
   description: string;
   eventDate: string | null;
   stage: EventStage;
+
+  venue: string | null;
+
+  /*
+   * These are null for users who do not have
+   * Events management access.
+   */
+  businessPurpose: string | null;
   budgetCad: number;
+
   notes: string | null;
 
   vendorId: string;
@@ -73,6 +82,8 @@ export interface EventRequest {
   description: string;
   eventDate: string | null;
   stage: EventStage;
+  venue: string | null;
+  businessPurpose: string;
   budgetCad: number;
   notes: string | null;
   vendorId: string;
@@ -82,6 +93,8 @@ export interface EventFormValues {
   description: string;
   eventDate: string;
   stage: EventStage;
+  venue: string;
+  businessPurpose: string;
   budgetCad: string;
   notes: string;
   vendorId: string;

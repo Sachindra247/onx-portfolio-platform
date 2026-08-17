@@ -13,6 +13,10 @@ public sealed class EventDto
 
     public EventStage Stage { get; init; }
 
+    public string? Venue { get; init; }
+
+    public string? BusinessPurpose { get; init; }
+
     public decimal BudgetCad { get; init; }
 
     public string? Notes { get; init; }

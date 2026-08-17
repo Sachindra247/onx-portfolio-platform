@@ -1,6 +1,7 @@
 import {
   CalendarDays,
   CheckCircle2,
+  MapPin,
   Pencil,
   UserCheck,
   Users,
@@ -112,13 +113,30 @@ export default function EventDetailsModal({
 
               <strong>{formatEventDate(event.eventDate)}</strong>
             </div>
-
             <div>
-              <span>Budget</span>
+              <MapPin size={17} aria-hidden="true" />
 
-              <strong>{formatBudget(event.budgetCad)}</strong>
+              <span>Venue</span>
+
+              <strong>{event.venue || "To be confirmed"}</strong>
             </div>
+
+            {canManage && (
+              <div>
+                <span>Budget</span>
+
+                <strong>{formatBudget(event.budgetCad)}</strong>
+              </div>
+            )}
           </div>
+
+          {canManage && event.businessPurpose && (
+            <div className="event-details-modal__notes">
+              <h3>Business purpose / Event objective</h3>
+
+              <p>{event.businessPurpose}</p>
+            </div>
+          )}
 
           {event.notes && (
             <div className="event-details-modal__notes">

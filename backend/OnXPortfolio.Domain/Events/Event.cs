@@ -14,6 +14,10 @@ public sealed class Event : AuditableEntity
     public EventStage Stage { get; set; } =
         EventStage.Planning;
 
+    public string? Venue { get; set; }
+
+    public string? BusinessPurpose { get; set; }
+
     public decimal BudgetCad { get; set; }
 
     public string? Notes { get; set; }

@@ -4,9 +4,10 @@ import { formatBudget } from "../../utils/eventFormatting";
 
 interface EventStatsProps {
   events: EventDto[];
+  canManage: boolean;
 }
 
-export default function EventStats({ events }: EventStatsProps) {
+export default function EventStats({ events, canManage }: EventStatsProps) {
   const totalBudget = events.reduce(
     (total, event) => total + event.budgetCad,
     0,
@@ -47,12 +48,19 @@ export default function EventStats({ events }: EventStatsProps) {
       detail: "Scheduled future events",
       icon: CalendarCheck2,
     },
-    {
-      label: "Total budget",
-      value: formatBudget(totalBudget),
-      detail: `${completedEvents} completed`,
-      icon: CircleDollarSign,
-    },
+    canManage
+      ? {
+          label: "Total budget",
+          value: formatBudget(totalBudget),
+          detail: `${completedEvents} completed`,
+          icon: CircleDollarSign,
+        }
+      : {
+          label: "Completed",
+          value: completedEvents.toString(),
+          detail: "Completed portfolio events",
+          icon: CalendarCheck2,
+        },
   ];
 
   return (
