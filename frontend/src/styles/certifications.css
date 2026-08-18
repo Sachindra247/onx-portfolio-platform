@@ -3606,6 +3606,157 @@
     font-size: 0.75rem;
 }
 
+/* =========================================================
+   CERTIFICATIONS - ARCHIVED TOGGLE
+   ========================================================= */
+
+.certification-table-card__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.certification-table-card__header>div:first-child {
+    min-width: 0;
+}
+
+.certification-table-card__header h2 {
+    margin: 0;
+}
+
+.certification-table-card__header p {
+    margin: 5px 0 0;
+
+    color: var(--color-muted);
+    font-size: 0.78rem;
+    line-height: 1.4;
+}
+
+/* Toggle container */
+
+.certification-archived-toggle {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+
+    cursor: pointer;
+
+    user-select: none;
+}
+
+/* Hide native checkbox */
+
+.certification-archived-toggle input {
+    position: absolute;
+
+    width: 1px;
+    height: 1px;
+
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Visible toggle */
+
+.certification-archived-toggle__content {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+
+    min-height: 34px;
+
+    padding: 7px 12px;
+
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+
+    background: var(--color-surface);
+
+    color: var(--color-muted);
+
+    font-size: 0.76rem;
+    font-weight: 700;
+    line-height: 1;
+
+    transition:
+        background-color 0.15s ease,
+        border-color 0.15s ease,
+        color 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+.certification-archived-toggle:hover .certification-archived-toggle__content {
+    border-color: var(--color-teal-700);
+
+    color: var(--color-teal-700);
+
+    background: rgb(0 107 85 / 4%);
+}
+
+/* Selected state */
+
+.certification-archived-toggle input:checked+.certification-archived-toggle__content {
+    border-color: var(--color-teal-700);
+
+    background: rgb(0 107 85 / 9%);
+
+    color: var(--color-teal-700);
+}
+
+/* Small visual indicator */
+
+.certification-archived-toggle__content::before {
+    content: "";
+
+    width: 7px;
+    height: 7px;
+
+    flex: 0 0 auto;
+
+    border-radius: 50%;
+
+    background: var(--color-muted);
+
+    opacity: 0.45;
+
+    transition:
+        background-color 0.15s ease,
+        opacity 0.15s ease;
+}
+
+.certification-archived-toggle input:checked+.certification-archived-toggle__content::before {
+    background: var(--color-teal-700);
+    opacity: 1;
+}
+
+/* Keyboard accessibility */
+
+.certification-archived-toggle input:focus-visible+.certification-archived-toggle__content {
+    outline: 2px solid var(--color-teal-700);
+    outline-offset: 2px;
+}
+
+/* Archived explanatory text */
+
+.certification-table-card__header p {
+    max-width: 520px;
+}
+
+/* Responsive */
+
+@media (max-width: 720px) {
+    .certification-table-card__header {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .certification-archived-toggle {
+        align-self: flex-start;
+    }
+}
+
 @media (max-width: 800px) {
     .people-coverage-table {
         min-width: 850px;

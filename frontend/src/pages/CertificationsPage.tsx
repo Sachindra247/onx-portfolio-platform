@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { AlertCircle, RefreshCw } from "lucide-react";
+import { AlertCircle, Archive, RefreshCw } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
+
 import { exportCertificationsCsv } from "../utils/certificationExport";
 
 import VendorIntelligenceView from "../components/certifications/vendors/VendorIntelligenceView";
@@ -49,8 +51,6 @@ import type {
 
 import { getCertificationSummary } from "../utils/certificationAnalytics";
 
-import { useSearchParams } from "react-router-dom";
-
 export default function CertificationsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -58,24 +58,61 @@ export default function CertificationsPage() {
 
   const requestedCertificationId = searchParams.get("certificationId");
 
+  const { user } = useAuth();
+
+  const { showToast } = useToast();
+
+  const canManageCertifications = Boolean(
+    user?.isGlobalAdministrator || user?.certificationsAccess === "Admin",
+  );
+
+  // =========================================================
+  // NAVIGATION
+  // =========================================================
+
   const [activeSection, setActiveSection] = useState<CertificationsSection>(
     isCertificationsSection(requestedSection) ? requestedSection : "overview",
   );
 
+  // =========================================================
+  // DATA
+  // =========================================================
+
   const [certifications, setCertifications] = useState<CertificationDto[]>([]);
 
-  const { showToast } = useToast();
+  const [vendors, setVendors] = useState<CertificationVendorDto[]>([]);
 
   const [isLoading, setIsLoading] = useState(true);
 
   const [loadError, setLoadError] = useState<string | null>(null);
 
+  // =========================================================
+  // FILTERS
+  // =========================================================
+
   const [search, setSearch] = useState("");
+
   const [vendorFilter, setVendorFilter] = useState("");
+
   const [statusFilter, setStatusFilter] = useState<CertificationStatus | "">(
     "",
   );
+
   const [practiceLeadFilter, setPracticeLeadFilter] = useState("");
+
+  /*
+   * Archived records remain hidden
+   * by default.
+   *
+   * Only Global Administrators and
+   * Certification Admins can enable
+   * this mode.
+   */
+  const [showArchived, setShowArchived] = useState(false);
+
+  // =========================================================
+  // SORTING / PAGINATION
+  // =========================================================
 
   const [sortField, setSortField] =
     useState<CertificationSortField>("personName");
@@ -84,7 +121,12 @@ export default function CertificationsPage() {
     useState<SortDirection>("ascending");
 
   const [page, setPage] = useState(1);
+
   const [pageSize, setPageSize] = useState(25);
+
+  // =========================================================
+  // FORM / DELETE STATE
+  // =========================================================
 
   const [modalIsOpen, setModalIsOpen] = useState(false);
 
@@ -94,13 +136,15 @@ export default function CertificationsPage() {
   const [certificationPendingDelete, setCertificationPendingDelete] =
     useState<CertificationDto | null>(null);
 
-  const [vendors, setVendors] = useState<CertificationVendorDto[]>([]);
-
   const [isSaving, setIsSaving] = useState(false);
 
   const [isDeleting, setIsDeleting] = useState(false);
 
   const [formError, setFormError] = useState<string | null>(null);
+
+  // =========================================================
+  // LOAD CERTIFICATIONS
+  // =========================================================
 
   useEffect(() => {
     const controller = new AbortController();
@@ -110,7 +154,11 @@ export default function CertificationsPage() {
     return () => {
       controller.abort();
     };
-  }, []);
+  }, [showArchived, canManageCertifications]);
+
+  // =========================================================
+  // PROFILE / DEEP-LINK SUPPORT
+  // =========================================================
 
   useEffect(() => {
     if (!requestedCertificationId || certifications.length === 0) {
@@ -132,21 +180,40 @@ export default function CertificationsPage() {
     setPage(1);
   }, [certifications, requestedCertificationId]);
 
-  const { user } = useAuth();
+  // =========================================================
+  // NON-ARCHIVED DATA
+  //
+  // Archived certifications must not
+  // affect dashboards, people coverage,
+  // gaps, expiry views or vendor stats.
+  // =========================================================
 
-  const canManageCertifications = Boolean(
-    user?.isGlobalAdministrator || user?.certificationsAccess === "Admin",
-  );
-
-  const prototypeGapCount = useMemo(
-    () => getCertificationActionCount(certifications),
+  const activeCertificationRecords = useMemo(
+    () =>
+      certifications.filter(
+        (certification) => certification.status !== "Archived",
+      ),
     [certifications],
   );
 
-  const summary = useMemo(
-    () => getCertificationSummary(certifications, prototypeGapCount),
-    [certifications, prototypeGapCount],
+  // =========================================================
+  // SUMMARY
+  // =========================================================
+
+  const prototypeGapCount = useMemo(
+    () => getCertificationActionCount(activeCertificationRecords),
+    [activeCertificationRecords],
   );
+
+  const summary = useMemo(
+    () =>
+      getCertificationSummary(activeCertificationRecords, prototypeGapCount),
+    [activeCertificationRecords, prototypeGapCount],
+  );
+
+  // =========================================================
+  // FILTER OPTIONS
+  // =========================================================
 
   const vendorOptions = useMemo(
     () =>
@@ -170,10 +237,27 @@ export default function CertificationsPage() {
     [certifications],
   );
 
+  // =========================================================
+  // FILTERED CERTIFICATION TABLE
+  // =========================================================
+
   const filteredAndSortedCertifications = useMemo(() => {
     const normalizedSearch = search.trim().toLocaleLowerCase();
 
     const filtered = certifications.filter((certification) => {
+      const isArchived = certification.status === "Archived";
+
+      /*
+       * Archived certifications
+       * are only shown when an
+       * authorized administrator
+       * explicitly enables the
+       * archived view.
+       */
+      if (isArchived && (!canManageCertifications || !showArchived)) {
+        return false;
+      }
+
       const matchesSearch =
         normalizedSearch.length === 0 ||
         certification.personName
@@ -206,13 +290,19 @@ export default function CertificationsPage() {
     return sortCertifications(filtered, sortField, sortDirection);
   }, [
     certifications,
-    practiceLeadFilter,
     search,
-    sortDirection,
-    sortField,
-    statusFilter,
     vendorFilter,
+    statusFilter,
+    practiceLeadFilter,
+    sortField,
+    sortDirection,
+    canManageCertifications,
+    showArchived,
   ]);
+
+  // =========================================================
+  // PAGE VALIDATION
+  // =========================================================
 
   useEffect(() => {
     const totalPages = Math.max(
@@ -234,18 +324,33 @@ export default function CertificationsPage() {
     );
   }, [filteredAndSortedCertifications, page, pageSize]);
 
+  // =========================================================
+  // PEOPLE
+  // =========================================================
+
   const peopleCoverage = useMemo(
-    () => buildPeopleCoverage(certifications),
-    [certifications],
+    () => buildPeopleCoverage(activeCertificationRecords),
+    [activeCertificationRecords],
   );
+
+  // =========================================================
+  // LOAD DATA
+  // =========================================================
 
   async function loadCertifications(signal?: AbortSignal) {
     setIsLoading(true);
     setLoadError(null);
 
     try {
+      /*
+       * Only admins are allowed to ask
+       * the API for archived records.
+       */
+      const includeArchived = canManageCertifications && showArchived;
+
       const [records, vendorRecords] = await Promise.all([
-        getCertifications(signal),
+        getCertifications(signal, includeArchived),
+
         getVendors(signal),
       ]);
 
@@ -269,14 +374,25 @@ export default function CertificationsPage() {
     }
   }
 
+  // =========================================================
+  // ADD
+  // =========================================================
+
   function openAddCertificationModal() {
     if (!canManageCertifications) {
       return;
     }
+
     setFormError(null);
+
     setSelectedCertification(null);
+
     setModalIsOpen(true);
   }
+
+  // =========================================================
+  // CLOSE FORM
+  // =========================================================
 
   function closeCertificationModal() {
     if (isSaving) {
@@ -284,13 +400,23 @@ export default function CertificationsPage() {
     }
 
     setModalIsOpen(false);
+
     setSelectedCertification(null);
+
     setFormError(null);
   }
+
+  // =========================================================
+  // EXPORT
+  // =========================================================
 
   function handleExportCsv() {
     exportCertificationsCsv(filteredAndSortedCertifications);
   }
+
+  // =========================================================
+  // SORT
+  // =========================================================
 
   function handleSort(field: CertificationSortField) {
     if (sortField === field) {
@@ -305,18 +431,37 @@ export default function CertificationsPage() {
     setPage(1);
   }
 
+  // =========================================================
+  // RESET FILTERS
+  // =========================================================
+
   function resetCertificationFilters() {
     setSearch("");
+
     setVendorFilter("");
+
     setStatusFilter("");
+
     setPracticeLeadFilter("");
+
+    setShowArchived(false);
+
     setPage(1);
   }
 
+  // =========================================================
+  // PAGINATION
+  // =========================================================
+
   function handlePageSizeChange(nextPageSize: number) {
     setPageSize(nextPageSize);
+
     setPage(1);
   }
+
+  // =========================================================
+  // EDIT
+  // =========================================================
 
   function openEditCertification(certification: CertificationDto) {
     if (!canManageCertifications) {
@@ -324,9 +469,15 @@ export default function CertificationsPage() {
     }
 
     setSelectedCertification(certification);
+
     setFormError(null);
+
     setModalIsOpen(true);
   }
+
+  // =========================================================
+  // DELETE
+  // =========================================================
 
   function requestDeleteCertification(certification: CertificationDto) {
     if (!canManageCertifications) {
@@ -336,19 +487,32 @@ export default function CertificationsPage() {
     setCertificationPendingDelete(certification);
   }
 
+  // =========================================================
+  // SAVE
+  // =========================================================
+
   async function handleCertificationSubmit(values: CertificationFormValues) {
     setIsSaving(true);
+
     setFormError(null);
 
     const request: CertificationRequest = {
       personName: values.personName.trim(),
+
       certificationName: values.certificationName.trim(),
+
       status: values.status,
+
       dateCompleted: values.dateCompleted || null,
+
       expiryDate: values.expiryDate || null,
+
       practiceLead: values.practiceLead.trim() || null,
+
       rebateImpact: values.rebateImpact.trim() || null,
+
       notes: values.notes.trim() || null,
+
       vendorId: values.vendorId,
     };
 
@@ -359,13 +523,30 @@ export default function CertificationsPage() {
           request,
         );
 
-        setCertifications((current) =>
-          current.map((certification) =>
-            certification.id === updated.id ? updated : certification,
-          ),
-        );
+        /*
+         * If a certification is archived
+         * while the archived view is not
+         * enabled, remove it immediately
+         * from the visible local dataset.
+         */
+        if (updated.status === "Archived" && !showArchived) {
+          setCertifications((current) =>
+            current.filter((certification) => certification.id !== updated.id),
+          );
+        } else {
+          setCertifications((current) =>
+            current.map((certification) =>
+              certification.id === updated.id ? updated : certification,
+            ),
+          );
+        }
 
-        showToast(`"${updated.certificationName}" was updated.`, "success");
+        showToast(
+          updated.status === "Archived"
+            ? `"${updated.certificationName}" was archived.`
+            : `"${updated.certificationName}" was updated.`,
+          "success",
+        );
       } else {
         const created = await createCertification(request);
 
@@ -375,7 +556,9 @@ export default function CertificationsPage() {
       }
 
       setModalIsOpen(false);
+
       setSelectedCertification(null);
+
       setFormError(null);
     } catch (error) {
       setFormError(getCertificationErrorMessage(error));
@@ -386,9 +569,6 @@ export default function CertificationsPage() {
 
   async function confirmDeleteCertification() {
     if (!canManageCertifications || !certificationPendingDelete) {
-      return;
-    }
-    if (!certificationPendingDelete) {
       return;
     }
 
@@ -402,6 +582,7 @@ export default function CertificationsPage() {
           (certification) => certification.id !== certificationPendingDelete.id,
         ),
       );
+
       showToast(
         `"${certificationPendingDelete.certificationName}" was deleted.`,
         "success",
@@ -415,16 +596,50 @@ export default function CertificationsPage() {
     }
   }
 
+  // =========================================================
+  // ARCHIVED TOGGLE
+  // =========================================================
+
+  function handleArchivedToggle(checked: boolean) {
+    if (!canManageCertifications) {
+      return;
+    }
+
+    setShowArchived(checked);
+
+    /*
+     * If archived mode is turned off
+     * while Status = Archived, clear
+     * that filter so the table doesn't
+     * appear unexpectedly empty.
+     */
+    if (!checked && statusFilter === "Archived") {
+      setStatusFilter("");
+    }
+
+    setPage(1);
+  }
+
+  // =========================================================
+  // SECTION CHANGE
+  // =========================================================
+
+  function handleSectionChange(section: CertificationsSection) {
+    setActiveSection(section);
+
+    setSearchParams({
+      section,
+    });
+  }
+
+  // =========================================================
+  // RENDER
+  // =========================================================
+
   return (
     <CertificationsLayout
       activeSection={activeSection}
-      onSectionChange={(section) => {
-        setActiveSection(section);
-
-        setSearchParams({
-          section,
-        });
-      }}
+      onSectionChange={handleSectionChange}
       onAddCertification={openAddCertificationModal}
       onExportCsv={handleExportCsv}
       canManageCertifications={canManageCertifications}
@@ -432,6 +647,10 @@ export default function CertificationsPage() {
       gapCount={summary.gapCount}
       expiringCount={summary.expiringWithin90Days}
     >
+      {/* =====================================================
+          LOADING
+         ===================================================== */}
+
       {isLoading && (
         <div className="page-state" aria-live="polite">
           <RefreshCw
@@ -441,15 +660,21 @@ export default function CertificationsPage() {
           />
 
           <h2>Loading certifications</h2>
+
           <p>Retrieving certification records from the API...</p>
         </div>
       )}
+
+      {/* =====================================================
+          ERROR
+         ===================================================== */}
 
       {!isLoading && loadError && (
         <div className="page-state page-state--error" role="alert">
           <AlertCircle size={31} aria-hidden="true" />
 
           <h2>Unable to load certifications</h2>
+
           <p>{loadError}</p>
 
           <button
@@ -465,24 +690,63 @@ export default function CertificationsPage() {
 
       {!isLoading && !loadError && (
         <>
+          {/* =================================================
+                OVERVIEW
+               ================================================= */}
+
           {activeSection === "overview" && (
             <section className="certifications-section">
               <CertificationStats
                 summary={summary}
-                onSectionChange={setActiveSection}
+                onSectionChange={handleSectionChange}
               />
 
-              <CertificationCharts certifications={certifications} />
+              <CertificationCharts
+                certifications={activeCertificationRecords}
+              />
 
-              <CertificationVendorCards certifications={certifications} />
+              <CertificationVendorCards
+                certifications={activeCertificationRecords}
+              />
             </section>
           )}
+
+          {/* =================================================
+                ALL CERTIFICATIONS
+               ================================================= */}
 
           {activeSection === "certifications" && (
             <section className="certifications-section">
               <div className="certification-table-card">
                 <header className="certification-table-card__header">
-                  <h2>All certifications</h2>
+                  <div>
+                    <h2>
+                      {showArchived
+                        ? "All certifications including archived"
+                        : "All certifications"}
+                    </h2>
+
+                    {showArchived && (
+                      <p>Archived records are included in this view.</p>
+                    )}
+                  </div>
+
+                  {canManageCertifications && (
+                    <label className="certification-archived-toggle">
+                      <input
+                        type="checkbox"
+                        checked={showArchived}
+                        onChange={(event) =>
+                          handleArchivedToggle(event.target.checked)
+                        }
+                      />
+
+                      <span className="certification-archived-toggle__content">
+                        <Archive size={15} aria-hidden="true" />
+                        Show archived
+                      </span>
+                    </label>
+                  )}
                 </header>
 
                 <CertificationFilters
@@ -493,21 +757,41 @@ export default function CertificationsPage() {
                   vendors={vendorOptions}
                   practiceLeads={practiceLeadOptions}
                   resultCount={filteredAndSortedCertifications.length}
-                  totalCount={certifications.length}
+                  totalCount={
+                    certifications.filter(
+                      (certification) =>
+                        showArchived || certification.status !== "Archived",
+                    ).length
+                  }
                   onSearchChange={(value) => {
                     setSearch(value);
+
                     setPage(1);
                   }}
                   onVendorChange={(value) => {
                     setVendorFilter(value);
+
                     setPage(1);
                   }}
                   onStatusChange={(value) => {
+                    /*
+                     * If an admin
+                     * selects Archived,
+                     * automatically make
+                     * sure archived
+                     * records are loaded.
+                     */
+                    if (value === "Archived" && canManageCertifications) {
+                      setShowArchived(true);
+                    }
+
                     setStatusFilter(value);
+
                     setPage(1);
                   }}
                   onPracticeLeadChange={(value) => {
                     setPracticeLeadFilter(value);
+
                     setPage(1);
                   }}
                   onReset={resetCertificationFilters}
@@ -534,36 +818,52 @@ export default function CertificationsPage() {
             </section>
           )}
 
+          {/* =================================================
+                PEOPLE
+               ================================================= */}
+
           {activeSection === "people" && (
             <section className="certifications-section">
               <PeopleCoverageGrid people={peopleCoverage} />
             </section>
           )}
 
+          {/* =================================================
+                GAPS
+               ================================================= */}
+
           {activeSection === "gaps" && (
             <section className="certifications-section">
               <CertificationGapsView
-                certifications={certifications}
+                certifications={activeCertificationRecords}
                 canManage={canManageCertifications}
                 onEdit={openEditCertification}
               />
             </section>
           )}
+
+          {/* =================================================
+                EXPIRING
+               ================================================= */}
 
           {activeSection === "expiring" && (
             <section className="certifications-section">
               <ExpiringCertificationsView
-                certifications={certifications}
+                certifications={activeCertificationRecords}
                 canManage={canManageCertifications}
                 onEdit={openEditCertification}
               />
             </section>
           )}
 
+          {/* =================================================
+                VENDORS
+               ================================================= */}
+
           {activeSection === "vendors" && (
             <section className="certifications-section">
               <VendorIntelligenceView
-                certifications={certifications}
+                certifications={activeCertificationRecords}
                 canManage={canManageCertifications}
                 onEdit={openEditCertification}
               />
@@ -571,6 +871,11 @@ export default function CertificationsPage() {
           )}
         </>
       )}
+
+      {/* =====================================================
+          ADD / EDIT
+         ===================================================== */}
+
       {canManageCertifications && modalIsOpen && (
         <CertificationFormModal
           isOpen={modalIsOpen}
@@ -582,6 +887,11 @@ export default function CertificationsPage() {
           onSubmit={handleCertificationSubmit}
         />
       )}
+
+      {/* =====================================================
+          DELETE
+         ===================================================== */}
+
       {canManageCertifications && (
         <ConfirmDialog
           isOpen={certificationPendingDelete !== null}
@@ -605,12 +915,25 @@ export default function CertificationsPage() {
   );
 }
 
+// =========================================================
+// ACTION / GAP COUNT
+// =========================================================
+
 function getCertificationActionCount(
   certifications: CertificationDto[],
 ): number {
   const actionGroups = new Set<string>();
 
   certifications.forEach((certification) => {
+    /*
+     * Archived certifications
+     * should never contribute to
+     * action/gap counts.
+     */
+    if (certification.status === "Archived") {
+      return;
+    }
+
     const isActionable =
       certification.status === "Expired" ||
       certification.status === "Pending" ||
@@ -624,6 +947,7 @@ function getCertificationActionCount(
 
     const key = [
       certification.vendorName.trim().toLocaleLowerCase(),
+
       certification.certificationName.trim().toLocaleLowerCase(),
     ].join("|");
 
@@ -632,6 +956,10 @@ function getCertificationActionCount(
 
   return actionGroups.size;
 }
+
+// =========================================================
+// EXPIRY HELPERS
+// =========================================================
 
 function isCertificationPastExpiry(value: string | null): boolean {
   const daysRemaining = getCertificationDaysRemaining(value);
@@ -675,21 +1003,9 @@ function getCertificationDaysRemaining(value: string | null): number {
   );
 }
 
-// interface CertificationPlaceholderProps {
-//   title: string;
-// }
-
-// function CertificationPlaceholder({ title }: CertificationPlaceholderProps) {
-//   return (
-//     <section className="certifications-section">
-//       <div className="certifications-section-heading">{title}</div>
-
-//       <div className="certifications-placeholder">
-//         Certification content will appear here.
-//       </div>
-//     </section>
-//   );
-// }
+// =========================================================
+// SORTING
+// =========================================================
 
 function sortCertifications(
   certifications: CertificationDto[],
@@ -713,6 +1029,10 @@ function sortCertifications(
     return sortDirection === "ascending" ? comparison : comparison * -1;
   });
 }
+
+// =========================================================
+// API ERROR
+// =========================================================
 
 function getCertificationErrorMessage(error: unknown): string {
   if (typeof error === "object" && error !== null && "response" in error) {
@@ -746,6 +1066,10 @@ function getCertificationErrorMessage(error: unknown): string {
 
   return "An unexpected error occurred.";
 }
+
+// =========================================================
+// ROUTE HELPERS
+// =========================================================
 
 function isCertificationsSection(
   value: string | null,
