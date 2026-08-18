@@ -194,6 +194,8 @@ function getStatusClass(
       return "tbd";
     case "Expired":
       return "expired";
+    case "Archived":
+      return "archived";
   }
 }
 

@@ -27,13 +27,15 @@ interface CertificationFormErrors {
   expiryDate?: string;
 }
 
-const statuses: CertificationStatus[] = [
+const createStatuses: CertificationStatus[] = [
   "Complete",
   "InProgress",
   "Pending",
   "Tbd",
   "Expired",
 ];
+
+const editStatuses: CertificationStatus[] = [...createStatuses, "Archived"];
 
 function createEmptyForm(): CertificationFormValues {
   return {
@@ -121,6 +123,8 @@ export default function CertificationFormModal({
   if (!isOpen) {
     return null;
   }
+
+  const availableStatuses = certification ? editStatuses : createStatuses;
 
   function updateField<Key extends keyof CertificationFormValues>(
     field: Key,
@@ -309,7 +313,7 @@ export default function CertificationFormModal({
                   )
                 }
               >
-                {statuses.map((status) => (
+                {availableStatuses.map((status) => (
                   <option value={status} key={status}>
                     {formatCertificationStatus(status)}
                   </option>

@@ -4,6 +4,7 @@ export const certificationStatuses = [
   "Pending",
   "Tbd",
   "Expired",
+  "Archived",
 ] as const;
 
 export type CertificationStatus = (typeof certificationStatuses)[number];

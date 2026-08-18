@@ -242,6 +242,9 @@ function getStatusClass(status: CertificationDto["status"]): string {
 
     case "Expired":
       return "expired";
+
+    case "Archived":
+      return "archived";
   }
 }
 

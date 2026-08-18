@@ -25,8 +25,12 @@ import type { LeaveRequestDto } from "../types/vacations";
 
 import { formatEventDate } from "../utils/eventFormatting";
 
+import { useNavigate } from "react-router-dom";
+
 export default function ProfilePage() {
   const { user } = useAuth();
+
+  const navigate = useNavigate();
 
   // =========================================================
   // EVENTS
@@ -174,20 +178,6 @@ export default function ProfilePage() {
       );
   }, [leaveRequests]);
 
-  const pendingLeaveCount = useMemo(
-    () =>
-      leaveRequests.filter((leaveRequest) => leaveRequest.status === "Pending")
-        .length,
-    [leaveRequests],
-  );
-
-  const approvedLeaveCount = useMemo(
-    () =>
-      leaveRequests.filter((leaveRequest) => leaveRequest.status === "Approved")
-        .length,
-    [leaveRequests],
-  );
-
   const activeCertifications = useMemo(
     () =>
       certifications
@@ -222,6 +212,30 @@ export default function ProfilePage() {
       return expiryDate >= now && expiryDate <= ninetyDaysFromNow;
     }).length;
   }, [certifications]);
+
+  const approvedDaysOff = useMemo(
+    () =>
+      leaveRequests
+        .filter((request) => request.status === "Approved")
+        .reduce(
+          (total, request) =>
+            total + countWorkingDays(request.startDate, request.endDate),
+          0,
+        ),
+    [leaveRequests],
+  );
+
+  const pendingDaysOff = useMemo(
+    () =>
+      leaveRequests
+        .filter((request) => request.status === "Pending")
+        .reduce(
+          (total, request) =>
+            total + countWorkingDays(request.startDate, request.endDate),
+          0,
+        ),
+    [leaveRequests],
+  );
 
   if (!user) {
     return null;
@@ -301,11 +315,41 @@ export default function ProfilePage() {
           ) : (
             <>
               <div className="profile-summary-row">
-                <ProfileSummary label="Pending" value={pendingLeaveCount} />
+                <ProfileSummary
+                  label="Approved days"
+                  value={approvedDaysOff}
+                  onClick={() =>
+                    navigate(
+                      `/vacations?section=requests&status=Approved&employee=${encodeURIComponent(
+                        `${user.firstName} ${user.lastName}`,
+                      )}`,
+                    )
+                  }
+                />
 
-                <ProfileSummary label="Approved" value={approvedLeaveCount} />
+                <ProfileSummary
+                  label="Pending days"
+                  value={pendingDaysOff}
+                  onClick={() =>
+                    navigate(
+                      `/vacations?section=requests&status=Pending&employee=${encodeURIComponent(
+                        `${user.firstName} ${user.lastName}`,
+                      )}`,
+                    )
+                  }
+                />
 
-                <ProfileSummary label="Upcoming" value={upcomingLeave.length} />
+                <ProfileSummary
+                  label="Upcoming"
+                  value={upcomingLeave.length}
+                  onClick={() =>
+                    navigate(
+                      `/vacations?section=requests&employee=${encodeURIComponent(
+                        `${user.firstName} ${user.lastName}`,
+                      )}`,
+                    )
+                  }
+                />
               </div>
 
               {upcomingLeave.length === 0 ? (
@@ -317,7 +361,18 @@ export default function ProfilePage() {
               ) : (
                 <div className="profile-record-list">
                   {upcomingLeave.slice(0, 4).map((leaveRequest) => (
-                    <div className="profile-record-item" key={leaveRequest.id}>
+                    <button
+                      type="button"
+                      className="profile-record-item profile-record-item--link"
+                      key={leaveRequest.id}
+                      onClick={() =>
+                        navigate(
+                          `/vacations?section=requests&employee=${encodeURIComponent(
+                            `${user.firstName} ${user.lastName}`,
+                          )}`,
+                        )
+                      }
+                    >
                       <div>
                         <strong>{leaveRequest.leaveType}</strong>
 
@@ -332,7 +387,7 @@ export default function ProfilePage() {
                       <span className="profile-status profile-status--approved">
                         Approved
                       </span>
-                    </div>
+                    </button>
                   ))}
                 </div>
               )}
@@ -372,7 +427,16 @@ export default function ProfilePage() {
           ) : (
             <div className="profile-record-list">
               {registeredEvents.slice(0, 5).map((portfolioEvent) => (
-                <div className="profile-record-item" key={portfolioEvent.id}>
+                <button
+                  type="button"
+                  className="profile-record-item profile-record-item--link"
+                  key={portfolioEvent.id}
+                  onClick={() =>
+                    navigate(
+                      `/events?section=events&eventId=${portfolioEvent.id}`,
+                    )
+                  }
+                >
                   <div>
                     <strong>{portfolioEvent.description}</strong>
 
@@ -386,7 +450,7 @@ export default function ProfilePage() {
                   <span className="profile-status profile-status--registered">
                     Registered
                   </span>
-                </div>
+                </button>
               ))}
             </div>
           )}
@@ -441,7 +505,16 @@ export default function ProfilePage() {
 
               <div className="profile-record-list">
                 {activeCertifications.slice(0, 5).map((certification) => (
-                  <div className="profile-record-item" key={certification.id}>
+                  <button
+                    type="button"
+                    className="profile-record-item profile-record-item--link"
+                    key={certification.id}
+                    onClick={() =>
+                      navigate(
+                        `/certifications?section=certifications&certificationId=${certification.id}`,
+                      )
+                    }
+                  >
                     <div>
                       <strong>{certification.certificationName}</strong>
 
@@ -464,7 +537,7 @@ export default function ProfilePage() {
                     >
                       {formatCertificationStatus(certification.status)}
                     </span>
-                  </div>
+                  </button>
                 ))}
               </div>
             </>
@@ -535,13 +608,26 @@ function AccessRow({ label, value }: AccessRowProps) {
 interface ProfileSummaryProps {
   label: string;
   value: number;
+  onClick?: () => void;
 }
 
-function ProfileSummary({ label, value }: ProfileSummaryProps) {
+function ProfileSummary({ label, value, onClick }: ProfileSummaryProps) {
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        className="profile-summary profile-summary--link"
+        onClick={onClick}
+      >
+        <strong>{value}</strong>
+        <span>{label}</span>
+      </button>
+    );
+  }
+
   return (
     <div className="profile-summary">
       <strong>{value}</strong>
-
       <span>{label}</span>
     </div>
   );
@@ -663,4 +749,30 @@ function getErrorMessage(error: unknown, fallback: string): string {
   }
 
   return fallback;
+}
+
+function countWorkingDays(startValue: string, endValue: string): number {
+  const startDate = parseDateOnly(startValue);
+
+  const endDate = parseDateOnly(endValue);
+
+  if (endDate < startDate) {
+    return 0;
+  }
+
+  let count = 0;
+
+  const current = new Date(startDate);
+
+  while (current <= endDate) {
+    const day = current.getDay();
+
+    if (day !== 0 && day !== 6) {
+      count += 1;
+    }
+
+    current.setDate(current.getDate() + 1);
+  }
+
+  return count;
 }

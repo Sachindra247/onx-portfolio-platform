@@ -49,9 +49,18 @@ import type {
 
 import { getCertificationSummary } from "../utils/certificationAnalytics";
 
+import { useSearchParams } from "react-router-dom";
+
 export default function CertificationsPage() {
-  const [activeSection, setActiveSection] =
-    useState<CertificationsSection>("overview");
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const requestedSection = searchParams.get("section");
+
+  const requestedCertificationId = searchParams.get("certificationId");
+
+  const [activeSection, setActiveSection] = useState<CertificationsSection>(
+    isCertificationsSection(requestedSection) ? requestedSection : "overview",
+  );
 
   const [certifications, setCertifications] = useState<CertificationDto[]>([]);
 
@@ -102,6 +111,26 @@ export default function CertificationsPage() {
       controller.abort();
     };
   }, []);
+
+  useEffect(() => {
+    if (!requestedCertificationId || certifications.length === 0) {
+      return;
+    }
+
+    const certification = certifications.find(
+      (record) => record.id === requestedCertificationId,
+    );
+
+    if (!certification) {
+      return;
+    }
+
+    setActiveSection("certifications");
+
+    setSearch(certification.certificationName);
+
+    setPage(1);
+  }, [certifications, requestedCertificationId]);
 
   const { user } = useAuth();
 
@@ -389,7 +418,13 @@ export default function CertificationsPage() {
   return (
     <CertificationsLayout
       activeSection={activeSection}
-      onSectionChange={setActiveSection}
+      onSectionChange={(section) => {
+        setActiveSection(section);
+
+        setSearchParams({
+          section,
+        });
+      }}
       onAddCertification={openAddCertificationModal}
       onExportCsv={handleExportCsv}
       canManageCertifications={canManageCertifications}
@@ -710,4 +745,17 @@ function getCertificationErrorMessage(error: unknown): string {
   }
 
   return "An unexpected error occurred.";
+}
+
+function isCertificationsSection(
+  value: string | null,
+): value is CertificationsSection {
+  return (
+    value === "overview" ||
+    value === "certifications" ||
+    value === "people" ||
+    value === "gaps" ||
+    value === "expiring" ||
+    value === "vendors"
+  );
 }

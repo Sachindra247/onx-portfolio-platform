@@ -6,5 +6,6 @@ public enum CertificationStatus
     InProgress,
     Pending,
     Tbd,
-    Expired
+    Expired,
+    Archived
 }

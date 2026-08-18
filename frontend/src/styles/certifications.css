@@ -952,6 +952,11 @@
     color: #c0392b;
 }
 
+.certification-status--archived {
+    background: #eef1f0;
+    color: #65706c;
+}
+
 .certification-expiry {
     font-weight: 700;
 }
@@ -3486,6 +3491,125 @@
     margin: 0;
     color: var(--color-muted);
     font-size: 11px;
+}
+
+.people-coverage-table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
+    background: var(--color-surface);
+}
+
+.people-coverage-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.people-coverage-table th,
+.people-coverage-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--color-border);
+    text-align: left;
+    vertical-align: middle;
+}
+
+.people-coverage-table th {
+    background: var(--color-background);
+    color: var(--color-muted);
+    font-size: 0.72rem;
+    font-weight: 750;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+}
+
+.people-coverage-table tbody>tr:hover:not(.people-coverage-details-row) {
+    background: rgb(0 107 85 / 3%);
+}
+
+.people-coverage-health {
+    display: inline-flex;
+    min-width: 58px;
+    justify-content: center;
+    padding: 4px 8px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 750;
+}
+
+.people-coverage-health--healthy {
+    background: #e8f6ee;
+    color: #256447;
+}
+
+.people-coverage-health--warning {
+    background: #fff4d6;
+    color: #8a6116;
+}
+
+.people-coverage-health--critical {
+    background: #fdebea;
+    color: #a73732;
+}
+
+.people-coverage-view-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 7px 10px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: var(--color-surface);
+    color: var(--color-teal-700);
+    font: inherit;
+    font-size: 0.74rem;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.people-coverage-view-button:hover {
+    background: var(--color-background);
+}
+
+.people-coverage-details-row>td {
+    padding: 0;
+    background: var(--color-background);
+}
+
+.people-coverage-details {
+    display: grid;
+    gap: 8px;
+    padding: 16px 20px 18px 36px;
+}
+
+.people-coverage-certification {
+    display: grid;
+    grid-template-columns: minmax(260px, 1fr) 120px 180px;
+    align-items: center;
+    gap: 16px;
+    padding: 11px 14px;
+    border: 1px solid var(--color-border);
+    border-radius: 9px;
+    background: var(--color-surface);
+}
+
+.people-coverage-certification>div {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.people-coverage-certification>div>span,
+.people-coverage-certification>span {
+    color: var(--color-muted);
+    font-size: 0.75rem;
+}
+
+@media (max-width: 800px) {
+    .people-coverage-table {
+        min-width: 850px;
+    }
 }
 
 @media (max-width: 1200px) {

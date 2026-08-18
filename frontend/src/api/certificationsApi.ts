@@ -7,11 +7,15 @@ import type {
 
 export async function getCertifications(
   signal?: AbortSignal,
+  includeArchived = false,
 ): Promise<CertificationDto[]> {
   const response = await httpClient.get<CertificationDto[]>(
     "/api/certifications",
     {
       signal,
+      params: {
+        includeArchived,
+      },
     },
   );
 

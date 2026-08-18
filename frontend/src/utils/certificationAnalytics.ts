@@ -125,6 +125,9 @@ export function formatCertificationStatus(status: CertificationStatus): string {
     case "Tbd":
       return "TBD";
 
+    case "Archived":
+      return "Archived";
+
     default:
       return status;
   }

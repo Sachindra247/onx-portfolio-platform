@@ -27,7 +27,16 @@ public sealed class CertificationsController : ControllerBase
 
     // =========================================================
     // GET ALL
-    // All authenticated internal users may view certifications.
+    //
+    // All authenticated internal users may view active
+    // certification records.
+    //
+    // Archived certifications are hidden by default.
+    //
+    // Certification Admins / Global Admins may explicitly
+    // request archived certifications using:
+    //
+    // ?includeArchived=true
     // =========================================================
 
     [HttpGet]
@@ -36,6 +45,8 @@ public sealed class CertificationsController : ControllerBase
         StatusCodes.Status200OK)]
     [ProducesResponseType(
         StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(
+        StatusCodes.Status403Forbidden)]
     public async Task<
         ActionResult<IReadOnlyList<CertificationDto>>>
         GetCertifications(
@@ -43,7 +54,8 @@ public sealed class CertificationsController : ControllerBase
             [FromQuery] CertificationStatus? status,
             [FromQuery] Guid? vendorId,
             [FromQuery] DateOnly? expiringBefore,
-            CancellationToken cancellationToken)
+            [FromQuery] bool includeArchived = false,
+            CancellationToken cancellationToken = default)
     {
         var currentUser =
             await _currentUserService.GetUserAsync(
@@ -54,122 +66,168 @@ public sealed class CertificationsController : ControllerBase
             return Unauthorized();
         }
 
-        var query = _dbContext.Certifications
-            .AsNoTracking()
-            .AsQueryable();
+        var canManageCertifications =
+            CanManageCertifications(
+                currentUser);
 
-        if (!string.IsNullOrWhiteSpace(search))
+        // Only Certification Admins / Global Admins
+        // may explicitly retrieve archived records.
+        if (
+            includeArchived &&
+            !canManageCertifications)
+        {
+            return Forbid();
+        }
+
+        var query =
+            _dbContext.Certifications
+                .AsNoTracking()
+                .AsQueryable();
+
+        // Archived certifications stay out of the
+        // normal tracker and analytics.
+        if (!includeArchived)
+        {
+            query =
+                query.Where(
+                    certification =>
+                        certification.Status !=
+                        CertificationStatus.Archived);
+        }
+
+        if (!string.IsNullOrWhiteSpace(
+                search))
         {
             var normalizedSearch =
                 search.Trim();
 
-            query = query.Where(
-                certification =>
-                    certification.PersonName.Contains(
-                        normalizedSearch) ||
-                    certification.CertificationName.Contains(
-                        normalizedSearch) ||
-                    certification.Vendor.Name.Contains(
-                        normalizedSearch) ||
-                    (
-                        certification.PracticeLead != null &&
-                        certification.PracticeLead.Contains(
-                            normalizedSearch)
-                    ) ||
-                    (
-                        certification.Notes != null &&
-                        certification.Notes.Contains(
-                            normalizedSearch)
-                    ));
+            query =
+                query.Where(
+                    certification =>
+                        certification.PersonName.Contains(
+                            normalizedSearch) ||
+                        certification.CertificationName.Contains(
+                            normalizedSearch) ||
+                        certification.Vendor.Name.Contains(
+                            normalizedSearch) ||
+                        (
+                            certification.PracticeLead != null &&
+                            certification.PracticeLead.Contains(
+                                normalizedSearch)
+                        ) ||
+                        (
+                            certification.Notes != null &&
+                            certification.Notes.Contains(
+                                normalizedSearch)
+                        ));
         }
 
         if (status.HasValue)
         {
-            query = query.Where(
-                certification =>
-                    certification.Status ==
-                    status.Value);
+            query =
+                query.Where(
+                    certification =>
+                        certification.Status ==
+                        status.Value);
         }
 
         if (vendorId.HasValue)
         {
-            query = query.Where(
-                certification =>
-                    certification.VendorId ==
-                    vendorId.Value);
+            query =
+                query.Where(
+                    certification =>
+                        certification.VendorId ==
+                        vendorId.Value);
         }
 
         if (expiringBefore.HasValue)
         {
-            query = query.Where(
-                certification =>
-                    certification.ExpiryDate != null &&
-                    certification.ExpiryDate <=
-                    expiringBefore.Value);
+            query =
+                query.Where(
+                    certification =>
+                        certification.ExpiryDate != null &&
+                        certification.ExpiryDate <=
+                        expiringBefore.Value);
         }
 
-        var certifications = await query
-            .OrderBy(
-                certification =>
-                    certification.ExpiryDate == null)
-            .ThenBy(
-                certification =>
-                    certification.ExpiryDate)
-            .ThenBy(
-                certification =>
-                    certification.PersonName)
-            .Select(
-                certification =>
-                    new CertificationDto
-                    {
-                        Id =
-                            certification.Id,
+        var certifications =
+            await query
+                .OrderBy(
+                    certification =>
+                        certification.ExpiryDate == null)
+                .ThenBy(
+                    certification =>
+                        certification.ExpiryDate)
+                .ThenBy(
+                    certification =>
+                        certification.PersonName)
+                .Select(
+                    certification =>
+                        new CertificationDto
+                        {
+                            Id =
+                                certification.Id,
 
-                        PersonName =
-                            certification.PersonName,
+                            PersonName =
+                                certification.PersonName,
 
-                        CertificationName =
-                            certification.CertificationName,
+                            CertificationName =
+                                certification.CertificationName,
 
-                        Status =
-                            certification.Status,
+                            // Stored status is selected here.
+                            // Effective expiry status is applied
+                            // after the SQL query completes.
+                            Status =
+                                certification.Status,
 
-                        DateCompleted =
-                            certification.DateCompleted,
+                            DateCompleted =
+                                certification.DateCompleted,
 
-                        ExpiryDate =
-                            certification.ExpiryDate,
+                            ExpiryDate =
+                                certification.ExpiryDate,
 
-                        PracticeLead =
-                            certification.PracticeLead,
+                            PracticeLead =
+                                certification.PracticeLead,
 
-                        RebateImpact =
-                            certification.RebateImpact,
+                            RebateImpact =
+                                certification.RebateImpact,
 
-                        Notes =
-                            certification.Notes,
+                            Notes =
+                                certification.Notes,
 
-                        VendorId =
-                            certification.VendorId,
+                            VendorId =
+                                certification.VendorId,
 
-                        VendorName =
-                            certification.Vendor.Name,
+                            VendorName =
+                                certification.Vendor.Name,
 
-                        CreatedAtUtc =
-                            certification.CreatedAtUtc,
+                            CreatedAtUtc =
+                                certification.CreatedAtUtc,
 
-                        UpdatedAtUtc =
-                            certification.UpdatedAtUtc
-                    })
-            .ToListAsync(
-                cancellationToken);
+                            UpdatedAtUtc =
+                                certification.UpdatedAtUtc
+                        })
+                .ToListAsync(
+                    cancellationToken);
 
-        return Ok(certifications);
+        var normalizedCertifications =
+            certifications
+                .Select(
+                    NormalizeCertificationDto)
+                .ToList();
+
+        return Ok(
+            normalizedCertifications);
     }
 
     // =========================================================
     // GET ONE
-    // All authenticated internal users may view.
+    //
+    // Active certifications may be viewed by all authenticated
+    // internal users.
+    //
+    // Archived certifications may only be retrieved by a
+    // Certification Admin or Global Admin.
     // =========================================================
 
     [HttpGet("{id:guid}")]
@@ -205,12 +263,29 @@ public sealed class CertificationsController : ControllerBase
             return NotFound();
         }
 
-        return Ok(certification);
+        // Archived certifications should remain hidden
+        // from ordinary users even if they somehow know
+        // the certification ID.
+        if (
+            certification.Status ==
+                CertificationStatus.Archived &&
+            !CanManageCertifications(
+                currentUser))
+        {
+            return NotFound();
+        }
+
+        return Ok(
+            certification);
     }
 
     // =========================================================
     // CREATE
-    // Raed / Certification Admin / Global Admin only.
+    //
+    // Certification Admin / Global Admin only.
+    //
+    // Archived is intentionally NOT valid when creating
+    // a brand-new certification.
     // =========================================================
 
     [HttpPost]
@@ -242,6 +317,20 @@ public sealed class CertificationsController : ControllerBase
                 currentUser))
         {
             return Forbid();
+        }
+
+        // Archived is only a lifecycle action
+        // performed against an existing record.
+        if (
+            request.Status ==
+            CertificationStatus.Archived)
+        {
+            ModelState.AddModelError(
+                nameof(request.Status),
+                "A new certification cannot be created as Archived.");
+
+            return ValidationProblem(
+                ModelState);
         }
 
         if (!IsValidDateRange(
@@ -281,7 +370,8 @@ public sealed class CertificationsController : ControllerBase
         var certification =
             new Certification
             {
-                Id = Guid.NewGuid(),
+                Id =
+                    Guid.NewGuid(),
 
                 PersonName =
                     request.PersonName.Trim(),
@@ -335,15 +425,24 @@ public sealed class CertificationsController : ControllerBase
             nameof(GetCertification),
             new
             {
-                id = certification.Id
+                id =
+                    certification.Id
             },
             createdCertification);
     }
 
     // =========================================================
     // UPDATE
-    // Raed / Certification Admin / Global Admin only.
-    // No approval workflow required.
+    //
+    // Certification Admin / Global Admin only.
+    //
+    // Archived is valid here.
+    //
+    // Renewal rule:
+    //
+    // If a certification was effectively Expired and an admin
+    // gives it a future expiry date while leaving the selected
+    // status as Expired, it automatically returns to Complete.
     // =========================================================
 
     [HttpPut("{id:guid}")]
@@ -430,7 +529,9 @@ public sealed class CertificationsController : ControllerBase
             request.CertificationName.Trim();
 
         certification.Status =
-            request.Status;
+            ResolveUpdatedStatus(
+                request.Status,
+                request.ExpiryDate);
 
         certification.DateCompleted =
             request.DateCompleted;
@@ -470,7 +571,12 @@ public sealed class CertificationsController : ControllerBase
 
     // =========================================================
     // DELETE
-    // Raed / Certification Admin / Global Admin only.
+    //
+    // Certification Admin / Global Admin only.
+    //
+    // Permanent deletion remains available, although Archived
+    // should normally be preferred when a certification simply
+    // no longer needs to be tracked.
     // =========================================================
 
     [HttpDelete("{id:guid}")]
@@ -527,8 +633,9 @@ public sealed class CertificationsController : ControllerBase
     // AUTHORIZATION
     // =========================================================
 
-    private static bool CanManageCertifications(
-        ApplicationUser user)
+    private static bool
+        CanManageCertifications(
+            ApplicationUser user)
     {
         return
             user.IsGlobalAdministrator ||
@@ -545,56 +652,193 @@ public sealed class CertificationsController : ControllerBase
             Guid id,
             CancellationToken cancellationToken)
     {
-        return await _dbContext.Certifications
-            .AsNoTracking()
-            .Where(
-                certification =>
-                    certification.Id == id)
-            .Select(
-                certification =>
-                    new CertificationDto
-                    {
-                        Id =
-                            certification.Id,
+        var certification =
+            await _dbContext.Certifications
+                .AsNoTracking()
+                .Where(
+                    certification =>
+                        certification.Id == id)
+                .Select(
+                    certification =>
+                        new CertificationDto
+                        {
+                            Id =
+                                certification.Id,
 
-                        PersonName =
-                            certification.PersonName,
+                            PersonName =
+                                certification.PersonName,
 
-                        CertificationName =
-                            certification.CertificationName,
+                            CertificationName =
+                                certification.CertificationName,
 
-                        Status =
-                            certification.Status,
+                            Status =
+                                certification.Status,
 
-                        DateCompleted =
-                            certification.DateCompleted,
+                            DateCompleted =
+                                certification.DateCompleted,
 
-                        ExpiryDate =
-                            certification.ExpiryDate,
+                            ExpiryDate =
+                                certification.ExpiryDate,
 
-                        PracticeLead =
-                            certification.PracticeLead,
+                            PracticeLead =
+                                certification.PracticeLead,
 
-                        RebateImpact =
-                            certification.RebateImpact,
+                            RebateImpact =
+                                certification.RebateImpact,
 
-                        Notes =
-                            certification.Notes,
+                            Notes =
+                                certification.Notes,
 
-                        VendorId =
-                            certification.VendorId,
+                            VendorId =
+                                certification.VendorId,
 
-                        VendorName =
-                            certification.Vendor.Name,
+                            VendorName =
+                                certification.Vendor.Name,
 
-                        CreatedAtUtc =
-                            certification.CreatedAtUtc,
+                            CreatedAtUtc =
+                                certification.CreatedAtUtc,
 
-                        UpdatedAtUtc =
-                            certification.UpdatedAtUtc
-                    })
-            .SingleOrDefaultAsync(
-                cancellationToken);
+                            UpdatedAtUtc =
+                                certification.UpdatedAtUtc
+                        })
+                .SingleOrDefaultAsync(
+                    cancellationToken);
+
+        return certification is null
+            ? null
+            : NormalizeCertificationDto(
+                certification);
+    }
+
+    // =========================================================
+    // EFFECTIVE STATUS
+    //
+    // Archived always wins.
+    //
+    // Otherwise, if the expiry date has already passed,
+    // the API reports Expired even when older imported data
+    // still contains Complete/InProgress/etc.
+    //
+    // This does not silently rewrite historical database rows.
+    // =========================================================
+
+    private static CertificationStatus
+        GetEffectiveStatus(
+            CertificationStatus storedStatus,
+            DateOnly? expiryDate)
+    {
+        if (
+            storedStatus ==
+            CertificationStatus.Archived)
+        {
+            return CertificationStatus.Archived;
+        }
+
+        if (
+            expiryDate.HasValue &&
+            expiryDate.Value <
+                GetToday())
+        {
+            return CertificationStatus.Expired;
+        }
+
+        return storedStatus;
+    }
+
+    // =========================================================
+    // RENEWAL STATUS
+    //
+    // Example:
+    //
+    // Existing cert:
+    // Expired / 2026-08-01
+    //
+    // Admin edits:
+    // Expired / 2027-08-01
+    //
+    // Result:
+    // Complete / 2027-08-01
+    //
+    // If the admin deliberately selects another valid status
+    // such as InProgress, that selected status is preserved.
+    // =========================================================
+
+    private static CertificationStatus
+        ResolveUpdatedStatus(
+            CertificationStatus requestedStatus,
+            DateOnly? expiryDate)
+    {
+        if (
+            requestedStatus ==
+            CertificationStatus.Archived)
+        {
+            return CertificationStatus.Archived;
+        }
+
+        if (
+            requestedStatus ==
+                CertificationStatus.Expired &&
+            expiryDate.HasValue &&
+            expiryDate.Value >=
+                GetToday())
+        {
+            return CertificationStatus.Complete;
+        }
+
+        return requestedStatus;
+    }
+
+    // =========================================================
+    // DTO NORMALIZATION
+    // =========================================================
+
+    private static CertificationDto
+        NormalizeCertificationDto(
+            CertificationDto certification)
+    {
+        return new CertificationDto
+        {
+            Id =
+                certification.Id,
+
+            PersonName =
+                certification.PersonName,
+
+            CertificationName =
+                certification.CertificationName,
+
+            Status =
+                GetEffectiveStatus(
+                    certification.Status,
+                    certification.ExpiryDate),
+
+            DateCompleted =
+                certification.DateCompleted,
+
+            ExpiryDate =
+                certification.ExpiryDate,
+
+            PracticeLead =
+                certification.PracticeLead,
+
+            RebateImpact =
+                certification.RebateImpact,
+
+            Notes =
+                certification.Notes,
+
+            VendorId =
+                certification.VendorId,
+
+            VendorName =
+                certification.VendorName,
+
+            CreatedAtUtc =
+                certification.CreatedAtUtc,
+
+            UpdatedAtUtc =
+                certification.UpdatedAtUtc
+        };
     }
 
     // =========================================================
@@ -610,6 +854,12 @@ public sealed class CertificationsController : ControllerBase
             !expiryDate.HasValue ||
             expiryDate.Value >=
                 completedDate.Value;
+    }
+
+    private static DateOnly GetToday()
+    {
+        return DateOnly.FromDateTime(
+            DateTime.UtcNow);
     }
 
     private static string?

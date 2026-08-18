@@ -15,27 +15,29 @@ export function buildPeopleCoverage(
     }
   >();
 
-  certifications.forEach((certification) => {
-    const displayName = certification.personName.trim();
+  certifications
+    .filter((certification) => certification.status !== "Archived")
+    .forEach((certification) => {
+      const displayName = certification.personName.trim();
 
-    if (!displayName) {
-      return;
-    }
+      if (!displayName) {
+        return;
+      }
 
-    const normalizedName = displayName.toLocaleLowerCase();
+      const normalizedName = displayName.toLocaleLowerCase();
 
-    const existing = groupedCertifications.get(normalizedName);
+      const existing = groupedCertifications.get(normalizedName);
 
-    if (existing) {
-      existing.certifications.push(certification);
-      return;
-    }
+      if (existing) {
+        existing.certifications.push(certification);
+        return;
+      }
 
-    groupedCertifications.set(normalizedName, {
-      displayName,
-      certifications: [certification],
+      groupedCertifications.set(normalizedName, {
+        displayName,
+        certifications: [certification],
+      });
     });
-  });
 
   return Array.from(groupedCertifications.values())
     .map(({ displayName, certifications: records }) => {

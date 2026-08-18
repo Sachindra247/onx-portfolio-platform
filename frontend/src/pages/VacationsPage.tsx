@@ -5,13 +5,17 @@ import VacationOverview from "../components/vacations/overview/VacationOverview"
 import TeamVacationCalendar from "../components/vacations/calendar/TeamVacationCalendar";
 
 import PeopleBalancesView from "../components/vacations/people/PeopleBalancesView";
+
 import CoverageWarningsView from "../components/vacations/coverage/CoverageWarningsView";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+
+import { useSearchParams } from "react-router-dom";
 
 import LeaveRequestsView from "../components/vacations/requests/LeaveRequestsView";
 
 import LeaveRequestFormModal from "../components/vacations/requests/LeaveRequestFormModal";
+
 import LeaveRequestDeleteModal from "../components/vacations/requests/LeaveRequestDeleteModal";
 
 import {
@@ -32,32 +36,66 @@ import type { VacationSection } from "../components/vacations/dashboard/Vacation
 export default function VacationsPage() {
   const { user } = useAuth();
 
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const requestedSection = searchParams.get("section");
+
+  const requestedStatus = searchParams.get("status");
+
+  const requestedEmployee = searchParams.get("employee");
+
   const canReviewVacation = Boolean(
     user?.isGlobalAdministrator ||
     (user?.role === "Manager" && user?.vacationAccess === "Admin"),
   );
 
-  const [modalIsOpen, setModalIsOpen] = useState(false);
+  // =========================================================
+  // PAGE DATA
+  // =========================================================
 
-  const [selectedLeaveRequest, setSelectedLeaveRequest] =
-    useState<LeaveRequestDto | null>(null);
-
-  const [leaveRequestPendingDelete, setLeaveRequestPendingDelete] =
-    useState<LeaveRequestDto | null>(null);
-
-  const [isSaving, setIsSaving] = useState(false);
-
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  const [formError, setFormError] = useState<string | null>(null);
   const [leaveRequests, setLeaveRequests] = useState<LeaveRequestDto[]>([]);
 
   const [isLoading, setIsLoading] = useState(true);
 
   const [loadError, setLoadError] = useState<string | null>(null);
 
+  // =========================================================
+  // ACTIVE SECTION
+  // =========================================================
+
+  const [activeSection, setActiveSection] = useState<VacationSection>(
+    isVacationSection(requestedSection) ? requestedSection : "overview",
+  );
+
+  // =========================================================
+  // CREATE / EDIT
+  // =========================================================
+
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+
+  const [selectedLeaveRequest, setSelectedLeaveRequest] =
+    useState<LeaveRequestDto | null>(null);
+
+  const [isSaving, setIsSaving] = useState(false);
+
+  const [formError, setFormError] = useState<string | null>(null);
+
+  // =========================================================
+  // DELETE
+  // =========================================================
+
+  const [leaveRequestPendingDelete, setLeaveRequestPendingDelete] =
+    useState<LeaveRequestDto | null>(null);
+
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // =========================================================
+  // LOAD DATA
+  // =========================================================
+
   const loadLeaveRequests = useCallback(async () => {
     setIsLoading(true);
+
     setLoadError(null);
 
     try {
@@ -78,23 +116,89 @@ export default function VacationsPage() {
   useEffect(() => {
     void loadLeaveRequests();
   }, [loadLeaveRequests]);
-  const [activeSection, setActiveSection] =
-    useState<VacationSection>("overview");
+
+  // =========================================================
+  // RESPOND TO URL SECTION CHANGES
+  // =========================================================
+
+  useEffect(() => {
+    if (isVacationSection(requestedSection)) {
+      setActiveSection(requestedSection);
+    }
+  }, [requestedSection]);
+
+  // =========================================================
+  // PROFILE / DEEP-LINK FILTERING
+  // =========================================================
+
+  const profileFilteredRequests = useMemo(() => {
+    return leaveRequests.filter((request) => {
+      const matchesEmployee =
+        !requestedEmployee ||
+        normalizeName(request.employeeName) ===
+          normalizeName(requestedEmployee);
+
+      const matchesStatus =
+        !requestedStatus || request.status === requestedStatus;
+
+      return matchesEmployee && matchesStatus;
+    });
+  }, [leaveRequests, requestedEmployee, requestedStatus]);
+
+  const hasProfileFilters = Boolean(requestedEmployee || requestedStatus);
+
+  const requestsForCurrentView = hasProfileFilters
+    ? profileFilteredRequests
+    : leaveRequests;
+
+  // =========================================================
+  // SECTION NAVIGATION
+  // =========================================================
+
+  function handleSectionChange(section: VacationSection) {
+    setActiveSection(section);
+
+    /*
+     * Once the user manually changes sections,
+     * clear Profile-specific employee/status
+     * filters and retain only the destination.
+     */
+    setSearchParams({
+      section,
+    });
+  }
+
+  // =========================================================
+  // CREATE
+  // =========================================================
 
   function handleAddLeaveRequest() {
     setSelectedLeaveRequest(null);
+
     setFormError(null);
+
     setModalIsOpen(true);
   }
+
+  // =========================================================
+  // EDIT
+  // =========================================================
 
   function handleEditLeaveRequest(request: LeaveRequestDto) {
     setSelectedLeaveRequest(request);
+
     setFormError(null);
+
     setModalIsOpen(true);
   }
 
+  // =========================================================
+  // SAVE
+  // =========================================================
+
   async function handleLeaveRequestSubmit(payload: LeaveRequestPayload) {
     setIsSaving(true);
+
     setFormError(null);
 
     try {
@@ -120,6 +224,7 @@ export default function VacationsPage() {
       }
 
       setModalIsOpen(false);
+
       setSelectedLeaveRequest(null);
     } catch (error) {
       setFormError(
@@ -131,6 +236,10 @@ export default function VacationsPage() {
       setIsSaving(false);
     }
   }
+
+  // =========================================================
+  // DELETE
+  // =========================================================
 
   async function handleDeleteLeaveRequest() {
     if (!leaveRequestPendingDelete) {
@@ -160,33 +269,55 @@ export default function VacationsPage() {
     }
   }
 
-  function handleExportCsv() {
-    console.log("Export vacation CSV");
-  }
+  // =========================================================
+  // APPROVE / REJECT
+  // =========================================================
 
   async function handleApproveLeaveRequest(request: LeaveRequestDto) {
     await approveLeaveRequest(request.id);
+
     await loadLeaveRequests();
   }
 
   async function handleRejectLeaveRequest(request: LeaveRequestDto) {
     await rejectLeaveRequest(request.id);
+
     await loadLeaveRequests();
   }
+
+  // =========================================================
+  // EXPORT
+  // =========================================================
+
+  function handleExportCsv() {
+    console.log("Export vacation CSV");
+  }
+
+  // =========================================================
+  // RENDER
+  // =========================================================
 
   return (
     <>
       <VacationsLayout
         activeSection={activeSection}
-        onSectionChange={setActiveSection}
+        onSectionChange={handleSectionChange}
         onAddLeaveRequest={handleAddLeaveRequest}
         onExportCsv={handleExportCsv}
       >
+        {/* =================================================
+            OVERVIEW
+           ================================================= */}
+
         {activeSection === "overview" && (
           <section className="vacations-section">
             <VacationOverview leaveRequests={leaveRequests} />
           </section>
         )}
+
+        {/* =================================================
+            TEAM CALENDAR
+           ================================================= */}
 
         {activeSection === "calendar" && (
           <section className="vacations-section">
@@ -197,10 +328,14 @@ export default function VacationsPage() {
           </section>
         )}
 
+        {/* =================================================
+            LEAVE REQUESTS
+           ================================================= */}
+
         {activeSection === "requests" && (
           <section className="vacations-section">
             <LeaveRequestsView
-              requests={leaveRequests}
+              requests={requestsForCurrentView}
               isLoading={isLoading}
               error={loadError}
               onRetry={() => void loadLeaveRequests()}
@@ -213,11 +348,19 @@ export default function VacationsPage() {
           </section>
         )}
 
+        {/* =================================================
+            PEOPLE & BALANCES
+           ================================================= */}
+
         {activeSection === "people" && (
           <section className="vacations-section">
             <PeopleBalancesView requests={leaveRequests} />
           </section>
         )}
+
+        {/* =================================================
+            COVERAGE WARNINGS
+           ================================================= */}
 
         {activeSection === "coverage" && (
           <section className="vacations-section">
@@ -225,6 +368,10 @@ export default function VacationsPage() {
           </section>
         )}
       </VacationsLayout>
+
+      {/* =====================================================
+          CREATE / EDIT MODAL
+         ===================================================== */}
 
       <LeaveRequestFormModal
         isOpen={modalIsOpen}
@@ -237,11 +384,17 @@ export default function VacationsPage() {
           }
 
           setModalIsOpen(false);
+
           setSelectedLeaveRequest(null);
+
           setFormError(null);
         }}
         onSubmit={handleLeaveRequestSubmit}
       />
+
+      {/* =====================================================
+          DELETE MODAL
+         ===================================================== */}
 
       <LeaveRequestDeleteModal
         request={leaveRequestPendingDelete}
@@ -255,4 +408,22 @@ export default function VacationsPage() {
       />
     </>
   );
+}
+
+// =========================================================
+// HELPERS
+// =========================================================
+
+function isVacationSection(value: string | null): value is VacationSection {
+  return (
+    value === "overview" ||
+    value === "calendar" ||
+    value === "requests" ||
+    value === "people" ||
+    value === "coverage"
+  );
+}
+
+function normalizeName(value: string): string {
+  return value.trim().replace(/\s+/g, " ").toLocaleLowerCase();
 }
