@@ -5,13 +5,46 @@ namespace OnXPortfolio.Application.Certifications;
 
 public sealed class UpdateCertificationRequest
 {
+    public Guid? CertificationPersonId {
+        get;
+        set;
+    }
+
+    public Guid? PersonApplicationUserId {
+        get;
+        set;
+    }
+
     [Required]
     [StringLength(200)]
-    public string PersonName { get; set; } = string.Empty;
+    public string PersonName { get; set; } =
+        string.Empty;
+
+    [EmailAddress]
+    [StringLength(320)]
+    public string? PersonEmail { get; set; }
+
+    public Guid? ManagerCertificationPersonId {
+        get;
+        set;
+    }
+
+    public Guid? ManagerApplicationUserId {
+        get;
+        set;
+    }
+
+    [StringLength(200)]
+    public string? ManagerName { get; set; }
+
+    [EmailAddress]
+    [StringLength(320)]
+    public string? ManagerEmail { get; set; }
 
     [Required]
     [StringLength(400)]
-    public string CertificationName { get; set; } = string.Empty;
+    public string CertificationName { get; set; } =
+        string.Empty;
 
     [Required]
     public CertificationStatus Status { get; set; }

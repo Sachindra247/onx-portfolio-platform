@@ -10,59 +10,93 @@ public sealed class CertificationConfiguration :
     public void Configure(
         EntityTypeBuilder<Certification> builder)
     {
-        builder.ToTable("Certifications");
+        builder.ToTable(
+            "Certifications");
 
-        builder.HasKey(certification => certification.Id);
+        builder.HasKey(
+            certification =>
+                certification.Id);
 
-        builder.Property(certification =>
-                certification.PersonName)
+        builder.Property(
+                certification =>
+                    certification.PersonName)
             .HasMaxLength(200)
             .IsRequired();
 
-        builder.Property(certification =>
-                certification.CertificationName)
+        builder.Property(
+                certification =>
+                    certification.CertificationName)
             .HasMaxLength(400)
             .IsRequired();
 
-        builder.Property(certification =>
-                certification.Status)
+        builder.Property(
+                certification =>
+                    certification.Status)
             .HasConversion<string>()
             .HasMaxLength(30)
             .IsRequired();
 
-        builder.Property(certification =>
-                certification.PracticeLead)
+        builder.Property(
+                certification =>
+                    certification.PracticeLead)
             .HasMaxLength(300);
 
-        builder.Property(certification =>
-                certification.RebateImpact)
+        builder.Property(
+                certification =>
+                    certification.RebateImpact)
             .HasMaxLength(500);
 
-        builder.Property(certification =>
-                certification.Notes)
+        builder.Property(
+                certification =>
+                    certification.Notes)
             .HasMaxLength(3000);
 
-        builder.HasOne(certification =>
-                certification.Vendor)
-            .WithMany(vendor =>
-                vendor.Certifications)
-            .HasForeignKey(certification =>
-                certification.VendorId)
-            .OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne(
+                certification =>
+                    certification.Vendor)
+            .WithMany(
+                vendor =>
+                    vendor.Certifications)
+            .HasForeignKey(
+                certification =>
+                    certification.VendorId)
+            .OnDelete(
+                DeleteBehavior.Restrict);
 
-        builder.HasIndex(certification =>
-            certification.PersonName);
+        builder.HasOne(
+                certification =>
+                    certification.CertificationPerson)
+            .WithMany(
+                person =>
+                    person.Certifications)
+            .HasForeignKey(
+                certification =>
+                    certification.CertificationPersonId)
+            .OnDelete(
+                DeleteBehavior.SetNull);
 
-        builder.HasIndex(certification =>
-            certification.CertificationName);
+        builder.HasIndex(
+            certification =>
+                certification.PersonName);
 
-        builder.HasIndex(certification =>
-            certification.Status);
+        builder.HasIndex(
+            certification =>
+                certification.CertificationName);
 
-        builder.HasIndex(certification =>
-            certification.ExpiryDate);
+        builder.HasIndex(
+            certification =>
+                certification.Status);
 
-        builder.HasIndex(certification =>
-            certification.VendorId);
+        builder.HasIndex(
+            certification =>
+                certification.ExpiryDate);
+
+        builder.HasIndex(
+            certification =>
+                certification.VendorId);
+
+        builder.HasIndex(
+            certification =>
+                certification.CertificationPersonId);
     }
 }

@@ -19,7 +19,18 @@ export type CertificationsSection =
 
 export interface CertificationDto {
   id: string;
+
+  certificationPersonId: string | null;
+  personApplicationUserId: string | null;
+
   personName: string;
+  personEmail: string | null;
+
+  managerCertificationPersonId: string | null;
+  managerApplicationUserId: string | null;
+  managerName: string | null;
+  managerEmail: string | null;
+
   certificationName: string;
   status: CertificationStatus;
   dateCompleted: string | null;
@@ -34,7 +45,17 @@ export interface CertificationDto {
 }
 
 export interface CertificationRequest {
+  certificationPersonId: string | null;
+  personApplicationUserId: string | null;
+
   personName: string;
+  personEmail: string | null;
+
+  managerCertificationPersonId: string | null;
+  managerApplicationUserId: string | null;
+  managerName: string | null;
+  managerEmail: string | null;
+
   certificationName: string;
   status: CertificationStatus;
   dateCompleted: string | null;
@@ -46,7 +67,17 @@ export interface CertificationRequest {
 }
 
 export interface CertificationFormValues {
+  certificationPersonId: string;
+  personApplicationUserId: string;
+
   personName: string;
+  personEmail: string;
+
+  managerCertificationPersonId: string;
+  managerApplicationUserId: string;
+  managerName: string;
+  managerEmail: string;
+
   certificationName: string;
   status: CertificationStatus;
   dateCompleted: string;
@@ -55,6 +86,21 @@ export interface CertificationFormValues {
   rebateImpact: string;
   notes: string;
   vendorId: string;
+}
+
+export interface CertificationPersonLookupDto {
+  certificationPersonId: string | null;
+  applicationUserId: string | null;
+
+  name: string;
+  email: string | null;
+
+  managerCertificationPersonId: string | null;
+  managerApplicationUserId: string | null;
+  managerName: string | null;
+  managerEmail: string | null;
+
+  isApplicationUser: boolean;
 }
 
 export interface CertificationVendorDto {

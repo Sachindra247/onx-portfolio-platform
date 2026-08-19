@@ -6,9 +6,44 @@ public sealed class CertificationDto
 {
     public Guid Id { get; set; }
 
-    public string PersonName { get; set; } = string.Empty;
+    public Guid? CertificationPersonId {
+        get;
+        set;
+    }
 
-    public string CertificationName { get; set; } = string.Empty;
+    public Guid? PersonApplicationUserId {
+        get;
+        set;
+    }
+
+    public string PersonName { get; set; } =
+        string.Empty;
+
+    public string? PersonEmail { get; set; }
+
+    public Guid? ManagerCertificationPersonId {
+        get;
+        set;
+    }
+
+    public Guid? ManagerApplicationUserId {
+        get;
+        set;
+    }
+
+    public string? ManagerName { get; set; }
+
+    /*
+     * Returned so Edit can preserve a manually
+     * created manager record.
+     *
+     * We don't have to visibly display this
+     * when the manager came from ApplicationUser.
+     */
+    public string? ManagerEmail { get; set; }
+
+    public string CertificationName { get; set; } =
+        string.Empty;
 
     public CertificationStatus Status { get; set; }
 
@@ -24,7 +59,8 @@ public sealed class CertificationDto
 
     public Guid VendorId { get; set; }
 
-    public string VendorName { get; set; } = string.Empty;
+    public string VendorName { get; set; } =
+        string.Empty;
 
     public DateTimeOffset CreatedAtUtc { get; set; }
 

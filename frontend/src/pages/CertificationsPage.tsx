@@ -497,7 +497,21 @@ export default function CertificationsPage() {
     setFormError(null);
 
     const request: CertificationRequest = {
+      certificationPersonId: values.certificationPersonId || null,
+
+      personApplicationUserId: values.personApplicationUserId || null,
+
       personName: values.personName.trim(),
+
+      personEmail: values.personEmail.trim() || null,
+
+      managerCertificationPersonId: values.managerCertificationPersonId || null,
+
+      managerApplicationUserId: values.managerApplicationUserId || null,
+
+      managerName: values.managerName.trim() || null,
+
+      managerEmail: values.managerEmail.trim() || null,
 
       certificationName: values.certificationName.trim(),
 

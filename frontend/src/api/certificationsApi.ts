@@ -2,6 +2,7 @@ import { httpClient } from "./httpClient";
 
 import type {
   CertificationDto,
+  CertificationPersonLookupDto,
   CertificationRequest,
 } from "../types/certifications";
 
@@ -61,4 +62,21 @@ export async function updateCertification(
 
 export async function deleteCertification(id: string): Promise<void> {
   await httpClient.delete(`/api/certifications/${id}`);
+}
+
+export async function searchCertificationPeople(
+  query: string,
+  signal?: AbortSignal,
+): Promise<CertificationPersonLookupDto[]> {
+  const response = await httpClient.get<CertificationPersonLookupDto[]>(
+    "/api/certifications/people/search",
+    {
+      signal,
+      params: {
+        q: query,
+      },
+    },
+  );
+
+  return response.data;
 }
