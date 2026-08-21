@@ -203,17 +203,21 @@ public static class ApplicationUserSeeder
             cancellationToken);
     }
 
-    private static bool IsGlobalAdministrator(
-        string email)
-    {
-        return email.Equals(
-                   "joel.william@onx.com",
-                   StringComparison.OrdinalIgnoreCase)
-               ||
-               email.Equals(
-                   "srimal.sachindra@onx.com",
-                   StringComparison.OrdinalIgnoreCase);
-    }
+   private static bool IsGlobalAdministrator(
+    string email)
+{
+    return email.Equals(
+               "joel.william@onx.com",
+               StringComparison.OrdinalIgnoreCase)
+           ||
+           email.Equals(
+               "srimal.sachindra@onx.com",
+               StringComparison.OrdinalIgnoreCase)
+           ||
+           email.Equals(
+               "sherif.mahmoud@onx.com",
+               StringComparison.OrdinalIgnoreCase);
+}
 
     private static IReadOnlyList<UserSeedData>
         GetUsers()
@@ -506,9 +510,8 @@ public static class ApplicationUserSeeder
                 UserRole.Member,
                 "ISR"),
 
-            // Spreadsheet gives Sherif admin
-            // access to all three modules.
-            // He is NOT marked as Global Admin.
+            // Sherif has Admin access to all three modules
+// and is a Global Administrator.
             User(
                 "Sherif",
                 "Mahmoud",

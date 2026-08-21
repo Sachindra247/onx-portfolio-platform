@@ -23,6 +23,7 @@ public static class BetaAuthenticationSeeder
                     configuration[
                         "BetaAuth:JoelPassword"]
             },
+
             new
             {
                 Email = "srimal.sachindra@onx.com",
@@ -30,20 +31,30 @@ public static class BetaAuthenticationSeeder
                     configuration[
                         "BetaAuth:SachindraPassword"]
             },
+
             new
-    {
-        Email = "sabrina.jubran@onx.com",
-        Password =
-            configuration[
-                "BetaAuth:SabrinaPassword"]
-    },
-    new
-    {
-        Email = "raed.jabak@onx.com",
-        Password =
-            configuration[
-                "BetaAuth:RaedPassword"]
-    }
+            {
+                Email = "sabrina.jubran@onx.com",
+                Password =
+                    configuration[
+                        "BetaAuth:SabrinaPassword"]
+            },
+
+            new
+            {
+                Email = "raed.jabak@onx.com",
+                Password =
+                    configuration[
+                        "BetaAuth:RaedPassword"]
+            },
+
+            new
+            {
+                Email = "sherif.mahmoud@onx.com",
+                Password =
+                    configuration[
+                        "BetaAuth:SherifPassword"]
+            }
         };
 
         foreach (var credential in credentials)
@@ -67,28 +78,51 @@ public static class BetaAuthenticationSeeder
                 continue;
             }
 
-            // Only create the password once.
-
-            // if (string.IsNullOrWhiteSpace(
-            //         user.PasswordHash))
-            // {
-            //     user.PasswordHash =
-            //         passwordHasher.HashPassword(
-            //             user,
-            //             credential.Password);
-            // }
-
-            // user.LoginEnabled = true;
-            // user.UpdatedAtUtc =
-            //     DateTimeOffset.UtcNow;
+            /*
+             * Hash the configured beta password.
+             *
+             * This intentionally refreshes the hash
+             * whenever the configured beta password
+             * changes.
+             */
             user.PasswordHash =
-    passwordHasher.HashPassword(
-        user,
-        credential.Password);
+                passwordHasher.HashPassword(
+                    user,
+                    credential.Password);
 
-user.LoginEnabled = true;
-user.UpdatedAtUtc =
-    DateTimeOffset.UtcNow;
+            user.LoginEnabled =
+                true;
+
+            /*
+             * Sherif is now a Global Administrator.
+             *
+             * Keeping this here is important because
+             * ApplicationUserSeeder does not rerun its
+             * user creation/update logic once the
+             * database already contains users.
+             */
+            if (user.Email.Equals(
+                    "sherif.mahmoud@onx.com",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                user.IsGlobalAdministrator =
+                    true;
+
+                user.Role =
+                    UserRole.Manager;
+
+                user.CertificationsAccess =
+                    ModuleAccess.Admin;
+
+                user.EventsAccess =
+                    ModuleAccess.Admin;
+
+                user.VacationAccess =
+                    ModuleAccess.Admin;
+            }
+
+            user.UpdatedAtUtc =
+                DateTimeOffset.UtcNow;
         }
 
         await dbContext.SaveChangesAsync(
