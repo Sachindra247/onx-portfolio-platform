@@ -1,4 +1,5 @@
 import { CalendarRange, Pencil, Search, Trash2 } from "lucide-react";
+
 import { useMemo, useState } from "react";
 
 import type {
@@ -9,8 +10,19 @@ import type {
 
 interface LeaveRequestsViewProps {
   requests: LeaveRequestDto[];
+
   isLoading: boolean;
+
   error: string | null;
+
+  /*
+   * Used only to decide which actions should
+   * be displayed in the UI.
+   *
+   * The backend remains the authoritative
+   * permission check.
+   */
+  currentUserName: string;
 
   onRetry: () => void;
 
@@ -29,6 +41,7 @@ export default function LeaveRequestsView({
   requests,
   isLoading,
   error,
+  currentUserName,
   onRetry,
   onEdit,
   onDelete,
@@ -45,6 +58,10 @@ export default function LeaveRequestsView({
   const [reviewingRequestId, setReviewingRequestId] = useState<string | null>(
     null,
   );
+
+  // =========================================================
+  // FILTERING
+  // =========================================================
 
   const filteredRequests = useMemo(() => {
     const normalizedSearch = search.trim().toLocaleLowerCase();
@@ -64,6 +81,10 @@ export default function LeaveRequestsView({
       return matchesSearch && matchesStatus && matchesType;
     });
   }, [requests, search, statusFilter, typeFilter]);
+
+  // =========================================================
+  // REVIEW
+  // =========================================================
 
   async function handleApprove(request: LeaveRequestDto) {
     if (reviewingRequestId) {
@@ -93,6 +114,10 @@ export default function LeaveRequestsView({
     }
   }
 
+  // =========================================================
+  // LOADING
+  // =========================================================
+
   if (isLoading) {
     return (
       <div className="leave-requests-state">
@@ -104,6 +129,10 @@ export default function LeaveRequestsView({
       </div>
     );
   }
+
+  // =========================================================
+  // ERROR
+  // =========================================================
 
   if (error) {
     return (
@@ -119,8 +148,16 @@ export default function LeaveRequestsView({
     );
   }
 
+  // =========================================================
+  // RENDER
+  // =========================================================
+
   return (
     <div className="leave-requests-view">
+      {/* =====================================================
+          FILTERS
+         ===================================================== */}
+
       <section className="leave-requests-toolbar">
         <div className="leave-requests-search">
           <Search size={16} aria-hidden="true" />
@@ -197,12 +234,16 @@ export default function LeaveRequestsView({
         </span>
       </section>
 
+      {/* =====================================================
+          TABLE
+         ===================================================== */}
+
       <section className="leave-requests-card">
         <header className="leave-requests-card__header">
           <div>
             <h2>Leave requests</h2>
 
-            <p>Review and manage team leave records</p>
+            <p>Review and manage permitted leave records</p>
           </div>
 
           <span>{filteredRequests.length} records</span>
@@ -237,10 +278,45 @@ export default function LeaveRequestsView({
                 {filteredRequests.map((request) => {
                   const isReviewing = reviewingRequestId === request.id;
 
+                  /*
+                   * UI ownership check.
+                   *
+                   * Backend authorization still
+                   * performs the real security
+                   * validation.
+                   */
+                  const isOwner =
+                    normalizeName(request.employeeName) ===
+                    normalizeName(currentUserName);
+
+                  /*
+                   * Users may only edit/delete
+                   * their OWN Pending or Draft
+                   * requests.
+                   */
+                  const canModify =
+                    isOwner &&
+                    (request.status === "Pending" ||
+                      request.status === "Draft");
+
+                  /*
+                   * Reviewers may only review
+                   * ANOTHER person's Pending
+                   * request.
+                   */
+                  const canReviewRequest =
+                    canReview && !isOwner && request.status === "Pending";
+
+                  const hasActions = canModify || canReviewRequest;
+
                   return (
                     <tr key={request.id}>
                       <td>
                         <strong>{request.employeeName}</strong>
+
+                        {isOwner && (
+                          <span className="leave-request-owner-badge">You</span>
+                        )}
                       </td>
 
                       <td>
@@ -282,50 +358,66 @@ export default function LeaveRequestsView({
                       </td>
 
                       <td>
-                        <div className="leave-request-actions">
-                          {canReview && request.status === "Pending" && (
-                            <>
-                              <button
-                                type="button"
-                                className="leave-request-actions__approve"
-                                title="Approve request"
-                                disabled={isReviewing}
-                                onClick={() => void handleApprove(request)}
-                              >
-                                {isReviewing ? "..." : "Approve"}
-                              </button>
+                        {hasActions ? (
+                          <div className="leave-request-actions">
+                            {/* =================================
+                                  APPROVE / REJECT
+                                 ================================= */}
 
-                              <button
-                                type="button"
-                                className="leave-request-actions__reject"
-                                title="Reject request"
-                                disabled={isReviewing}
-                                onClick={() => void handleReject(request)}
-                              >
-                                {isReviewing ? "..." : "Reject"}
-                              </button>
-                            </>
-                          )}
+                            {canReviewRequest && (
+                              <>
+                                <button
+                                  type="button"
+                                  className="leave-request-actions__approve"
+                                  title="Approve request"
+                                  disabled={isReviewing}
+                                  onClick={() => void handleApprove(request)}
+                                >
+                                  {isReviewing ? "..." : "Approve"}
+                                </button>
 
-                          <button
-                            type="button"
-                            aria-label={`Edit leave request for ${request.employeeName}`}
-                            title="Edit request"
-                            onClick={() => onEdit(request)}
-                          >
-                            <Pencil size={14} aria-hidden="true" />
-                          </button>
+                                <button
+                                  type="button"
+                                  className="leave-request-actions__reject"
+                                  title="Reject request"
+                                  disabled={isReviewing}
+                                  onClick={() => void handleReject(request)}
+                                >
+                                  {isReviewing ? "..." : "Reject"}
+                                </button>
+                              </>
+                            )}
 
-                          <button
-                            type="button"
-                            className="leave-request-actions__delete"
-                            aria-label={`Delete leave request for ${request.employeeName}`}
-                            title="Delete request"
-                            onClick={() => onDelete(request)}
-                          >
-                            <Trash2 size={14} aria-hidden="true" />
-                          </button>
-                        </div>
+                            {/* =================================
+                                  OWNER EDIT / DELETE
+                                 ================================= */}
+
+                            {canModify && (
+                              <>
+                                <button
+                                  type="button"
+                                  aria-label={`Edit your leave request starting ${request.startDate}`}
+                                  title="Edit your request"
+                                  onClick={() => onEdit(request)}
+                                >
+                                  <Pencil size={14} aria-hidden="true" />
+                                </button>
+
+                                <button
+                                  type="button"
+                                  className="leave-request-actions__delete"
+                                  aria-label={`Delete your leave request starting ${request.startDate}`}
+                                  title="Delete your request"
+                                  onClick={() => onDelete(request)}
+                                >
+                                  <Trash2 size={14} aria-hidden="true" />
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="leave-request-actions__none">—</span>
+                        )}
                       </td>
                     </tr>
                   );
@@ -347,6 +439,10 @@ export default function LeaveRequestsView({
   );
 }
 
+// =========================================================
+// LEAVE TYPE
+// =========================================================
+
 function formatLeaveType(leaveType: LeaveType): string {
   switch (leaveType) {
     case "Sick":
@@ -365,6 +461,10 @@ function formatLeaveType(leaveType: LeaveType): string {
       return leaveType;
   }
 }
+
+// =========================================================
+// WORKING DAYS
+// =========================================================
 
 function countWorkingDays(startValue: string, endValue: string): number {
   const startDate = parseDate(startValue);
@@ -392,6 +492,10 @@ function countWorkingDays(startValue: string, endValue: string): number {
   return count;
 }
 
+// =========================================================
+// DATE
+// =========================================================
+
 function formatDate(value: string): string {
   const date = parseDate(value);
 
@@ -414,4 +518,12 @@ function parseDate(value: string): Date | null {
   }
 
   return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+}
+
+// =========================================================
+// NAME NORMALIZATION
+// =========================================================
+
+function normalizeName(value: string): string {
+  return value.trim().replace(/\s+/g, " ").toLocaleLowerCase();
 }

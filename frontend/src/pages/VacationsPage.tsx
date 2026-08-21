@@ -168,6 +168,15 @@ export default function VacationsPage() {
     });
   }
 
+  function handleViewPersonRequests(employeeName: string) {
+    setActiveSection("requests");
+
+    setSearchParams({
+      section: "requests",
+      employee: employeeName,
+    });
+  }
+
   // =========================================================
   // CREATE
   // =========================================================
@@ -338,6 +347,7 @@ export default function VacationsPage() {
               requests={requestsForCurrentView}
               isLoading={isLoading}
               error={loadError}
+              currentUserName={user ? `${user.firstName} ${user.lastName}` : ""}
               onRetry={() => void loadLeaveRequests()}
               onEdit={handleEditLeaveRequest}
               onDelete={setLeaveRequestPendingDelete}
@@ -354,7 +364,11 @@ export default function VacationsPage() {
 
         {activeSection === "people" && (
           <section className="vacations-section">
-            <PeopleBalancesView requests={leaveRequests} />
+            <PeopleBalancesView
+              requests={leaveRequests}
+              isGlobalAdministrator={Boolean(user?.isGlobalAdministrator)}
+              onViewRequests={handleViewPersonRequests}
+            />
           </section>
         )}
 

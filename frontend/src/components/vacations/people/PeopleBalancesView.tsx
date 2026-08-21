@@ -1,10 +1,14 @@
-import { CalendarDays, Palmtree, Users } from "lucide-react";
+import { ArrowRight, CalendarDays, Palmtree, Users } from "lucide-react";
 import { useMemo } from "react";
 
 import type { LeaveRequestDto } from "../../../types/vacations";
 
 interface PeopleBalancesViewProps {
   requests: LeaveRequestDto[];
+
+  isGlobalAdministrator: boolean;
+
+  onViewRequests: (employeeName: string) => void;
 }
 
 interface PersonSummary {
@@ -18,51 +22,93 @@ interface PersonSummary {
 
 export default function PeopleBalancesView({
   requests,
+  isGlobalAdministrator,
+  onViewRequests,
 }: PeopleBalancesViewProps) {
   const people = useMemo(() => buildPeopleSummaries(requests), [requests]);
 
+  const approvedVacationDays = people.reduce(
+    (total, person) => total + person.approvedVacationDays,
+    0,
+  );
+
+  const pendingDays = people.reduce(
+    (total, person) => total + person.pendingDays,
+    0,
+  );
+
   return (
     <div className="vacation-people-view">
+      {/* =====================================================
+          HEADING
+         ===================================================== */}
+
+      <header className="vacation-people-view__heading">
+        <div>
+          <h2>People &amp; Balances</h2>
+
+          <p>
+            {isGlobalAdministrator
+              ? "Vacation and leave information across all user groups."
+              : "Vacation and leave information for members of your user group."}
+          </p>
+        </div>
+
+        <span className="vacation-people-view__scope">
+          <Users size={14} aria-hidden="true" />
+
+          {isGlobalAdministrator ? "All groups" : "My group"}
+        </span>
+      </header>
+
+      {/* =====================================================
+          SUMMARY
+         ===================================================== */}
+
       <section className="vacation-people-summary">
         <article>
           <Users size={18} aria-hidden="true" />
+
           <div>
             <strong>{people.length}</strong>
+
             <span>People tracked</span>
           </div>
         </article>
 
         <article>
           <Palmtree size={18} aria-hidden="true" />
+
           <div>
-            <strong>
-              {people.reduce(
-                (total, person) => total + person.approvedVacationDays,
-                0,
-              )}
-            </strong>
+            <strong>{approvedVacationDays}</strong>
+
             <span>Approved vacation days</span>
           </div>
         </article>
 
         <article>
           <CalendarDays size={18} aria-hidden="true" />
+
           <div>
-            <strong>
-              {people.reduce((total, person) => total + person.pendingDays, 0)}
-            </strong>
+            <strong>{pendingDays}</strong>
+
             <span>Pending days</span>
           </div>
         </article>
       </section>
 
+      {/* =====================================================
+          PEOPLE
+         ===================================================== */}
+
       {people.length > 0 ? (
         <section className="vacation-people-grid">
           {people.map((person) => (
             <article key={person.employeeName} className="vacation-person-card">
-              <header>
+              <header className="vacation-person-card__header">
                 <div>
                   <h3>{person.employeeName}</h3>
+
                   <span>
                     {person.totalRequests}{" "}
                     {person.totalRequests === 1 ? "request" : "requests"}
@@ -73,16 +119,19 @@ export default function PeopleBalancesView({
               <div className="vacation-person-card__metrics">
                 <div>
                   <strong>{person.approvedVacationDays}</strong>
+
                   <span>Vacation</span>
                 </div>
 
                 <div>
                   <strong>{person.pendingDays}</strong>
+
                   <span>Pending</span>
                 </div>
 
                 <div>
                   <strong>{person.sickDays}</strong>
+
                   <span>Sick</span>
                 </div>
               </div>
@@ -107,19 +156,36 @@ export default function PeopleBalancesView({
                   <strong>No upcoming leave</strong>
                 )}
               </div>
+
+              <footer className="vacation-person-card__footer">
+                <button
+                  type="button"
+                  className="vacation-person-card__view-button"
+                  onClick={() => onViewRequests(person.employeeName)}
+                >
+                  View Requests
+                  <ArrowRight size={14} aria-hidden="true" />
+                </button>
+              </footer>
             </article>
           ))}
         </section>
       ) : (
         <div className="vacation-overview-empty">
           <Users size={29} aria-hidden="true" />
+
           <h3>No people data yet</h3>
+
           <p>People summaries will appear after leave requests are created.</p>
         </div>
       )}
     </div>
   );
 }
+
+// =========================================================
+// BUILD PEOPLE SUMMARIES
+// =========================================================
 
 function buildPeopleSummaries(requests: LeaveRequestDto[]): PersonSummary[] {
   const groups = new Map<string, LeaveRequestDto[]>();
@@ -128,6 +194,7 @@ function buildPeopleSummaries(requests: LeaveRequestDto[]): PersonSummary[] {
     const existing = groups.get(request.employeeName) ?? [];
 
     existing.push(request);
+
     groups.set(request.employeeName, existing);
   });
 
@@ -194,8 +261,13 @@ function buildPeopleSummaries(requests: LeaveRequestDto[]): PersonSummary[] {
     );
 }
 
+// =========================================================
+// WORKING DAYS
+// =========================================================
+
 function countWorkingDays(startValue: string, endValue: string): number {
   const startDate = parseDate(startValue);
+
   const endDate = parseDate(endValue);
 
   if (!startDate || !endDate || endDate < startDate) {
@@ -203,6 +275,7 @@ function countWorkingDays(startValue: string, endValue: string): number {
   }
 
   let count = 0;
+
   const current = new Date(startDate);
 
   while (current <= endDate) {
@@ -217,6 +290,10 @@ function countWorkingDays(startValue: string, endValue: string): number {
 
   return count;
 }
+
+// =========================================================
+// DATE HELPERS
+// =========================================================
 
 function startOfToday(): Date {
   const today = new Date();

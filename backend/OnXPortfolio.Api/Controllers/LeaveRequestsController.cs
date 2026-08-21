@@ -54,84 +54,110 @@ public sealed class LeaveRequestsController : ControllerBase
             return Unauthorized();
         }
 
-        var query = _dbContext.LeaveRequests
-            .AsNoTracking()
-            .Include(request => request.EmployeeUser)
-                .ThenInclude(user => user!.Group)
-            .AsQueryable();
+        var query =
+            _dbContext.LeaveRequests
+                .AsNoTracking()
+                .Include(request =>
+                    request.EmployeeUser)
+                .ThenInclude(user =>
+                    user!.Group)
+                .AsQueryable();
 
-        // Normal users and managers can only see
-        // vacation data belonging to their own group.
+        /*
+         * Normal users and managers can only
+         * see Vacation data belonging to their
+         * own Application Group.
+         *
+         * Global Administrators retain
+         * organization-wide visibility.
+         */
         if (!currentUser.IsGlobalAdministrator)
         {
-            query = query.Where(request =>
-                request.EmployeeUser != null &&
-                request.EmployeeUser.GroupId ==
-                    currentUser.GroupId);
+            query =
+                query.Where(
+                    request =>
+                        request.EmployeeUser != null &&
+                        request.EmployeeUser.GroupId ==
+                            currentUser.GroupId);
         }
 
-        if (!string.IsNullOrWhiteSpace(search))
+        if (!string.IsNullOrWhiteSpace(
+                search))
         {
             var normalizedSearch =
                 search.Trim();
 
-            query = query.Where(request =>
-                request.EmployeeName.Contains(
-                    normalizedSearch) ||
-                (
-                    request.Reason != null &&
-                    request.Reason.Contains(
-                        normalizedSearch)
-                ) ||
-                (
-                    request.ApproverName != null &&
-                    request.ApproverName.Contains(
-                        normalizedSearch)
-                ) ||
-                (
-                    request.Notes != null &&
-                    request.Notes.Contains(
-                        normalizedSearch)
-                ));
+            query =
+                query.Where(
+                    request =>
+                        request.EmployeeName.Contains(
+                            normalizedSearch) ||
+                        (
+                            request.Reason != null &&
+                            request.Reason.Contains(
+                                normalizedSearch)
+                        ) ||
+                        (
+                            request.ApproverName != null &&
+                            request.ApproverName.Contains(
+                                normalizedSearch)
+                        ) ||
+                        (
+                            request.Notes != null &&
+                            request.Notes.Contains(
+                                normalizedSearch)
+                        ));
         }
 
         if (leaveType.HasValue)
         {
-            query = query.Where(request =>
-                request.LeaveType ==
-                    leaveType.Value);
+            query =
+                query.Where(
+                    request =>
+                        request.LeaveType ==
+                            leaveType.Value);
         }
 
         if (status.HasValue)
         {
-            query = query.Where(request =>
-                request.Status ==
-                    status.Value);
+            query =
+                query.Where(
+                    request =>
+                        request.Status ==
+                            status.Value);
         }
 
         if (fromDate.HasValue)
         {
-            query = query.Where(request =>
-                request.EndDate >=
-                    fromDate.Value);
+            query =
+                query.Where(
+                    request =>
+                        request.EndDate >=
+                            fromDate.Value);
         }
 
         if (toDate.HasValue)
         {
-            query = query.Where(request =>
-                request.StartDate <=
-                    toDate.Value);
+            query =
+                query.Where(
+                    request =>
+                        request.StartDate <=
+                            toDate.Value);
         }
 
-        var requests = await query
-            .OrderBy(request =>
-                request.StartDate)
-            .ThenBy(request =>
-                request.EmployeeName)
-            .Select(request =>
-                ToDto(request))
-            .ToListAsync(
-                cancellationToken);
+        var requests =
+            await query
+                .OrderBy(
+                    request =>
+                        request.StartDate)
+                .ThenBy(
+                    request =>
+                        request.EmployeeName)
+                .Select(
+                    request =>
+                        ToDto(request))
+                .ToListAsync(
+                    cancellationToken);
 
         return Ok(requests);
     }
@@ -186,11 +212,18 @@ public sealed class LeaveRequestsController : ControllerBase
             return Forbid();
         }
 
-        return Ok(ToDto(leaveRequest));
+        return Ok(
+            ToDto(leaveRequest));
     }
 
     // =========================================================
     // CREATE
+    //
+    // A leave request is always created for the currently
+    // authenticated user.
+    //
+    // The browser cannot create a request for somebody else
+    // and cannot self-approve during creation.
     // =========================================================
 
     [HttpPost]
@@ -233,7 +266,8 @@ public sealed class LeaveRequestsController : ControllerBase
         var leaveRequest =
             new LeaveRequest
             {
-                Id = Guid.NewGuid(),
+                Id =
+                    Guid.NewGuid(),
 
                 EmployeeUserId =
                     currentUser.Id,
@@ -250,8 +284,10 @@ public sealed class LeaveRequestsController : ControllerBase
                 EndDate =
                     request.EndDate,
 
-                // Users cannot approve their own
-                // request during creation.
+                /*
+                 * New leave requests must enter
+                 * the approval workflow.
+                 */
                 Status =
                     LeaveRequestStatus.Pending,
 
@@ -268,8 +304,11 @@ public sealed class LeaveRequestsController : ControllerBase
                     NormalizeOptional(
                         request.Notes),
 
-                CreatedAtUtc = now,
-                UpdatedAtUtc = now
+                CreatedAtUtc =
+                    now,
+
+                UpdatedAtUtc =
+                    now
             };
 
         _dbContext.LeaveRequests.Add(
@@ -282,13 +321,25 @@ public sealed class LeaveRequestsController : ControllerBase
             nameof(GetLeaveRequest),
             new
             {
-                id = leaveRequest.Id
+                id =
+                    leaveRequest.Id
             },
             ToDto(leaveRequest));
     }
 
     // =========================================================
     // UPDATE
+    //
+    // IMPORTANT:
+    //
+    // A leave request can ONLY be edited by the employee
+    // who owns that request.
+    //
+    // Global Administrators and Vacation Administrators
+    // must use Approve / Reject for other employees'
+    // requests. They cannot edit the employee's request.
+    //
+    // Only Pending or Draft requests may be edited.
     // =========================================================
 
     [HttpPut("{id:guid}")]
@@ -348,16 +399,20 @@ public sealed class LeaveRequestsController : ControllerBase
             leaveRequest.EmployeeUserId ==
                 currentUser.Id;
 
+        /*
+         * Only the employee who created the
+         * request can modify it.
+         *
+         * Even Global Administrators do not
+         * receive an edit override.
+         */
         var canEdit =
-            currentUser.IsGlobalAdministrator ||
+            isOwner &&
             (
-                isOwner &&
-                (
-                    leaveRequest.Status ==
-                        LeaveRequestStatus.Pending ||
-                    leaveRequest.Status ==
-                        LeaveRequestStatus.Draft
-                )
+                leaveRequest.Status ==
+                    LeaveRequestStatus.Pending ||
+                leaveRequest.Status ==
+                    LeaveRequestStatus.Draft
             );
 
         if (!canEdit)
@@ -382,39 +437,30 @@ public sealed class LeaveRequestsController : ControllerBase
             NormalizeOptional(
                 request.Notes);
 
-        if (currentUser.IsGlobalAdministrator)
-        {
-            // Global admins may administratively
-            // update status.
-            leaveRequest.Status =
-                request.Status;
+        /*
+         * Editing your own request sends it
+         * through the approval workflow again.
+         *
+         * The Status / Approver values supplied
+         * by the browser are intentionally ignored.
+         */
+        leaveRequest.Status =
+            LeaveRequestStatus.Pending;
 
-            leaveRequest.ApproverName =
-                NormalizeOptional(
-                    request.ApproverName);
-        }
-        else
-        {
-            // Editing your own leave automatically
-            // returns it to Pending.
-            leaveRequest.Status =
-                LeaveRequestStatus.Pending;
+        leaveRequest.ApproverName =
+            currentUser.Manager is null
+                ? null
+                : $"{currentUser.Manager.FirstName} {currentUser.Manager.LastName}";
 
-            // Don't allow the browser payload to
-            // impersonate an approver.
-            leaveRequest.ApproverName =
-                currentUser.Manager is null
-                    ? null
-                    : $"{currentUser.Manager.FirstName} {currentUser.Manager.LastName}";
+        /*
+         * A previous review is no longer valid
+         * after the employee changes the request.
+         */
+        leaveRequest.ReviewedByUserId =
+            null;
 
-            // Any previous review is no longer valid
-            // after the employee changes the request.
-            leaveRequest.ReviewedByUserId =
-                null;
-
-            leaveRequest.ReviewedAtUtc =
-                null;
-        }
+        leaveRequest.ReviewedAtUtc =
+            null;
 
         leaveRequest.UpdatedAtUtc =
             DateTimeOffset.UtcNow;
@@ -428,6 +474,11 @@ public sealed class LeaveRequestsController : ControllerBase
 
     // =========================================================
     // DELETE
+    //
+    // Only the request owner can delete their own
+    // Pending / Draft leave request.
+    //
+    // Admins cannot delete somebody else's request.
     // =========================================================
 
     [HttpDelete("{id:guid}")]
@@ -470,15 +521,12 @@ public sealed class LeaveRequestsController : ControllerBase
                 currentUser.Id;
 
         var canDelete =
-            currentUser.IsGlobalAdministrator ||
+            isOwner &&
             (
-                isOwner &&
-                (
-                    leaveRequest.Status ==
-                        LeaveRequestStatus.Pending ||
-                    leaveRequest.Status ==
-                        LeaveRequestStatus.Draft
-                )
+                leaveRequest.Status ==
+                    LeaveRequestStatus.Pending ||
+                leaveRequest.Status ==
+                    LeaveRequestStatus.Draft
             );
 
         if (!canDelete)
@@ -497,11 +545,17 @@ public sealed class LeaveRequestsController : ControllerBase
 
     // =========================================================
     // APPROVE
+    //
+    // Global Admin or eligible Vacation Admin / Manager.
+    //
+    // The reviewer cannot approve their own request.
     // =========================================================
 
     [HttpPost("{id:guid}/approve")]
     [ProducesResponseType(
         StatusCodes.Status200OK)]
+    [ProducesResponseType(
+        StatusCodes.Status400BadRequest)]
     [ProducesResponseType(
         StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(
@@ -521,11 +575,17 @@ public sealed class LeaveRequestsController : ControllerBase
 
     // =========================================================
     // REJECT
+    //
+    // Global Admin or eligible Vacation Admin / Manager.
+    //
+    // The reviewer cannot reject their own request.
     // =========================================================
 
     [HttpPost("{id:guid}/reject")]
     [ProducesResponseType(
         StatusCodes.Status200OK)]
+    [ProducesResponseType(
+        StatusCodes.Status400BadRequest)]
     [ProducesResponseType(
         StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(
@@ -578,6 +638,33 @@ public sealed class LeaveRequestsController : ControllerBase
             return NotFound();
         }
 
+        /*
+         * A user must never approve/reject
+         * their own leave request.
+         *
+         * This applies to Managers AND
+         * Global Administrators.
+         */
+        var isOwner =
+            leaveRequest.EmployeeUserId ==
+                currentUser.Id;
+
+        if (isOwner)
+        {
+            return Forbid();
+        }
+
+        /*
+         * Review permissions:
+         *
+         * 1. Global Administrator:
+         *    may review another user's request.
+         *
+         * 2. Vacation Admin Manager:
+         *    may review another user's request
+         *    only when that employee belongs
+         *    to the same Application Group.
+         */
         var canReview =
             currentUser.IsGlobalAdministrator ||
             (
@@ -594,8 +681,10 @@ public sealed class LeaveRequestsController : ControllerBase
             return Forbid();
         }
 
-        // Only pending requests should normally
-        // enter the approval workflow.
+        /*
+         * Only Pending requests enter the
+         * approval/rejection workflow.
+         */
         if (
             leaveRequest.Status !=
                 LeaveRequestStatus.Pending)
@@ -659,11 +748,13 @@ public sealed class LeaveRequestsController : ControllerBase
         DateOnly startDate,
         DateOnly endDate)
     {
-        return endDate >= startDate;
+        return endDate >=
+            startDate;
     }
 
-    private static string? NormalizeOptional(
-        string? value)
+    private static string?
+        NormalizeOptional(
+            string? value)
     {
         return string.IsNullOrWhiteSpace(
             value)
@@ -671,12 +762,14 @@ public sealed class LeaveRequestsController : ControllerBase
             : value.Trim();
     }
 
-    private static LeaveRequestDto ToDto(
-        LeaveRequest request)
+    private static LeaveRequestDto
+        ToDto(
+            LeaveRequest request)
     {
         return new LeaveRequestDto
         {
-            Id = request.Id,
+            Id =
+                request.Id,
 
             EmployeeName =
                 request.EmployeeName,
