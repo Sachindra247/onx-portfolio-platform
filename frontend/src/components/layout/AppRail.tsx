@@ -28,8 +28,9 @@ const navigationItems = [
   },
   {
     label: "Rebates",
+    path: "/rebates",
     icon: BadgeDollarSign,
-    available: false,
+    available: true,
   },
   {
     label: "Vacations",

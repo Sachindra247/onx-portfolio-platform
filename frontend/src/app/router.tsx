@@ -9,6 +9,7 @@ import VacationsPage from "../pages/VacationsPage";
 import LoginPage from "../pages/LoginPage";
 import RequireAuth from "../auth/RequireAuth";
 import ProfilePage from "../pages/ProfilePage";
+import RebatesPage from "../pages/RebatesPage";
 
 const baseName = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -43,6 +44,10 @@ export const router = createBrowserRouter(
             {
               path: "certifications",
               element: <CertificationsPage />,
+            },
+            {
+              path: "rebates",
+              element: <RebatesPage />,
             },
             {
               path: "vacations",

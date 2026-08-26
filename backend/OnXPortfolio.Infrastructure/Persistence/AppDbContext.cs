@@ -4,6 +4,7 @@ using OnXPortfolio.Domain.Events;
 using OnXPortfolio.Domain.Users;
 using OnXPortfolio.Domain.Vacations;
 using OnXPortfolio.Domain.Vendors;
+using OnXPortfolio.Domain.Rebates;
 
 namespace OnXPortfolio.Infrastructure.Persistence;
 
@@ -29,6 +30,9 @@ public sealed class AppDbContext : DbContext
 
     public DbSet<CertificationPerson> CertificationPeople =>
         Set<CertificationPerson>();
+
+    public DbSet<Rebate> Rebates =>
+    Set<Rebate>();
 
     public DbSet<LeaveRequest> LeaveRequests =>
         Set<LeaveRequest>();
