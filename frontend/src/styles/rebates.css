@@ -284,6 +284,8 @@
     color: #8a9591;
 }
 
+
+
 @media (max-width: 1050px) {
     .rebates-stats {
         grid-template-columns:
@@ -350,6 +352,1463 @@
     }
 
     .rebates-stats {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* =========================================================
+   REBATE RECORDS
+   ========================================================= */
+
+.rebates-records {
+    display: grid;
+    gap: 18px;
+}
+
+.rebates-section-heading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 18px;
+}
+
+.rebates-section-heading h2 {
+    margin: 0;
+    color: #173d34;
+    font-size: 1.15rem;
+}
+
+.rebates-section-heading p {
+    margin: 5px 0 0;
+    color: #74807b;
+    font-size: 0.84rem;
+}
+
+.rebates-record-count {
+    flex: 0 0 auto;
+    border: 1px solid #d9e3df;
+    border-radius: 999px;
+    background: #f7faf9;
+    padding: 5px 10px;
+    color: #5d6c66;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   FILTERS
+   ========================================================= */
+
+.rebate-filters {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    border: 1px solid #dfe5e2;
+    border-radius: 10px;
+    background: #ffffff;
+    padding: 12px;
+}
+
+.rebate-filters__search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1 1 260px;
+    min-width: 210px;
+    border: 1px solid #d9e1de;
+    border-radius: 7px;
+    background: #ffffff;
+    padding: 0 10px;
+    color: #81908a;
+}
+
+.rebate-filters__search:focus-within {
+    border-color: #7eb6a8;
+    box-shadow: 0 0 0 3px rgba(0, 107, 85, 0.08);
+}
+
+.rebate-filters__search input {
+    width: 100%;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    padding: 9px 0;
+    color: #243d36;
+    font: inherit;
+    font-size: 0.82rem;
+}
+
+.rebate-filters__search input::placeholder {
+    color: #9ba6a2;
+}
+
+.rebate-filters__select-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid #d9e1de;
+    border-radius: 7px;
+    background: #ffffff;
+    padding-left: 9px;
+    color: #7a8883;
+}
+
+.rebate-filters__select-wrap select {
+    min-width: 135px;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    padding: 9px 28px 9px 2px;
+    color: #43534d;
+    font: inherit;
+    font-size: 0.79rem;
+    cursor: pointer;
+}
+
+.rebate-filters__clear {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border: 0;
+    background: transparent;
+    padding: 8px 6px;
+    color: #7b8783;
+    font: inherit;
+    font-size: 0.76rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.rebate-filters__clear:hover {
+    color: #a13f35;
+}
+
+
+/* =========================================================
+   TABLE
+   ========================================================= */
+
+.rebate-table-shell {
+    overflow: hidden;
+    border: 1px solid #dfe5e2;
+    border-radius: 10px;
+    background: #ffffff;
+}
+
+.rebate-table-scroll {
+    overflow-x: auto;
+}
+
+.rebate-table {
+    width: 100%;
+    min-width: 1080px;
+    border-collapse: collapse;
+    table-layout: auto;
+}
+
+.rebate-table th {
+    border-bottom: 1px solid #dfe5e2;
+    background: #f8faf9;
+    padding: 0;
+    color: #68766f;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.025em;
+    text-align: left;
+    text-transform: uppercase;
+}
+
+.rebate-table td {
+    border-bottom: 1px solid #edf1ef;
+    padding: 13px 12px;
+    color: #3f504a;
+    font-size: 0.79rem;
+    vertical-align: middle;
+}
+
+.rebate-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.rebate-table tbody tr:hover {
+    background: #fbfdfc;
+}
+
+.rebate-table__sort {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    width: 100%;
+    border: 0;
+    background: transparent;
+    padding: 11px 12px;
+    color: inherit;
+    font: inherit;
+    font-weight: inherit;
+    letter-spacing: inherit;
+    text-align: left;
+    text-transform: inherit;
+    cursor: pointer;
+}
+
+.rebate-table__sort:hover,
+.rebate-table__sort--active {
+    color: #006b55;
+}
+
+.rebate-table__primary {
+    display: grid;
+    gap: 3px;
+    min-width: 170px;
+    max-width: 260px;
+}
+
+.rebate-table__primary strong {
+    overflow: hidden;
+    color: #1e4037;
+    font-size: 0.81rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rebate-table__primary span {
+    display: -webkit-box;
+    overflow: hidden;
+    color: #87928e;
+    font-size: 0.7rem;
+    line-height: 1.35;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}
+
+.rebate-table__amount {
+    white-space: nowrap;
+}
+
+.rebate-status {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 4px 8px;
+    font-size: 0.68rem;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.rebate-status--draft {
+    background: #eef1f0;
+    color: #68736f;
+}
+
+.rebate-status--active {
+    background: #e1f2eb;
+    color: #17694f;
+}
+
+.rebate-status--pending {
+    background: #fff3d8;
+    color: #8b6413;
+}
+
+.rebate-status--completed {
+    background: #e4edf8;
+    color: #315f91;
+}
+
+.rebate-status--cancelled {
+    background: #f5e6e4;
+    color: #944239;
+}
+
+.rebate-table__due {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+}
+
+.rebate-table__due--soon {
+    color: #9b6b0d;
+    font-weight: 700;
+}
+
+.rebate-table__due--overdue {
+    color: #a63d34;
+    font-weight: 700;
+}
+
+.rebate-table__date-note {
+    display: block;
+    margin-top: 3px;
+    color: #9b6b0d;
+    font-size: 0.65rem;
+    font-weight: 700;
+}
+
+.rebate-table__date-note--overdue {
+    color: #a63d34;
+}
+
+.rebate-table__owner {
+    display: grid;
+    gap: 2px;
+    min-width: 130px;
+}
+
+.rebate-table__owner small {
+    color: #89948f;
+    font-size: 0.67rem;
+}
+
+.rebate-table__actions-heading {
+    width: 76px;
+}
+
+.rebate-table__actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 5px;
+}
+
+.rebate-table__actions button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border: 1px solid #dce4e1;
+    border-radius: 6px;
+    background: #ffffff;
+    color: #597068;
+    cursor: pointer;
+}
+
+.rebate-table__actions button:hover {
+    border-color: #9fc6bb;
+    background: #edf6f3;
+    color: #006b55;
+}
+
+.rebate-table__actions .rebate-table__delete:hover {
+    border-color: #e3b6b1;
+    background: #fff1ef;
+    color: #a63d34;
+}
+
+.rebate-table-empty {
+    display: grid;
+    place-items: center;
+    min-height: 240px;
+    border: 1px solid #dfe5e2;
+    border-radius: 10px;
+    background: #ffffff;
+    padding: 32px;
+    text-align: center;
+}
+
+.rebate-table-empty strong {
+    color: #24483e;
+    font-size: 0.95rem;
+}
+
+.rebate-table-empty p {
+    margin: 5px 0 0;
+    color: #84908b;
+    font-size: 0.78rem;
+}
+
+@media (max-width: 760px) {
+    .rebates-section-heading {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 9px;
+    }
+
+    .rebate-filters {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .rebate-filters__search {
+        flex-basis: auto;
+        width: 100%;
+    }
+
+    .rebate-filters__select-wrap {
+        width: 100%;
+    }
+
+    .rebate-filters__select-wrap select {
+        flex: 1;
+    }
+
+    .rebate-filters__clear {
+        align-self: flex-start;
+    }
+}
+
+/* =========================================================
+   REBATE FORM MODAL
+   ========================================================= */
+
+.rebate-modal-backdrop {
+    position: fixed;
+    z-index: 1000;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(17, 36, 31, 0.48);
+    padding: 24px;
+    backdrop-filter: blur(2px);
+}
+
+.rebate-modal {
+    display: flex;
+    flex-direction: column;
+    width: min(760px, 100%);
+    max-height: calc(100vh - 48px);
+    overflow: hidden;
+    border: 1px solid #d8e1de;
+    border-radius: 14px;
+    background: #ffffff;
+    box-shadow:
+        0 24px 70px rgba(19, 44, 37, 0.22);
+}
+
+.rebate-modal__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    border-bottom: 1px solid #e3e8e6;
+    padding: 20px 22px;
+}
+
+.rebate-modal__heading {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.rebate-modal__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    border-radius: 9px;
+    background: #e8f3ef;
+    color: #006b55;
+}
+
+.rebate-modal__heading h2 {
+    margin: 0;
+    color: #173d34;
+    font-size: 1.05rem;
+}
+
+.rebate-modal__heading p {
+    margin: 4px 0 0;
+    color: #7b8883;
+    font-size: 0.76rem;
+}
+
+.rebate-modal__close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
+    color: #71807a;
+    cursor: pointer;
+}
+
+.rebate-modal__close:hover {
+    background: #f0f4f2;
+    color: #27483f;
+}
+
+.rebate-modal__close:disabled {
+    cursor: default;
+    opacity: 0.45;
+}
+
+.rebate-form {
+    display: flex;
+    min-height: 0;
+    flex: 1;
+    flex-direction: column;
+}
+
+.rebate-form__body {
+    display: grid;
+    gap: 22px;
+    overflow-y: auto;
+    padding: 22px;
+}
+
+.rebate-form__section {
+    display: grid;
+    gap: 14px;
+}
+
+.rebate-form__section+.rebate-form__section {
+    border-top: 1px solid #edf0ef;
+    padding-top: 20px;
+}
+
+.rebate-form__section-heading h3 {
+    margin: 0;
+    color: #24483e;
+    font-size: 0.87rem;
+}
+
+.rebate-form__section-heading p {
+    margin: 3px 0 0;
+    color: #8a9591;
+    font-size: 0.7rem;
+}
+
+.rebate-form__section-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #527268;
+}
+
+.rebate-form__grid {
+    display: grid;
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.rebate-form__grid--three {
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+}
+
+.rebate-form__field {
+    display: grid;
+    align-content: start;
+    gap: 6px;
+}
+
+.rebate-form__field--wide {
+    grid-column: 1 / -1;
+}
+
+.rebate-form__field>span {
+    color: #56665f;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.rebate-form__field>span strong {
+    color: #b34940;
+}
+
+.rebate-form__field input,
+.rebate-form__field select,
+.rebate-form__field textarea {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #d8e0dd;
+    border-radius: 7px;
+    outline: none;
+    background: #ffffff;
+    padding: 9px 10px;
+    color: #344a43;
+    font: inherit;
+    font-size: 0.79rem;
+}
+
+.rebate-form__field textarea {
+    min-height: 76px;
+    resize: vertical;
+    line-height: 1.45;
+}
+
+.rebate-form__field input:focus,
+.rebate-form__field select:focus,
+.rebate-form__field textarea:focus {
+    border-color: #75ad9f;
+    box-shadow:
+        0 0 0 3px rgba(0, 107, 85, 0.08);
+}
+
+.rebate-form__field input:disabled,
+.rebate-form__field select:disabled,
+.rebate-form__field textarea:disabled {
+    background: #f6f8f7;
+    cursor: default;
+    opacity: 0.7;
+}
+
+.rebate-form__money {
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    border: 1px solid #d8e0dd;
+    border-radius: 7px;
+    background: #ffffff;
+}
+
+.rebate-form__money:focus-within {
+    border-color: #75ad9f;
+    box-shadow:
+        0 0 0 3px rgba(0, 107, 85, 0.08);
+}
+
+.rebate-form__money>span {
+    border-right: 1px solid #e1e6e4;
+    background: #f7f9f8;
+    padding: 9px 10px;
+    color: #718079;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.rebate-form__money input {
+    border: 0;
+    border-radius: 0;
+    box-shadow: none !important;
+}
+
+.rebate-modal__footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 9px;
+    border-top: 1px solid #e3e8e6;
+    background: #fafcfb;
+    padding: 14px 22px;
+}
+
+.rebate-form__cancel,
+.rebate-form__save {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 36px;
+    border-radius: 7px;
+    padding: 8px 14px;
+    font: inherit;
+    font-size: 0.76rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.rebate-form__cancel {
+    border: 1px solid #d7dfdc;
+    background: #ffffff;
+    color: #60706a;
+}
+
+.rebate-form__cancel:hover {
+    background: #f5f8f7;
+}
+
+.rebate-form__save {
+    border: 1px solid #006b55;
+    background: #006b55;
+    color: #ffffff;
+}
+
+.rebate-form__save:hover {
+    background: #005b49;
+}
+
+.rebate-form__cancel:disabled,
+.rebate-form__save:disabled {
+    cursor: default;
+    opacity: 0.55;
+}
+
+@media (max-width: 700px) {
+    .rebate-modal-backdrop {
+        align-items: flex-end;
+        padding: 0;
+    }
+
+    .rebate-modal {
+        width: 100%;
+        max-height: 94vh;
+        border-radius: 14px 14px 0 0;
+    }
+
+    .rebate-form__grid,
+    .rebate-form__grid--three {
+        grid-template-columns: 1fr;
+    }
+
+    .rebate-form__field--wide {
+        grid-column: auto;
+    }
+}
+
+/* =========================================================
+   DELETE CONFIRMATION
+   ========================================================= */
+
+.rebate-delete-modal {
+    width: min(440px, 100%);
+    overflow: hidden;
+    border: 1px solid #e3d9d7;
+    border-radius: 13px;
+    background: #ffffff;
+    box-shadow:
+        0 24px 70px rgba(19, 44, 37, 0.22);
+}
+
+.rebate-delete-modal__body {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 22px;
+}
+
+.rebate-delete-modal__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    flex: 0 0 40px;
+    border-radius: 9px;
+    background: #fff0ee;
+    color: #a63d34;
+}
+
+.rebate-delete-modal__body h2 {
+    margin: 1px 0 0;
+    color: #3f3431;
+    font-size: 1rem;
+}
+
+.rebate-delete-modal__body p {
+    margin: 7px 0 0;
+    color: #77817d;
+    font-size: 0.78rem;
+    line-height: 1.5;
+}
+
+.rebate-delete-modal__body p strong {
+    color: #4d5b56;
+}
+
+.rebate-delete-modal__error {
+    margin: 0 22px 18px;
+    border: 1px solid #ebcbc7;
+    border-radius: 7px;
+    background: #fff4f2;
+    padding: 9px 11px;
+    color: #9b4139;
+    font-size: 0.74rem;
+}
+
+.rebate-delete-modal__footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 9px;
+    border-top: 1px solid #ece8e7;
+    background: #fcfbfb;
+    padding: 14px 22px;
+}
+
+.rebate-delete-modal__confirm {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 36px;
+    border: 1px solid #a63d34;
+    border-radius: 7px;
+    background: #a63d34;
+    padding: 8px 14px;
+    color: #ffffff;
+    font: inherit;
+    font-size: 0.76rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.rebate-delete-modal__confirm:hover {
+    background: #91352d;
+}
+
+.rebate-delete-modal__confirm:disabled {
+    cursor: default;
+    opacity: 0.55;
+}
+
+/* =========================================================
+   REBATES OVERVIEW DASHBOARD
+   ========================================================= */
+
+.rebates-dashboard-grid {
+    display: grid;
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.rebates-dashboard-card {
+    overflow: hidden;
+    border: 1px solid #dfe5e2;
+    border-radius: 10px;
+    background: #ffffff;
+}
+
+.rebates-dashboard-card--wide {
+    grid-column: 1 / -1;
+}
+
+.rebates-dashboard-card__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    border-bottom: 1px solid #edf1ef;
+    padding: 16px 18px;
+}
+
+.rebates-dashboard-card__header h2 {
+    margin: 0;
+    color: #24483e;
+    font-size: 0.91rem;
+}
+
+.rebates-dashboard-card__header p {
+    margin: 4px 0 0;
+    color: #87928e;
+    font-size: 0.71rem;
+}
+
+.rebates-dashboard-card__header-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    flex: 0 0 34px;
+    border-radius: 8px;
+    background: #edf6f3;
+    color: #006b55;
+}
+
+.rebates-dashboard-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 170px;
+    padding: 24px;
+    color: #89948f;
+    font-size: 0.76rem;
+}
+
+
+/* Status overview */
+
+.rebate-status-overview {
+    display: grid;
+    padding: 9px 18px 14px;
+}
+
+.rebate-status-overview__row {
+    display: grid;
+    grid-template-columns:
+        105px minmax(70px, 1fr) 42px;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    border: 0;
+    border-bottom: 1px solid #f0f2f1;
+    background: transparent;
+    padding: 10px 0;
+    text-align: left;
+    cursor: pointer;
+}
+
+.rebate-status-overview__row:last-child {
+    border-bottom: 0;
+}
+
+.rebate-status-overview__row:hover {
+    opacity: 0.78;
+}
+
+.rebate-status-overview__label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 7px;
+}
+
+.rebate-status-overview__label strong {
+    color: #52615b;
+    font-size: 0.76rem;
+}
+
+.rebate-status-overview__track {
+    height: 7px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #edf1ef;
+}
+
+.rebate-status-overview__fill {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+}
+
+.rebate-status-overview__fill--active {
+    background: #39876e;
+}
+
+.rebate-status-overview__fill--pending {
+    background: #c69a3a;
+}
+
+.rebate-status-overview__fill--draft {
+    background: #8b9893;
+}
+
+.rebate-status-overview__fill--completed {
+    background: #5b82aa;
+}
+
+.rebate-status-overview__fill--cancelled {
+    background: #b66b63;
+}
+
+.rebate-status-overview__percentage {
+    color: #85908c;
+    font-size: 0.69rem;
+    font-weight: 700;
+    text-align: right;
+}
+
+
+/* Value overview */
+
+.rebate-value-overview {
+    display: grid;
+    gap: 19px;
+    padding: 18px;
+}
+
+.rebate-value-overview__primary {
+    display: grid;
+    gap: 7px;
+}
+
+.rebate-value-overview__primary>span {
+    color: #78847f;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.rebate-value-overview__primary>strong {
+    color: #1f4b3f;
+    font-size: 1.65rem;
+    line-height: 1;
+}
+
+.rebate-value-overview__progress {
+    height: 8px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #e8eeeb;
+}
+
+.rebate-value-overview__progress span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: #37816b;
+}
+
+.rebate-value-overview__values {
+    display: grid;
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.rebate-value-overview__values>div {
+    display: grid;
+    gap: 4px;
+    border: 1px solid #e6ebe9;
+    border-radius: 8px;
+    background: #fafcfb;
+    padding: 10px;
+}
+
+.rebate-value-overview__values span {
+    color: #84908b;
+    font-size: 0.65rem;
+}
+
+.rebate-value-overview__values strong {
+    overflow: hidden;
+    color: #344e46;
+    font-size: 0.78rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rebate-value-overview__note {
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    border-radius: 7px;
+    background: #f2f7f5;
+    padding: 9px 10px;
+    color: #698078;
+    font-size: 0.67rem;
+    line-height: 1.45;
+}
+
+
+/* Upcoming deadlines */
+
+.rebates-dashboard-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    border: 0;
+    background: transparent;
+    padding: 3px;
+    color: #006b55;
+    font: inherit;
+    font-size: 0.7rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.rebates-dashboard-link:hover {
+    text-decoration: underline;
+}
+
+.rebate-deadlines {
+    display: grid;
+}
+
+.rebate-deadline {
+    display: grid;
+    grid-template-columns:
+        minmax(180px, 1fr) 130px 145px 20px;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    border: 0;
+    border-bottom: 1px solid #edf1ef;
+    background: #ffffff;
+    padding: 13px 18px;
+    text-align: left;
+    cursor: pointer;
+}
+
+.rebate-deadline:last-child {
+    border-bottom: 0;
+}
+
+.rebate-deadline:hover {
+    background: #fafcfb;
+}
+
+.rebate-deadline__main {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+}
+
+.rebate-deadline__main strong {
+    overflow: hidden;
+    color: #284a41;
+    font-size: 0.78rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rebate-deadline__main span {
+    overflow: hidden;
+    color: #87928e;
+    font-size: 0.67rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rebate-deadline__value {
+    display: grid;
+    gap: 2px;
+}
+
+.rebate-deadline__value span {
+    color: #929c98;
+    font-size: 0.62rem;
+}
+
+.rebate-deadline__value strong {
+    color: #42584f;
+    font-size: 0.74rem;
+}
+
+.rebate-deadline__date {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: #65766f;
+}
+
+.rebate-deadline__date>div {
+    display: grid;
+    gap: 1px;
+}
+
+.rebate-deadline__date strong {
+    font-size: 0.7rem;
+}
+
+.rebate-deadline__date span {
+    color: #939d99;
+    font-size: 0.61rem;
+}
+
+.rebate-deadline__date--overdue {
+    color: #a63d34;
+}
+
+.rebate-deadline__date--overdue span {
+    color: #a63d34;
+    font-weight: 700;
+}
+
+.rebate-deadline__arrow {
+    color: #9ca7a2;
+}
+
+
+/* Responsive */
+
+@media (max-width: 980px) {
+    .rebates-dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .rebates-dashboard-card--wide {
+        grid-column: auto;
+    }
+
+    .rebate-deadline {
+        grid-template-columns:
+            minmax(180px, 1fr) 120px 135px 18px;
+    }
+}
+
+@media (max-width: 700px) {
+    .rebate-value-overview__values {
+        grid-template-columns: 1fr;
+    }
+
+    .rebate-status-overview__row {
+        grid-template-columns:
+            100px minmax(60px, 1fr) 36px;
+        gap: 8px;
+    }
+
+    .rebate-deadline {
+        grid-template-columns:
+            minmax(0, 1fr) auto;
+        gap: 10px;
+    }
+
+    .rebate-deadline__value {
+        display: none;
+    }
+
+    .rebate-deadline__date {
+        grid-column: 1 / 2;
+    }
+
+    .rebate-deadline__arrow {
+        grid-column: 2;
+        grid-row: 1 / 3;
+    }
+}
+
+/* =========================================================
+   VENDOR REBATES
+   ========================================================= */
+
+.rebates-vendors {
+    display: grid;
+    gap: 18px;
+}
+
+.rebate-vendor-stats {
+    display: grid;
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.rebate-vendor-stat {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    min-width: 0;
+    border: 1px solid #dfe5e2;
+    border-radius: 9px;
+    background: #ffffff;
+    padding: 14px;
+}
+
+.rebate-vendor-stat__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    flex: 0 0 36px;
+    border-radius: 8px;
+    background: #edf6f3;
+    color: #006b55;
+}
+
+.rebate-vendor-stat>div {
+    display: grid;
+    min-width: 0;
+    gap: 3px;
+}
+
+.rebate-vendor-stat strong {
+    overflow: hidden;
+    color: #23493e;
+    font-size: 0.94rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rebate-vendor-stat span:not(.rebate-vendor-stat__icon) {
+    overflow: hidden;
+    color: #84908b;
+    font-size: 0.66rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rebate-vendor-stat__empty-value {
+    color: #929c98 !important;
+}
+
+.rebates-vendor-list-card {
+    overflow: hidden;
+    border: 1px solid #dfe5e2;
+    border-radius: 10px;
+    background: #ffffff;
+}
+
+.rebates-vendor-list-card__header {
+    border-bottom: 1px solid #e8edeb;
+    padding: 15px 18px;
+}
+
+.rebates-vendor-list-card__header h3 {
+    margin: 0;
+    color: #274a40;
+    font-size: 0.86rem;
+}
+
+.rebates-vendor-list-card__header p {
+    margin: 4px 0 0;
+    color: #89948f;
+    font-size: 0.69rem;
+}
+
+
+/* Vendor table */
+
+.rebate-vendor-table-scroll {
+    overflow-x: auto;
+}
+
+.rebate-vendor-table {
+    width: 100%;
+    min-width: 840px;
+    border-collapse: collapse;
+}
+
+.rebate-vendor-table th {
+    border-bottom: 1px solid #e4e9e7;
+    background: #f8faf9;
+    padding: 10px 13px;
+    color: #74817c;
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.025em;
+    text-align: left;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.rebate-vendor-table td {
+    border-bottom: 1px solid #edf1ef;
+    padding: 12px 13px;
+    color: #485a53;
+    font-size: 0.75rem;
+    vertical-align: middle;
+}
+
+.rebate-vendor-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.rebate-vendor-table tbody tr:hover {
+    background: #fbfdfc;
+}
+
+.rebate-vendor-table__vendor {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 150px;
+}
+
+.rebate-vendor-table__vendor>span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    flex: 0 0 28px;
+    border-radius: 6px;
+    background: #eef5f2;
+    color: #397665;
+}
+
+.rebate-vendor-table__vendor strong {
+    overflow: hidden;
+    color: #294b42;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rebate-vendor-table__count {
+    color: #43564f;
+}
+
+.rebate-vendor-metric {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 26px;
+    border-radius: 999px;
+    padding: 3px 7px;
+    font-size: 0.66rem;
+    font-weight: 800;
+}
+
+.rebate-vendor-metric--active {
+    background: #e1f2eb;
+    color: #17694f;
+}
+
+.rebate-vendor-metric--pending {
+    background: #fff3d8;
+    color: #8b6413;
+}
+
+.rebate-vendor-metric--completed {
+    background: #e4edf8;
+    color: #315f91;
+}
+
+.rebate-vendor-table__money {
+    color: #365248 !important;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.rebate-vendor-table__view {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 29px;
+    height: 29px;
+    border: 1px solid #dbe4e0;
+    border-radius: 6px;
+    background: #ffffff;
+    color: #60756d;
+    cursor: pointer;
+}
+
+.rebate-vendor-table__view:hover {
+    border-color: #9fc6bb;
+    background: #edf6f3;
+    color: #006b55;
+}
+
+
+/* Vendor empty state */
+
+.rebate-vendors-empty {
+    display: grid;
+    justify-items: center;
+    min-height: 220px;
+    align-content: center;
+    padding: 30px;
+    text-align: center;
+}
+
+.rebate-vendors-empty__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    background: #edf6f3;
+    color: #397665;
+}
+
+.rebate-vendors-empty h2 {
+    margin: 0;
+    color: #294b42;
+    font-size: 0.9rem;
+}
+
+.rebate-vendors-empty p {
+    margin: 5px 0 0;
+    color: #89948f;
+    font-size: 0.72rem;
+}
+
+
+/* Vendor responsive */
+
+@media (max-width: 1050px) {
+    .rebate-vendor-stats {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 620px) {
+    .rebate-vendor-stats {
         grid-template-columns: 1fr;
     }
 }
