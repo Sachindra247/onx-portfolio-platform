@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import type {
   LeaveRequestDto,
   LeaveRequestPayload,
-  LeaveRequestStatus,
   LeaveType,
 } from "../../../types/vacations";
 
@@ -18,13 +17,10 @@ interface LeaveRequestFormModalProps {
 }
 
 const defaultPayload: LeaveRequestPayload = {
-  employeeName: "",
   leaveType: "Vacation",
   startDate: "",
   endDate: "",
-  status: "Pending",
   reason: null,
-  approverName: null,
   notes: null,
 };
 
@@ -45,13 +41,10 @@ export default function LeaveRequestFormModal({
 
     if (request) {
       setForm({
-        employeeName: request.employeeName,
         leaveType: request.leaveType,
         startDate: request.startDate,
         endDate: request.endDate,
-        status: request.status,
         reason: request.reason,
-        approverName: request.approverName,
         notes: request.notes,
       });
 
@@ -66,9 +59,8 @@ export default function LeaveRequestFormModal({
   }
 
   const isValid =
-    form.employeeName.trim() &&
-    form.startDate &&
-    form.endDate &&
+    Boolean(form.startDate) &&
+    Boolean(form.endDate) &&
     form.endDate >= form.startDate;
 
   return (
@@ -93,7 +85,11 @@ export default function LeaveRequestFormModal({
               {request ? "Edit Leave Request" : "Add Leave Request"}
             </h2>
 
-            <p>Manage employee leave dates, status, and supporting details.</p>
+            <p>
+              {request
+                ? "Update your leave request details."
+                : "Submit a new leave request for approval."}
+            </p>
           </div>
 
           <button
@@ -116,31 +112,12 @@ export default function LeaveRequestFormModal({
 
             void onSubmit({
               ...form,
-              employeeName: form.employeeName.trim(),
               reason: form.reason?.trim() || null,
-              approverName: form.approverName?.trim() || null,
               notes: form.notes?.trim() || null,
             });
           }}
         >
           <div className="vacation-form__grid">
-            <label>
-              <span>Employee</span>
-
-              <input
-                required
-                maxLength={150}
-                value={form.employeeName}
-                placeholder="Employee name"
-                onChange={(event) =>
-                  setForm((current) => ({
-                    ...current,
-                    employeeName: event.target.value,
-                  }))
-                }
-              />
-            </label>
-
             <label>
               <span>Leave Type</span>
 
@@ -191,42 +168,6 @@ export default function LeaveRequestFormModal({
                   setForm((current) => ({
                     ...current,
                     endDate: event.target.value,
-                  }))
-                }
-              />
-            </label>
-
-            <label>
-              <span>Status</span>
-
-              <select
-                value={form.status}
-                onChange={(event) =>
-                  setForm((current) => ({
-                    ...current,
-                    status: event.target.value as LeaveRequestStatus,
-                  }))
-                }
-              >
-                <option value="Draft">Draft</option>
-                <option value="Pending">Pending</option>
-                <option value="Approved">Approved</option>
-                <option value="Rejected">Rejected</option>
-                <option value="Cancelled">Cancelled</option>
-              </select>
-            </label>
-
-            <label>
-              <span>Approver</span>
-
-              <input
-                maxLength={150}
-                value={form.approverName ?? ""}
-                placeholder="Approver name"
-                onChange={(event) =>
-                  setForm((current) => ({
-                    ...current,
-                    approverName: event.target.value,
                   }))
                 }
               />

@@ -29,12 +29,9 @@ export interface LeaveRequestDto {
 }
 
 export interface LeaveRequestPayload {
-  employeeName: string;
   leaveType: LeaveType;
   startDate: string;
   endDate: string;
-  status: LeaveRequestStatus;
   reason: string | null;
-  approverName: string | null;
   notes: string | null;
 }

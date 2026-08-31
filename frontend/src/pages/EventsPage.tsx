@@ -6,7 +6,6 @@ import {
   cancelEventRegistration,
   createEvent,
   deleteEvent,
-  getApiErrorMessage,
   getEventRegistrations,
   getEvents,
   getMyEventRegistration,
@@ -16,6 +15,8 @@ import {
   updateEvent,
   createVendor,
 } from "../api/eventsApi";
+
+import { getApiErrorMessage } from "../api/apiErrors";
 
 import { useAuth } from "../auth/AuthContext";
 

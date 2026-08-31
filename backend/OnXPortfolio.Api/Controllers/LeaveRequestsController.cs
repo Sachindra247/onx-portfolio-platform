@@ -260,6 +260,24 @@ public sealed class LeaveRequestsController : ControllerBase
                 ModelState);
         }
 
+        var hasOverlap =
+    await HasOverlappingLeaveRequestAsync(
+        currentUser.Id,
+        request.StartDate,
+        request.EndDate,
+        excludeRequestId: null,
+        cancellationToken);
+
+if (hasOverlap)
+{
+    ModelState.AddModelError(
+        nameof(request.StartDate),
+        "This leave request overlaps an existing active leave request.");
+
+    return ValidationProblem(
+        ModelState);
+}
+
         var now =
             DateTimeOffset.UtcNow;
 
@@ -419,6 +437,24 @@ public sealed class LeaveRequestsController : ControllerBase
         {
             return Forbid();
         }
+
+        var hasOverlap =
+    await HasOverlappingLeaveRequestAsync(
+        currentUser.Id,
+        request.StartDate,
+        request.EndDate,
+        excludeRequestId: leaveRequest.Id,
+        cancellationToken);
+
+if (hasOverlap)
+{
+    ModelState.AddModelError(
+        nameof(request.StartDate),
+        "This leave request overlaps an existing active leave request.");
+
+    return ValidationProblem(
+        ModelState);
+}
 
         leaveRequest.LeaveType =
             request.LeaveType;
@@ -743,6 +779,43 @@ public sealed class LeaveRequestsController : ControllerBase
     // =========================================================
     // GENERAL HELPERS
     // =========================================================
+
+    private async Task<bool>
+    HasOverlappingLeaveRequestAsync(
+        Guid employeeUserId,
+        DateOnly startDate,
+        DateOnly endDate,
+        Guid? excludeRequestId,
+        CancellationToken cancellationToken)
+{
+    var query =
+        _dbContext.LeaveRequests
+            .AsNoTracking()
+            .Where(
+                request =>
+                    request.EmployeeUserId ==
+                        employeeUserId &&
+                    request.Status !=
+                        LeaveRequestStatus.Rejected &&
+                    request.Status !=
+                        LeaveRequestStatus.Cancelled &&
+                    request.StartDate <=
+                        endDate &&
+                    request.EndDate >=
+                        startDate);
+
+    if (excludeRequestId.HasValue)
+    {
+        query =
+            query.Where(
+                request =>
+                    request.Id !=
+                        excludeRequestId.Value);
+    }
+
+    return await query.AnyAsync(
+        cancellationToken);
+}
 
     private static bool IsValidDateRange(
         DateOnly startDate,

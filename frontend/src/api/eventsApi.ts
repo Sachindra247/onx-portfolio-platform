@@ -99,14 +99,6 @@ export async function getEventRegistrations(
   return response.data;
 }
 
-interface ProblemDetails {
-  message?: string;
-  title?: string;
-  detail?: string;
-
-  errors?: Record<string, string[]>;
-}
-
 export async function getMyRegisteredEvents(
   signal?: AbortSignal,
 ): Promise<EventDto[]> {
@@ -118,41 +110,6 @@ export async function getMyRegisteredEvents(
   );
 
   return response.data;
-}
-
-export function getApiErrorMessage(error: unknown): string {
-  if (!axios.isAxiosError(error)) {
-    return "An unexpected error occurred.";
-  }
-
-  if (error.code === "ECONNABORTED") {
-    return "The request took too long. " + "Confirm that the API is running.";
-  }
-
-  if (!error.response) {
-    return (
-      "The Events API could not be reached. " +
-      "Confirm that the backend is running " +
-      "and that VITE_API_BASE_URL is correct."
-    );
-  }
-
-  const problem = error.response.data as ProblemDetails;
-
-  if (problem?.errors) {
-    const validationMessages = Object.values(problem.errors).flat();
-
-    if (validationMessages.length > 0) {
-      return validationMessages.join(" ");
-    }
-  }
-
-  return (
-    problem?.message ??
-    problem?.detail ??
-    problem?.title ??
-    `The server returned status ${error.response.status}.`
-  );
 }
 
 export async function createVendor(name: string): Promise<VendorDto> {

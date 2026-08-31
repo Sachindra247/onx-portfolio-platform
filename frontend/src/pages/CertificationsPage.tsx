@@ -22,6 +22,8 @@ import { useToast } from "../components/feedback/ToastProvider";
 import CertificationFormModal from "../components/certifications/CertificationFormModal";
 import ConfirmDialog from "../components/feedback/ConfirmDialog";
 
+import { getApiErrorMessage } from "../api/apiErrors";
+
 import {
   createCertification,
   deleteCertification,
@@ -366,7 +368,12 @@ export default function CertificationsPage() {
         return;
       }
 
-      setLoadError("Unable to load certification records from the API.");
+      setLoadError(
+        getApiErrorMessage(
+          error,
+          "Unable to load certification records from the API.",
+        ),
+      );
     } finally {
       if (!signal?.aborted) {
         setIsLoading(false);
@@ -575,7 +582,9 @@ export default function CertificationsPage() {
 
       setFormError(null);
     } catch (error) {
-      setFormError(getCertificationErrorMessage(error));
+      setFormError(
+        getApiErrorMessage(error, "The certification could not be saved."),
+      );
     } finally {
       setIsSaving(false);
     }
@@ -604,7 +613,10 @@ export default function CertificationsPage() {
 
       setCertificationPendingDelete(null);
     } catch (error) {
-      showToast(getCertificationErrorMessage(error), "error");
+      showToast(
+        getApiErrorMessage(error, "The certification could not be deleted."),
+        "error",
+      );
     } finally {
       setIsDeleting(false);
     }
@@ -1047,39 +1059,6 @@ function sortCertifications(
 // =========================================================
 // API ERROR
 // =========================================================
-
-function getCertificationErrorMessage(error: unknown): string {
-  if (typeof error === "object" && error !== null && "response" in error) {
-    const response = (
-      error as {
-        response?: {
-          data?: {
-            title?: string;
-            detail?: string;
-            errors?: Record<string, string[]>;
-          };
-        };
-      }
-    ).response;
-
-    const validationMessage =
-      response?.data?.errors &&
-      Object.values(response.data.errors).flat().find(Boolean);
-
-    return (
-      validationMessage ??
-      response?.data?.detail ??
-      response?.data?.title ??
-      "The certification could not be saved."
-    );
-  }
-
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return "An unexpected error occurred.";
-}
 
 // =========================================================
 // ROUTE HELPERS

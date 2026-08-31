@@ -6,6 +6,8 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
+import { getApiErrorMessage } from "../api/apiErrors";
+
 import RebateStatusOverview from "../components/rebates/dashboard/RebateStatusOverview";
 import RebateValueOverview from "../components/rebates/dashboard/RebateValueOverview";
 import UpcomingRebates from "../components/rebates/dashboard/UpcomingRebates";
@@ -139,7 +141,9 @@ export default function RebatesPage() {
 
         console.error("Failed to load rebates.", loadError);
 
-        setError("We couldn't load the rebate records.");
+        setError(
+          getApiErrorMessage(loadError, "We couldn't load the rebate records."),
+        );
       } finally {
         if (!controller.signal.aborted) {
           setIsLoading(false);
@@ -319,7 +323,10 @@ export default function RebatesPage() {
       console.error("Failed to save rebate.", saveError);
 
       setFormError(
-        "We couldn't save the rebate. Please review the information and try again.",
+        getApiErrorMessage(
+          saveError,
+          "We couldn't save the rebate. Please review the information and try again.",
+        ),
       );
     } finally {
       setIsSaving(false);
@@ -363,7 +370,12 @@ export default function RebatesPage() {
     } catch (deleteFailure) {
       console.error("Failed to delete rebate.", deleteFailure);
 
-      setDeleteError("We couldn't delete this rebate. Please try again.");
+      setDeleteError(
+        getApiErrorMessage(
+          deleteFailure,
+          "We couldn't delete this rebate. Please try again.",
+        ),
+      );
     } finally {
       setIsDeleting(false);
     }
