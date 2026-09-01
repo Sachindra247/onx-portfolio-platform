@@ -9,6 +9,7 @@ interface VacationsLayoutProps {
   onSectionChange: (section: VacationSection) => void;
   onAddLeaveRequest: () => void;
   onExportCsv: () => void;
+  exportDisabled?: boolean;
   children: ReactNode;
 }
 
@@ -17,6 +18,7 @@ export default function VacationsLayout({
   onSectionChange,
   onAddLeaveRequest,
   onExportCsv,
+  exportDisabled = false,
   children,
 }: VacationsLayoutProps) {
   return (
@@ -27,6 +29,7 @@ export default function VacationsLayout({
           onSectionChange={onSectionChange}
           onAddLeaveRequest={onAddLeaveRequest}
           onExportCsv={onExportCsv}
+          exportDisabled={exportDisabled}
         />
 
         <div className="vacations-workspace__content">{children}</div>

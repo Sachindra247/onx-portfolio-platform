@@ -9,6 +9,8 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
+import { getApiErrorMessage } from "../api/apiErrors";
+
 import { useAuth } from "../auth/AuthContext";
 
 import { getMyRegisteredEvents } from "../api/eventsApi";
@@ -96,7 +98,7 @@ export default function ProfilePage() {
       } catch (error) {
         if (!controller.signal.aborted) {
           setEventsError(
-            getErrorMessage(error, "Unable to load your registered events."),
+            getApiErrorMessage(error, "Unable to load your registered events."),
           );
         }
       } finally {
@@ -120,7 +122,7 @@ export default function ProfilePage() {
       } catch (error) {
         if (!controller.signal.aborted) {
           setCertificationsError(
-            getErrorMessage(error, "Unable to load your certifications."),
+            getApiErrorMessage(error, "Unable to load your certifications."),
           );
         }
       } finally {

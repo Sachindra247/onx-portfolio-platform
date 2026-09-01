@@ -18,6 +18,8 @@ import LeaveRequestFormModal from "../components/vacations/requests/LeaveRequest
 
 import LeaveRequestDeleteModal from "../components/vacations/requests/LeaveRequestDeleteModal";
 
+import { exportVacationCsv } from "../utils/vacationExport";
+
 import {
   approveLeaveRequest,
   createLeaveRequest,
@@ -299,7 +301,7 @@ export default function VacationsPage() {
   // =========================================================
 
   function handleExportCsv() {
-    console.log("Export vacation CSV");
+    exportVacationCsv(leaveRequests);
   }
 
   // =========================================================
@@ -313,6 +315,7 @@ export default function VacationsPage() {
         onSectionChange={handleSectionChange}
         onAddLeaveRequest={handleAddLeaveRequest}
         onExportCsv={handleExportCsv}
+        exportDisabled={isLoading || leaveRequests.length === 0}
       >
         {/* =================================================
             OVERVIEW

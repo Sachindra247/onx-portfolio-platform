@@ -19,6 +19,7 @@ interface VacationsDashboardNavProps {
   activeSection: VacationSection;
   onSectionChange: (section: VacationSection) => void;
   onAddLeaveRequest: () => void;
+  exportDisabled?: boolean;
   onExportCsv: () => void;
 }
 
@@ -55,6 +56,7 @@ export default function VacationsDashboardNav({
   onSectionChange,
   onAddLeaveRequest,
   onExportCsv,
+  exportDisabled = false,
 }: VacationsDashboardNavProps) {
   return (
     <aside
@@ -113,6 +115,7 @@ export default function VacationsDashboardNav({
             type="button"
             className="vacations-sidebar__export-button"
             onClick={onExportCsv}
+            disabled={exportDisabled}
           >
             <Download size={16} aria-hidden="true" />
             Export CSV
