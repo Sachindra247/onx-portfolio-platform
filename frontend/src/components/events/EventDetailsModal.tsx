@@ -1,6 +1,7 @@
 import {
   CalendarDays,
   CheckCircle2,
+  Download,
   MapPin,
   Pencil,
   UserCheck,
@@ -36,6 +37,8 @@ interface EventDetailsModalProps {
   onRegister: (event: EventDto) => Promise<void>;
 
   onCancelRegistration: (event: EventDto) => Promise<void>;
+
+  onExportAttendees: (event: EventDto, attendees: EventAttendeeDto[]) => void;
 }
 
 export default function EventDetailsModal({
@@ -51,6 +54,7 @@ export default function EventDetailsModal({
   onEdit,
   onRegister,
   onCancelRegistration,
+  onExportAttendees,
 }: EventDetailsModalProps) {
   if (!event) {
     return null;
@@ -167,6 +171,17 @@ export default function EventDetailsModal({
 
                 <span>{attendees.length}</span>
               </header>
+
+              {!attendeesLoading && attendees.length > 0 && (
+                <button
+                  type="button"
+                  className="event-attendees-export-button"
+                  onClick={() => onExportAttendees(event, attendees)}
+                >
+                  <Download size={15} aria-hidden="true" />
+                  Export Attendees CSV
+                </button>
+              )}
 
               {attendeesLoading ? (
                 <p>Loading attendees...</p>

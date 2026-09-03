@@ -831,6 +831,52 @@
     transform: none;
 }
 
+.events-sidebar__export-button {
+    display: flex;
+    width: 100%;
+    min-height: 40px;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 8px;
+    padding: 10px 12px;
+    border: 1px solid var(--color-teal-900);
+    border-radius: var(--radius-medium);
+    background: transparent;
+    color: var(--color-teal-900);
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+        background 140ms ease,
+        border-color 140ms ease,
+        color 140ms ease,
+        transform 140ms ease;
+}
+
+.events-sidebar__export-button:first-child {
+    margin-top: 0;
+}
+
+.events-sidebar__export-button:hover:not(:disabled) {
+    background: var(--color-gold-600);
+    border-color: var(--color-gold-600);
+    color: var(--color-teal-900);
+    transform: translateY(-1px);
+}
+
+.events-sidebar__export-button:focus-visible {
+    outline: 2px solid var(--color-gold-600);
+    outline-offset: 2px;
+}
+
+.events-sidebar__export-button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+}
+
 /* ==========================================================
    CONTENT
    ========================================================== */
@@ -1006,6 +1052,40 @@
     border-radius: 999px;
     font-size: 0.75rem;
     font-weight: 700;
+}
+
+.event-attendees-export-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    margin-bottom: 14px;
+    padding: 8px 11px;
+    border: 1px solid var(--color-teal-900);
+    border-radius: var(--radius-medium);
+    background: transparent;
+    color: var(--color-teal-900);
+    font: inherit;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+        background 140ms ease,
+        border-color 140ms ease,
+        color 140ms ease,
+        transform 140ms ease;
+}
+
+.event-attendees-export-button:hover {
+    background: var(--color-gold-600);
+    border-color: var(--color-gold-600);
+    color: var(--color-teal-900);
+    transform: translateY(-1px);
+}
+
+.event-attendees-export-button:focus-visible {
+    outline: 2px solid var(--color-gold-600);
+    outline-offset: 2px;
 }
 
 .event-details-attendee-list {

@@ -2,6 +2,7 @@ import {
   BarChart3,
   CalendarDays,
   CheckCircle2,
+  Download,
   List,
   Plus,
   Users,
@@ -11,14 +12,12 @@ import type { EventsSection } from "../../../types/events";
 
 interface EventsDashboardNavProps {
   activeSection: EventsSection;
-
   onSectionChange: (section: EventsSection) => void;
-
   onAddEvent: () => void;
-
+  onExportCsv: () => void;
   canManageEvents: boolean;
-
   addEventDisabled?: boolean;
+  exportDisabled?: boolean;
 }
 
 const navigationItems = [
@@ -53,8 +52,10 @@ export default function EventsDashboardNav({
   activeSection,
   onSectionChange,
   onAddEvent,
+  onExportCsv,
   canManageEvents,
   addEventDisabled = false,
+  exportDisabled = false,
 }: EventsDashboardNavProps) {
   return (
     <aside className="events-sidebar">
@@ -94,8 +95,8 @@ export default function EventsDashboardNav({
         })}
       </div>
 
-      {canManageEvents && (
-        <div className="events-sidebar__actions">
+      <div className="events-sidebar__actions">
+        {canManageEvents && (
           <button
             type="button"
             className="events-sidebar__add-button"
@@ -103,11 +104,20 @@ export default function EventsDashboardNav({
             onClick={onAddEvent}
           >
             <Plus size={17} aria-hidden="true" />
-
             <span>Add Event</span>
           </button>
-        </div>
-      )}
+        )}
+
+        <button
+          type="button"
+          className="events-sidebar__export-button"
+          disabled={exportDisabled}
+          onClick={onExportCsv}
+        >
+          <Download size={17} aria-hidden="true" />
+          <span>Export CSV</span>
+        </button>
+      </div>
     </aside>
   );
 }

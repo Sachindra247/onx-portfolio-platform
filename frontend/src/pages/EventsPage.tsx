@@ -16,6 +16,8 @@ import {
   createVendor,
 } from "../api/eventsApi";
 
+import { exportEventAttendeesCsv, exportEventsCsv } from "../utils/eventExport";
+
 import { getApiErrorMessage } from "../api/apiErrors";
 
 import { useAuth } from "../auth/AuthContext";
@@ -567,6 +569,21 @@ export default function EventsPage() {
   }
 
   // =========================================================
+  // EXPORT
+  // =========================================================
+
+  function handleExportCsv() {
+    exportEventsCsv(filteredAndSortedEvents);
+  }
+
+  function handleExportAttendees(
+    portfolioEvent: EventDto,
+    eventAttendees: EventAttendeeDto[],
+  ) {
+    exportEventAttendeesCsv(portfolioEvent, eventAttendees);
+  }
+
+  // =========================================================
   // FILTER HELPERS
   // =========================================================
 
@@ -594,8 +611,10 @@ export default function EventsPage() {
           activeSection={activeSection}
           onSectionChange={setActiveSection}
           onAddEvent={openCreateModal}
+          onExportCsv={handleExportCsv}
           canManageEvents={canManageEvents}
           addEventDisabled={isLoading || vendors.length === 0}
+          exportDisabled={isLoading || filteredAndSortedEvents.length === 0}
         />
 
         <main className="events-workspace__content">
@@ -784,6 +803,7 @@ export default function EventsPage() {
         isRegistrationSaving={isRegistrationSaving}
         attendees={attendees}
         attendeesLoading={attendeesLoading}
+        onExportAttendees={handleExportAttendees}
         canManage={canManageEvents}
         canViewAttendees={canManageEvents}
         onClose={closeEventDetails}
