@@ -24,6 +24,8 @@ import ConfirmDialog from "../components/feedback/ConfirmDialog";
 
 import { getApiErrorMessage } from "../api/apiErrors";
 
+import { exportCertificationBulkEditCsv } from "../utils/certificationBulkExport";
+
 import {
   createCertification,
   deleteCertification,
@@ -421,6 +423,10 @@ export default function CertificationsPage() {
     exportCertificationsCsv(filteredAndSortedCertifications);
   }
 
+  function handleBulkExportCsv() {
+    exportCertificationBulkEditCsv(filteredAndSortedCertifications);
+  }
+
   // =========================================================
   // SORT
   // =========================================================
@@ -672,6 +678,7 @@ export default function CertificationsPage() {
       exportDisabled={certifications.length === 0}
       gapCount={summary.gapCount}
       expiringCount={summary.expiringWithin90Days}
+      onBulkExportCsv={handleBulkExportCsv}
     >
       {/* =====================================================
           LOADING

@@ -16,6 +16,7 @@ interface CertificationsDashboardNavProps {
   onSectionChange: (section: CertificationsSection) => void;
   onAddCertification: () => void;
   onExportCsv: () => void;
+  onBulkExportCsv: () => void;
   canManageCertifications: boolean;
   addCertificationDisabled?: boolean;
   exportDisabled?: boolean;
@@ -61,6 +62,7 @@ export default function CertificationsDashboardNav({
   onSectionChange,
   onAddCertification,
   onExportCsv,
+  onBulkExportCsv,
   canManageCertifications,
   addCertificationDisabled = false,
   exportDisabled = false,
@@ -140,6 +142,16 @@ export default function CertificationsDashboardNav({
           >
             <Plus size={17} aria-hidden="true" />
             <span>Add Certification</span>
+          </button>
+        )}
+
+        {canManageCertifications && (
+          <button
+            type="button"
+            className="certifications-sidebar__action-button"
+            onClick={onBulkExportCsv}
+          >
+            Bulk Update Export
           </button>
         )}
 
