@@ -1,6 +1,7 @@
 import {
   BadgeDollarSign,
   Building2,
+  Download,
   LayoutDashboard,
   Plus,
 } from "lucide-react";
@@ -12,6 +13,7 @@ interface RebatesDashboardNavProps {
   canManage: boolean;
   onSectionChange: (section: RebatesSection) => void;
   onAddRebate: () => void;
+  onExportCsv: () => void;
 }
 
 const navigationItems = [
@@ -37,6 +39,7 @@ export default function RebatesDashboardNav({
   canManage,
   onSectionChange,
   onAddRebate,
+  onExportCsv,
 }: RebatesDashboardNavProps) {
   return (
     <aside className="rebates-sidebar" aria-label="Rebates navigation">
@@ -76,6 +79,16 @@ export default function RebatesDashboardNav({
           );
         })}
 
+        <div className="rebates-sidebar__actions">
+          <button
+            type="button"
+            className="rebates-sidebar__add-button"
+            onClick={onExportCsv}
+          >
+            <Download size={17} aria-hidden="true" />
+            Export CSV
+          </button>
+        </div>
         {canManage ? (
           <div className="rebates-sidebar__actions">
             <button

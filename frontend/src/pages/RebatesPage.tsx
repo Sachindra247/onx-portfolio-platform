@@ -44,6 +44,8 @@ import type { CertificationVendorDto } from "../types/certifications";
 
 import { formatRebateAmount, getRebateSummary } from "../utils/rebateAnalytics";
 
+import { exportRebatesCsv } from "../utils/rebateExport";
+
 import "../styles/rebates.css";
 
 export default function RebatesPage() {
@@ -266,6 +268,10 @@ export default function RebatesPage() {
     setVendorFilter("");
   }
 
+  function handleExportCsv() {
+    exportRebatesCsv(filteredRebates);
+  }
+
   /*
    * Add will open the form modal in
    * Batch 3B. For now, move the user
@@ -416,6 +422,7 @@ export default function RebatesPage() {
         canManage={canManage}
         onSectionChange={setActiveSection}
         onAddRebate={handleAddRebate}
+        onExportCsv={handleExportCsv}
       >
         <header className="rebates-page-header">
           <div>

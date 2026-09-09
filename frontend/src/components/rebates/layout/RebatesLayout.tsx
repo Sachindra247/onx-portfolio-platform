@@ -9,6 +9,7 @@ interface RebatesLayoutProps {
   canManage: boolean;
   onSectionChange: (section: RebatesSection) => void;
   onAddRebate: () => void;
+  onExportCsv: () => void;
   children: ReactNode;
 }
 
@@ -17,6 +18,7 @@ export default function RebatesLayout({
   canManage,
   onSectionChange,
   onAddRebate,
+  onExportCsv,
   children,
 }: RebatesLayoutProps) {
   return (
@@ -27,6 +29,7 @@ export default function RebatesLayout({
           canManage={canManage}
           onSectionChange={onSectionChange}
           onAddRebate={onAddRebate}
+          onExportCsv={onExportCsv}
         />
 
         <div className="rebates-workspace__content">{children}</div>
