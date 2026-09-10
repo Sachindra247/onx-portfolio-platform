@@ -10,6 +10,7 @@ interface CertificationsLayoutProps {
   onAddCertification: () => void;
   onExportCsv: () => void;
   onBulkExportCsv: () => void;
+  onImportUpdates: () => void;
   canManageCertifications: boolean;
   addCertificationDisabled?: boolean;
   exportDisabled?: boolean;
@@ -24,6 +25,7 @@ export default function CertificationsLayout({
   onAddCertification,
   onExportCsv,
   onBulkExportCsv,
+  onImportUpdates,
   canManageCertifications,
   addCertificationDisabled = false,
   exportDisabled = false,
@@ -40,6 +42,7 @@ export default function CertificationsLayout({
           onAddCertification={onAddCertification}
           onExportCsv={onExportCsv}
           onBulkExportCsv={onBulkExportCsv}
+          onImportUpdates={onImportUpdates}
           canManageCertifications={canManageCertifications}
           addCertificationDisabled={addCertificationDisabled}
           exportDisabled={exportDisabled}

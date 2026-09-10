@@ -141,3 +141,47 @@ export type CertificationSortField =
   | "practiceLead";
 
 export type SortDirection = "ascending" | "descending";
+
+export type CertificationImportAction =
+  | "Update"
+  | "Archive"
+  | "New"
+  | "Invalid";
+
+export interface CertificationImportPreviewRowDto {
+  rowNumber: number;
+  action: CertificationImportAction;
+  certificationId: string | null;
+  personName: string;
+  personEmail: string | null;
+  vendorName: string;
+  certificationName: string;
+  status: string;
+  dateCompleted: string | null;
+  expiryDate: string | null;
+  practiceLead: string | null;
+  rebateImpact: string | null;
+  notes: string | null;
+  isValid: boolean;
+  errors: string[];
+  warnings: string[];
+}
+
+export interface CertificationImportPreviewDto {
+  totalRows: number;
+  validRows: number;
+  errorRows: number;
+  newRecords: number;
+  updates: number;
+  archives: number;
+  rows: CertificationImportPreviewRowDto[];
+}
+
+export interface CertificationImportResultDto {
+  totalRows: number;
+  created: number;
+  updated: number;
+  archived: number;
+  totalChanged: number;
+  createdCertificationIds: string[];
+}

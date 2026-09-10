@@ -6,6 +6,7 @@ import {
   Download,
   LayoutDashboard,
   Plus,
+  Upload,
   Users,
 } from "lucide-react";
 
@@ -17,6 +18,7 @@ interface CertificationsDashboardNavProps {
   onAddCertification: () => void;
   onExportCsv: () => void;
   onBulkExportCsv: () => void;
+  onImportUpdates: () => void;
   canManageCertifications: boolean;
   addCertificationDisabled?: boolean;
   exportDisabled?: boolean;
@@ -63,6 +65,7 @@ export default function CertificationsDashboardNav({
   onAddCertification,
   onExportCsv,
   onBulkExportCsv,
+  onImportUpdates,
   canManageCertifications,
   addCertificationDisabled = false,
   exportDisabled = false,
@@ -152,6 +155,17 @@ export default function CertificationsDashboardNav({
             onClick={onBulkExportCsv}
           >
             Bulk Update Export
+          </button>
+        )}
+
+        {canManageCertifications && (
+          <button
+            type="button"
+            className="certifications-sidebar__action-button"
+            onClick={onImportUpdates}
+          >
+            <Upload size={17} aria-hidden="true" />
+            <span>Import Updates</span>
           </button>
         )}
 

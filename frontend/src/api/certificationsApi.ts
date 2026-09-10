@@ -2,6 +2,8 @@ import { httpClient } from "./httpClient";
 
 import type {
   CertificationDto,
+  CertificationImportPreviewDto,
+  CertificationImportResultDto,
   CertificationPersonLookupDto,
   CertificationRequest,
 } from "../types/certifications";
@@ -74,6 +76,46 @@ export async function searchCertificationPeople(
       signal,
       params: {
         q: query,
+      },
+    },
+  );
+
+  return response.data;
+}
+
+export async function previewCertificationImport(
+  file: File,
+): Promise<CertificationImportPreviewDto> {
+  const formData = new FormData();
+
+  formData.append("file", file);
+
+  const response = await httpClient.post<CertificationImportPreviewDto>(
+    "/api/certifications/import/preview",
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    },
+  );
+
+  return response.data;
+}
+
+export async function confirmCertificationImport(
+  file: File,
+): Promise<CertificationImportResultDto> {
+  const formData = new FormData();
+
+  formData.append("file", file);
+
+  const response = await httpClient.post<CertificationImportResultDto>(
+    "/api/certifications/import/confirm",
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
       },
     },
   );

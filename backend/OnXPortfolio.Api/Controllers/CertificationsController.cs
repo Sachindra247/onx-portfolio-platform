@@ -6,6 +6,8 @@ using OnXPortfolio.Application.Certifications;
 using OnXPortfolio.Domain.Certifications;
 using OnXPortfolio.Domain.Users;
 using OnXPortfolio.Infrastructure.Persistence;
+using System.Globalization;
+using Microsoft.VisualBasic.FileIO;
 
 namespace OnXPortfolio.Api.Controllers;
 
@@ -894,6 +896,978 @@ certification.PersonName =
     }
 
     // =========================================================
+// IMPORT PREVIEW
+//
+// Certification Admin / Global Admin only.
+//
+// Parses and validates the bulk-edit CSV without making
+// any database changes.
+// =========================================================
+
+[HttpPost("import/preview")]
+[Consumes("multipart/form-data")]
+[ProducesResponseType(
+    typeof(CertificationImportPreviewDto),
+    StatusCodes.Status200OK)]
+[ProducesResponseType(
+    StatusCodes.Status400BadRequest)]
+[ProducesResponseType(
+    StatusCodes.Status401Unauthorized)]
+[ProducesResponseType(
+    StatusCodes.Status403Forbidden)]
+public async Task<ActionResult<CertificationImportPreviewDto>>
+    PreviewCertificationImport(
+        IFormFile file,
+        CancellationToken cancellationToken)
+{
+    var currentUser =
+        await _currentUserService.GetUserAsync(
+            cancellationToken);
+
+    if (currentUser is null)
+    {
+        return Unauthorized();
+    }
+
+    if (!CanManageCertifications(currentUser))
+    {
+        return Forbid();
+    }
+
+    if (file is null || file.Length == 0)
+    {
+        return BadRequest(
+            new
+            {
+                message = "A CSV file is required."
+            });
+    }
+
+    if (!string.Equals(
+            Path.GetExtension(file.FileName),
+            ".csv",
+            StringComparison.OrdinalIgnoreCase))
+    {
+        return BadRequest(
+            new
+            {
+                message = "Only CSV files are supported."
+            });
+    }
+
+    var expectedHeaders =
+        new[]
+        {
+            "Certification ID",
+            "Person",
+            "Person Email",
+            "Vendor",
+            "Certification",
+            "Status",
+            "Date Completed",
+            "Expiry",
+            "Lead",
+            "Rebate",
+            "Notes"
+        };
+
+    var parsedRows =
+        new List<ParsedCertificationImportRow>();
+
+    try
+    {
+        using var stream =
+            file.OpenReadStream();
+
+        using var reader =
+            new TextFieldParser(stream);
+
+        reader.TextFieldType =
+            FieldType.Delimited;
+
+        reader.SetDelimiters(",");
+
+        reader.HasFieldsEnclosedInQuotes =
+            true;
+
+        if (reader.EndOfData)
+        {
+            return BadRequest(
+                new
+                {
+                    message =
+                        "The CSV file is empty."
+                });
+        }
+
+        var headers =
+            reader.ReadFields();
+
+        if (headers is null ||
+            headers.Length != expectedHeaders.Length)
+        {
+            return BadRequest(
+                new
+                {
+                    message =
+                        "The CSV headers do not match the required bulk-update format."
+                });
+        }
+
+        for (
+            var index = 0;
+            index < expectedHeaders.Length;
+            index++)
+        {
+            var actualHeader =
+                headers[index]
+                    .Trim()
+                    .TrimStart('\uFEFF');
+
+            if (!string.Equals(
+                    actualHeader,
+                    expectedHeaders[index],
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                return BadRequest(
+                    new
+                    {
+                        message =
+                            $"Unexpected CSV header '{actualHeader}'. Expected '{expectedHeaders[index]}'."
+                    });
+            }
+        }
+
+        var rowNumber = 1;
+
+        while (!reader.EndOfData)
+        {
+            rowNumber++;
+
+            var fields =
+                reader.ReadFields();
+
+            if (fields is null)
+            {
+                continue;
+            }
+
+            if (fields.All(
+                    field =>
+                        string.IsNullOrWhiteSpace(field)))
+            {
+                continue;
+            }
+
+            if (fields.Length != expectedHeaders.Length)
+            {
+                parsedRows.Add(
+                    new ParsedCertificationImportRow
+                    {
+                        RowNumber =
+                            rowNumber,
+
+                        ParseError =
+                            $"Expected {expectedHeaders.Length} columns but found {fields.Length}."
+                    });
+
+                continue;
+            }
+
+            parsedRows.Add(
+                new ParsedCertificationImportRow
+                {
+                    RowNumber =
+                        rowNumber,
+
+                    CertificationIdText =
+                        fields[0].Trim(),
+
+                    PersonName =
+                        fields[1].Trim(),
+
+                    PersonEmail =
+                        NormalizeOptionalText(
+                            fields[2]),
+
+                    VendorName =
+                        fields[3].Trim(),
+
+                    CertificationName =
+                        fields[4].Trim(),
+
+                    StatusText =
+                        fields[5].Trim(),
+
+                    DateCompletedText =
+                        fields[6].Trim(),
+
+                    ExpiryDateText =
+                        fields[7].Trim(),
+
+                    PracticeLead =
+                        NormalizeOptionalText(
+                            fields[8]),
+
+                    RebateImpact =
+                        NormalizeOptionalText(
+                            fields[9]),
+
+                    Notes =
+                        NormalizeOptionalText(
+                            fields[10])
+                });
+        }
+    }
+    catch (MalformedLineException exception)
+    {
+        return BadRequest(
+            new
+            {
+                message =
+                    $"The CSV file could not be parsed. {exception.Message}"
+            });
+    }
+
+    var activeVendors =
+        await _dbContext.Vendors
+            .AsNoTracking()
+            .Where(vendor =>
+                vendor.IsActive)
+            .Select(vendor =>
+                vendor.Name)
+            .ToListAsync(
+                cancellationToken);
+
+    var validCertificationIds =
+        parsedRows
+            .Where(row =>
+                Guid.TryParse(
+                    row.CertificationIdText,
+                    out _))
+            .Select(row =>
+                Guid.Parse(
+                    row.CertificationIdText!))
+            .Distinct()
+            .ToList();
+
+    var existingCertificationIds =
+        await _dbContext.Certifications
+            .AsNoTracking()
+            .Where(certification =>
+                validCertificationIds.Contains(
+                    certification.Id))
+            .Select(certification =>
+                certification.Id)
+            .ToListAsync(
+                cancellationToken);
+
+    var duplicateIds =
+        parsedRows
+            .Where(row =>
+                Guid.TryParse(
+                    row.CertificationIdText,
+                    out _))
+            .GroupBy(row =>
+                Guid.Parse(
+                    row.CertificationIdText!))
+            .Where(group =>
+                group.Count() > 1)
+            .Select(group =>
+                group.Key)
+            .ToHashSet();
+
+    var result =
+        new CertificationImportPreviewDto
+        {
+            TotalRows =
+                parsedRows.Count
+        };
+
+    foreach (var parsedRow in parsedRows)
+    {
+        var previewRow =
+            new CertificationImportPreviewRowDto
+            {
+                RowNumber =
+                    parsedRow.RowNumber,
+
+                PersonName =
+                    parsedRow.PersonName,
+
+                PersonEmail =
+                    parsedRow.PersonEmail,
+
+                VendorName =
+                    parsedRow.VendorName,
+
+                CertificationName =
+                    parsedRow.CertificationName,
+
+                Status =
+                    parsedRow.StatusText,
+
+                PracticeLead =
+                    parsedRow.PracticeLead,
+
+                RebateImpact =
+                    parsedRow.RebateImpact,
+
+                Notes =
+                    parsedRow.Notes
+            };
+
+        if (!string.IsNullOrWhiteSpace(
+                parsedRow.ParseError))
+        {
+            previewRow.Errors.Add(
+                parsedRow.ParseError);
+
+            previewRow.Action =
+                "Invalid";
+
+            result.Rows.Add(
+                previewRow);
+
+            continue;
+        }
+
+        Guid? certificationId = null;
+
+        if (!string.IsNullOrWhiteSpace(
+                parsedRow.CertificationIdText))
+        {
+            if (!Guid.TryParse(
+                    parsedRow.CertificationIdText,
+                    out var parsedCertificationId))
+            {
+                previewRow.Errors.Add(
+                    "Certification ID is not a valid ID.");
+            }
+            else
+            {
+                certificationId =
+                    parsedCertificationId;
+
+                previewRow.CertificationId =
+                    parsedCertificationId;
+
+                if (!existingCertificationIds.Contains(
+                        parsedCertificationId))
+                {
+                    previewRow.Errors.Add(
+                        "Certification ID does not match an existing certification.");
+                }
+
+                if (duplicateIds.Contains(
+                        parsedCertificationId))
+                {
+                    previewRow.Errors.Add(
+                        "Certification ID appears more than once in the uploaded file.");
+                }
+            }
+        }
+
+        if (string.IsNullOrWhiteSpace(
+                parsedRow.PersonName))
+        {
+            previewRow.Errors.Add(
+                "Person is required.");
+        }
+
+        if (string.IsNullOrWhiteSpace(
+                parsedRow.VendorName))
+        {
+            previewRow.Errors.Add(
+                "Vendor is required.");
+        }
+        else if (!activeVendors.Any(
+                     vendorName =>
+                         string.Equals(
+                             vendorName,
+                             parsedRow.VendorName,
+                             StringComparison.OrdinalIgnoreCase)))
+        {
+            previewRow.Errors.Add(
+                "Vendor does not exist or is inactive.");
+        }
+
+        if (string.IsNullOrWhiteSpace(
+                parsedRow.CertificationName))
+        {
+            previewRow.Errors.Add(
+                "Certification is required.");
+        }
+
+        CertificationStatus? parsedStatus = null;
+
+        if (string.IsNullOrWhiteSpace(
+                parsedRow.StatusText))
+        {
+            previewRow.Errors.Add(
+                "Status is required.");
+        }
+        else if (!Enum.TryParse<CertificationStatus>(
+                     parsedRow.StatusText
+                         .Replace(" ", string.Empty),
+                     true,
+                     out var status))
+        {
+            previewRow.Errors.Add(
+                $"Status '{parsedRow.StatusText}' is not valid.");
+        }
+        else
+        {
+            parsedStatus =
+                status;
+        }
+
+        DateOnly? dateCompleted = null;
+
+        if (!string.IsNullOrWhiteSpace(
+                parsedRow.DateCompletedText))
+        {
+            if (!DateOnly.TryParseExact(
+                    parsedRow.DateCompletedText,
+                    "yyyy-MM-dd",
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.None,
+                    out var parsedDateCompleted))
+            {
+                previewRow.Errors.Add(
+                    "Date Completed must use YYYY-MM-DD format.");
+            }
+            else
+            {
+                dateCompleted =
+                    parsedDateCompleted;
+
+                previewRow.DateCompleted =
+                    parsedDateCompleted;
+            }
+        }
+
+        DateOnly? expiryDate = null;
+
+        if (!string.IsNullOrWhiteSpace(
+                parsedRow.ExpiryDateText))
+        {
+            if (!DateOnly.TryParseExact(
+                    parsedRow.ExpiryDateText,
+                    "yyyy-MM-dd",
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.None,
+                    out var parsedExpiryDate))
+            {
+                previewRow.Errors.Add(
+                    "Expiry must use YYYY-MM-DD format.");
+            }
+            else
+            {
+                expiryDate =
+                    parsedExpiryDate;
+
+                previewRow.ExpiryDate =
+                    parsedExpiryDate;
+            }
+        }
+
+        if (!IsValidDateRange(
+                dateCompleted,
+                expiryDate))
+        {
+            previewRow.Errors.Add(
+                "Expiry date cannot be earlier than the completion date.");
+        }
+
+        var certificationIdWasProvided =
+    !string.IsNullOrWhiteSpace(
+        parsedRow.CertificationIdText);
+
+var isNew =
+    !certificationIdWasProvided;
+
+if (isNew &&
+    parsedStatus ==
+        CertificationStatus.Archived)
+{
+    previewRow.Errors.Add(
+        "A new certification cannot be created as Archived.");
+}
+
+previewRow.IsValid =
+    previewRow.Errors.Count == 0;
+
+if (!previewRow.IsValid)
+{
+    previewRow.Action =
+        "Invalid";
+
+    result.ErrorRows++;
+}
+else if (isNew)
+{
+    previewRow.Action =
+        "New";
+
+    result.NewRecords++;
+    result.ValidRows++;
+}
+else if (
+    parsedStatus ==
+        CertificationStatus.Archived)
+{
+    previewRow.Action =
+        "Archive";
+
+    result.Archives++;
+    result.ValidRows++;
+}
+else
+{
+    previewRow.Action =
+        "Update";
+
+    result.Updates++;
+    result.ValidRows++;
+}
+
+result.Rows.Add(
+    previewRow);
+
+
+    }
+
+
+
+    return Ok(
+        result);
+}
+
+// =========================================================
+// IMPORT CONFIRM
+//
+// Certification Admin / Global Admin only.
+//
+// Re-validates the uploaded CSV using the same preview
+// endpoint before making any changes.
+//
+// All database writes run inside one transaction.
+// If any operation fails, the entire import is rolled back.
+// =========================================================
+
+[HttpPost("import/confirm")]
+[Consumes("multipart/form-data")]
+[ProducesResponseType(
+    typeof(CertificationImportResultDto),
+    StatusCodes.Status200OK)]
+[ProducesResponseType(
+    StatusCodes.Status400BadRequest)]
+[ProducesResponseType(
+    StatusCodes.Status401Unauthorized)]
+[ProducesResponseType(
+    StatusCodes.Status403Forbidden)]
+public async Task<ActionResult<CertificationImportResultDto>>
+    ConfirmCertificationImport(
+        IFormFile file,
+        CancellationToken cancellationToken)
+{
+    var currentUser =
+        await _currentUserService.GetUserAsync(
+            cancellationToken);
+
+    if (currentUser is null)
+    {
+        return Unauthorized();
+    }
+
+    if (!CanManageCertifications(currentUser))
+    {
+        return Forbid();
+    }
+
+    // -----------------------------------------------------
+    // Re-run the exact preview validation.
+    //
+    // The browser preview is not trusted as permission
+    // to modify the database.
+    // -----------------------------------------------------
+
+    var previewAction =
+        await PreviewCertificationImport(
+            file,
+            cancellationToken);
+
+    CertificationImportPreviewDto? preview = null;
+
+    if (previewAction.Value is not null)
+    {
+        preview =
+            previewAction.Value;
+    }
+    else if (
+        previewAction.Result is OkObjectResult okResult &&
+        okResult.Value is CertificationImportPreviewDto okPreview)
+    {
+        preview =
+            okPreview;
+    }
+    else if (previewAction.Result is not null)
+    {
+        return previewAction.Result;
+    }
+
+    if (preview is null)
+    {
+        return BadRequest(
+            new
+            {
+                message =
+                    "The certification import could not be validated."
+            });
+    }
+
+    if (preview.ErrorRows > 0)
+    {
+        return BadRequest(
+            new
+            {
+                message =
+                    "The certification import contains validation errors. No records were changed.",
+
+                preview
+            });
+    }
+
+    if (preview.ValidRows == 0)
+    {
+        return BadRequest(
+            new
+            {
+                message =
+                    "The certification import does not contain any valid rows."
+            });
+    }
+
+    // -----------------------------------------------------
+    // Load active vendors once.
+    // -----------------------------------------------------
+
+    var activeVendors =
+        await _dbContext.Vendors
+            .Where(vendor =>
+                vendor.IsActive)
+            .ToListAsync(
+                cancellationToken);
+
+    var vendorsByName =
+        activeVendors.ToDictionary(
+            vendor => vendor.Name,
+            vendor => vendor,
+            StringComparer.OrdinalIgnoreCase);
+
+    // -----------------------------------------------------
+    // Load every existing certification referenced by ID.
+    //
+    // Include person/manager relationships so an imported
+    // update does not accidentally remove manager data.
+    // -----------------------------------------------------
+
+    var existingIds =
+        preview.Rows
+            .Where(row =>
+                row.IsValid &&
+                row.CertificationId.HasValue)
+            .Select(row =>
+                row.CertificationId!.Value)
+            .Distinct()
+            .ToList();
+
+    var existingCertifications =
+        await _dbContext.Certifications
+            .Include(certification =>
+                certification.CertificationPerson)
+                .ThenInclude(person =>
+                    person!.ApplicationUser)
+                    .ThenInclude(user =>
+                        user!.Manager)
+            .Include(certification =>
+                certification.CertificationPerson)
+                .ThenInclude(person =>
+                    person!.ManagerPerson)
+            .Where(certification =>
+                existingIds.Contains(
+                    certification.Id))
+            .ToDictionaryAsync(
+                certification =>
+                    certification.Id,
+                cancellationToken);
+
+    var result =
+        new CertificationImportResultDto
+        {
+            TotalRows =
+                preview.TotalRows
+        };
+
+    await using var transaction =
+        await _dbContext.Database.BeginTransactionAsync(
+            cancellationToken);
+
+    try
+    {
+        var now =
+            DateTimeOffset.UtcNow;
+
+        foreach (
+            var row in preview.Rows.Where(
+                row => row.IsValid))
+        {
+            if (!vendorsByName.TryGetValue(
+                    row.VendorName,
+                    out var vendor))
+            {
+                throw new InvalidOperationException(
+                    $"Vendor '{row.VendorName}' could not be resolved.");
+            }
+
+            if (!Enum.TryParse<CertificationStatus>(
+                    row.Status.Replace(
+                        " ",
+                        string.Empty),
+                    true,
+                    out var requestedStatus))
+            {
+                throw new InvalidOperationException(
+                    $"Status '{row.Status}' could not be resolved.");
+            }
+
+            // =================================================
+            // NEW CERTIFICATION
+            // =================================================
+
+            if (!row.CertificationId.HasValue)
+            {
+                CertificationPerson certificationPerson;
+
+                try
+                {
+                    certificationPerson =
+                        await ResolveCertificationPersonAsync(
+                            null,
+                            null,
+                            row.PersonName,
+                            row.PersonEmail,
+                            null,
+                            null,
+                            null,
+                            null,
+                            now,
+                            cancellationToken);
+                }
+                catch (InvalidOperationException exception)
+                {
+                    throw new InvalidOperationException(
+                        $"CSV row {row.RowNumber}: {exception.Message}",
+                        exception);
+                }
+
+                var certification =
+                    new Certification
+                    {
+                        Id =
+                            Guid.NewGuid(),
+
+                        CertificationPersonId =
+                            certificationPerson.Id,
+
+                        PersonName =
+                            certificationPerson.Name,
+
+                        CertificationName =
+                            row.CertificationName.Trim(),
+
+                        Status =
+                            requestedStatus,
+
+                        DateCompleted =
+                            row.DateCompleted,
+
+                        ExpiryDate =
+                            row.ExpiryDate,
+
+                        PracticeLead =
+                            NormalizeOptionalText(
+                                row.PracticeLead),
+
+                        RebateImpact =
+                            NormalizeOptionalText(
+                                row.RebateImpact),
+
+                        Notes =
+                            NormalizeOptionalText(
+                                row.Notes),
+
+                        VendorId =
+                            vendor.Id,
+
+                        CreatedAtUtc =
+                            now,
+
+                        UpdatedAtUtc =
+                            now
+                    };
+
+                _dbContext.Certifications.Add(
+                    certification);
+
+                result.Created++;
+
+                result.CreatedCertificationIds.Add(
+                    certification.Id);
+
+                // Persist newly created directory people so a
+                // later row in the same import can resolve them
+                // instead of creating unnecessary duplicates.
+                await _dbContext.SaveChangesAsync(
+                    cancellationToken);
+
+                continue;
+            }
+
+            // =================================================
+            // EXISTING CERTIFICATION
+            // =================================================
+
+            if (!existingCertifications.TryGetValue(
+                    row.CertificationId.Value,
+                    out var existingCertification))
+            {
+                throw new InvalidOperationException(
+                    $"CSV row {row.RowNumber}: Certification ID '{row.CertificationId}' no longer exists.");
+            }
+
+            var existingPerson =
+                existingCertification.CertificationPerson;
+
+            var existingManagerName =
+                existingPerson?.ApplicationUser?.Manager is not null
+                    ? $"{existingPerson.ApplicationUser.Manager.FirstName} {existingPerson.ApplicationUser.Manager.LastName}"
+                    : existingPerson?.ManagerPerson?.Name;
+
+            var existingManagerEmail =
+                existingPerson?.ApplicationUser?.Manager?.Email ??
+                existingPerson?.ManagerPerson?.Email;
+
+            CertificationPerson resolvedPerson;
+
+            try
+            {
+                resolvedPerson =
+                    await ResolveCertificationPersonAsync(
+                        existingPerson?.Id,
+                        existingPerson?.ApplicationUserId,
+                        row.PersonName,
+                        row.PersonEmail,
+                        existingPerson?.ManagerPersonId,
+                        existingPerson?.ApplicationUser?.ManagerId,
+                        existingManagerName,
+                        existingManagerEmail,
+                        now,
+                        cancellationToken);
+            }
+            catch (InvalidOperationException exception)
+            {
+                throw new InvalidOperationException(
+                    $"CSV row {row.RowNumber}: {exception.Message}",
+                    exception);
+            }
+
+            existingCertification.CertificationPersonId =
+                resolvedPerson.Id;
+
+            existingCertification.PersonName =
+                resolvedPerson.Name;
+
+            existingCertification.CertificationName =
+                row.CertificationName.Trim();
+
+            existingCertification.Status =
+                ResolveUpdatedStatus(
+                    requestedStatus,
+                    row.ExpiryDate);
+
+            existingCertification.DateCompleted =
+                row.DateCompleted;
+
+            existingCertification.ExpiryDate =
+                row.ExpiryDate;
+
+            existingCertification.PracticeLead =
+                NormalizeOptionalText(
+                    row.PracticeLead);
+
+            existingCertification.RebateImpact =
+                NormalizeOptionalText(
+                    row.RebateImpact);
+
+            existingCertification.Notes =
+                NormalizeOptionalText(
+                    row.Notes);
+
+            existingCertification.VendorId =
+                vendor.Id;
+
+            existingCertification.UpdatedAtUtc =
+                now;
+
+            if (
+                requestedStatus ==
+                CertificationStatus.Archived)
+            {
+                result.Archived++;
+            }
+            else
+            {
+                result.Updated++;
+            }
+        }
+
+        await _dbContext.SaveChangesAsync(
+            cancellationToken);
+
+        await transaction.CommitAsync(
+            cancellationToken);
+
+        return Ok(
+            result);
+    }
+    catch (InvalidOperationException exception)
+    {
+        await transaction.RollbackAsync(
+            cancellationToken);
+
+        _dbContext.ChangeTracker.Clear();
+
+        return BadRequest(
+            new
+            {
+                message =
+                    exception.Message
+            });
+    }
+    catch
+    {
+        await transaction.RollbackAsync(
+            cancellationToken);
+
+        _dbContext.ChangeTracker.Clear();
+
+        throw;
+    }
+}
+
+    // =========================================================
     // DELETE
     //
     // Certification Admin / Global Admin only.
@@ -1659,35 +2633,65 @@ private async Task<CertificationPerson?>
         CancellationToken cancellationToken)
 {
     var loweredName =
-        name.ToLower();
+        name.Trim().ToLower();
 
     var loweredEmail =
-        email?.ToLower();
+        email?
+            .Trim()
+            .ToLower();
+
+    // -----------------------------------------------------
+    // Prefer email because it is the strongest identity.
+    // -----------------------------------------------------
 
     if (loweredEmail is not null)
     {
-        var emailMatch =
-            await _dbContext.CertificationPeople
-                .SingleOrDefaultAsync(
-                    person =>
-                        person.Email != null &&
-                        person.Email.ToLower() ==
-                            loweredEmail,
-                    cancellationToken);
+        var emailMatches =
+    await _dbContext.CertificationPeople
+        .Where(person =>
+            person.Email != null &&
+            person.Email.ToLower() ==
+                loweredEmail)
+        .Take(2)
+        .ToListAsync(
+            cancellationToken);
 
-        if (emailMatch is not null)
+        if (emailMatches.Count > 1)
         {
-            return emailMatch;
+            throw new InvalidOperationException(
+                $"More than one certification person uses the email '{email}'.");
+        }
+
+        if (emailMatches.Count == 1)
+        {
+            return emailMatches[0];
         }
     }
 
-    return await _dbContext.CertificationPeople
-        .SingleOrDefaultAsync(
-            person =>
-                person.ApplicationUserId == null &&
-                person.Name.ToLower() ==
-                    loweredName,
+    // -----------------------------------------------------
+    // When email is unavailable, match manual directory
+    // people by exact normalized name.
+    // -----------------------------------------------------
+
+    var nameMatches =
+    await _dbContext.CertificationPeople
+        .Where(person =>
+            person.ApplicationUserId == null &&
+            person.Name.ToLower() ==
+                loweredName)
+        .Take(2)
+        .ToListAsync(
             cancellationToken);
+
+    if (nameMatches.Count > 1)
+    {
+        throw new InvalidOperationException(
+            $"More than one certification person matches '{name}'. Add a Person Email or clean up the duplicate person records before importing a new certification.");
+    }
+
+    return nameMatches.Count == 1
+        ? nameMatches[0]
+        : null;
 }
 
 private static string BuildUserName(
@@ -1726,4 +2730,39 @@ private static string BuildUserName(
             ? null
             : value.Trim();
     }
+
+    private sealed class ParsedCertificationImportRow
+{
+    public int RowNumber { get; set; }
+
+    public string? CertificationIdText { get; set; }
+
+    public string PersonName { get; set; } =
+        string.Empty;
+
+    public string? PersonEmail { get; set; }
+
+    public string VendorName { get; set; } =
+        string.Empty;
+
+    public string CertificationName { get; set; } =
+        string.Empty;
+
+    public string StatusText { get; set; } =
+        string.Empty;
+
+    public string DateCompletedText { get; set; } =
+        string.Empty;
+
+    public string ExpiryDateText { get; set; } =
+        string.Empty;
+
+    public string? PracticeLead { get; set; }
+
+    public string? RebateImpact { get; set; }
+
+    public string? Notes { get; set; }
+
+    public string? ParseError { get; set; }
+}
 }

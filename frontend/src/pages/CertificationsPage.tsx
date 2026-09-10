@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { type ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { AlertCircle, Archive, RefreshCw } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 
@@ -26,10 +26,14 @@ import { getApiErrorMessage } from "../api/apiErrors";
 
 import { exportCertificationBulkEditCsv } from "../utils/certificationBulkExport";
 
+import { CertificationImportPreview } from "../components/certifications/CertificationImportPreview";
+
 import {
   createCertification,
   deleteCertification,
   getCertifications,
+  previewCertificationImport,
+  confirmCertificationImport,
   updateCertification,
 } from "../api/certificationsApi";
 
@@ -51,6 +55,7 @@ import type {
   CertificationVendorDto,
   CertificationsSection,
   SortDirection,
+  CertificationImportPreviewDto,
 } from "../types/certifications";
 
 import { getCertificationSummary } from "../utils/certificationAnalytics";
@@ -145,6 +150,23 @@ export default function CertificationsPage() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const [formError, setFormError] = useState<string | null>(null);
+
+  const importFileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const [importPreview, setImportPreview] =
+    useState<CertificationImportPreviewDto | null>(null);
+
+  const [isPreviewingImport, setIsPreviewingImport] = useState(false);
+
+  const [importError, setImportError] = useState<string | null>(null);
+
+  const [selectedImportFile, setSelectedImportFile] = useState<File | null>(
+    null,
+  );
+
+  const [isConfirmingImport, setIsConfirmingImport] = useState(false);
+
+  const [importSuccess, setImportSuccess] = useState<string | null>(null);
 
   // =========================================================
   // LOAD CERTIFICATIONS
@@ -427,6 +449,97 @@ export default function CertificationsPage() {
     exportCertificationBulkEditCsv(filteredAndSortedCertifications);
   }
 
+  function handleImportUpdates() {
+    if (!canManageCertifications || isPreviewingImport) {
+      return;
+    }
+
+    setImportError(null);
+    setImportPreview(null);
+    setSelectedImportFile(null);
+    setImportSuccess(null);
+
+    importFileInputRef.current?.click();
+  }
+
+  async function handleImportFileSelected(
+    event: ChangeEvent<HTMLInputElement>,
+  ) {
+    const file = event.target.files?.[0];
+
+    event.target.value = "";
+
+    if (!file) {
+      return;
+    }
+
+    setSelectedImportFile(file);
+    setImportSuccess(null);
+
+    if (!file.name.toLowerCase().endsWith(".csv")) {
+      setImportError("Please select a CSV file.");
+      return;
+    }
+
+    setIsPreviewingImport(true);
+    setImportError(null);
+    setImportPreview(null);
+
+    try {
+      const preview = await previewCertificationImport(file);
+
+      setImportPreview(preview);
+    } catch (error) {
+      setImportError(
+        getApiErrorMessage(
+          error,
+          "The certification import file could not be previewed.",
+        ),
+      );
+    } finally {
+      setIsPreviewingImport(false);
+    }
+  }
+
+  async function handleConfirmCertificationImport() {
+    if (
+      !canManageCertifications ||
+      !selectedImportFile ||
+      !importPreview ||
+      importPreview.errorRows > 0 ||
+      isConfirmingImport
+    ) {
+      return;
+    }
+
+    setIsConfirmingImport(true);
+    setImportError(null);
+    setImportSuccess(null);
+
+    try {
+      const result = await confirmCertificationImport(selectedImportFile);
+
+      setImportSuccess(
+        `Import completed successfully: ${result.updated} updated, ` +
+          `${result.created} created, ${result.archived} archived.`,
+      );
+
+      setImportPreview(null);
+      setSelectedImportFile(null);
+
+      await loadCertifications();
+    } catch (error) {
+      setImportError(
+        getApiErrorMessage(
+          error,
+          "The certification import could not be completed.",
+        ),
+      );
+    } finally {
+      setIsConfirmingImport(false);
+    }
+  }
+
   // =========================================================
   // SORT
   // =========================================================
@@ -669,282 +782,326 @@ export default function CertificationsPage() {
   // =========================================================
 
   return (
-    <CertificationsLayout
-      activeSection={activeSection}
-      onSectionChange={handleSectionChange}
-      onAddCertification={openAddCertificationModal}
-      onExportCsv={handleExportCsv}
-      canManageCertifications={canManageCertifications}
-      exportDisabled={certifications.length === 0}
-      gapCount={summary.gapCount}
-      expiringCount={summary.expiringWithin90Days}
-      onBulkExportCsv={handleBulkExportCsv}
-    >
-      {/* =====================================================
+    <>
+      <input
+        ref={importFileInputRef}
+        type="file"
+        accept=".csv,text/csv"
+        hidden
+        onChange={handleImportFileSelected}
+      />
+
+      {isPreviewingImport && (
+        <div className="certification-import-status" aria-live="polite">
+          Validating certification import...
+        </div>
+      )}
+
+      {importSuccess && (
+        <div className="certification-import-status" role="status">
+          {importSuccess}
+        </div>
+      )}
+
+      {importError && (
+        <div
+          className="certification-import-status certification-import-status--error"
+          role="alert"
+        >
+          {importError}
+        </div>
+      )}
+
+      <CertificationsLayout
+        activeSection={activeSection}
+        onSectionChange={handleSectionChange}
+        onAddCertification={openAddCertificationModal}
+        onExportCsv={handleExportCsv}
+        onImportUpdates={handleImportUpdates}
+        canManageCertifications={canManageCertifications}
+        exportDisabled={certifications.length === 0}
+        gapCount={summary.gapCount}
+        expiringCount={summary.expiringWithin90Days}
+        onBulkExportCsv={handleBulkExportCsv}
+      >
+        {canManageCertifications && importPreview && (
+          <CertificationImportPreview
+            preview={importPreview}
+            isConfirming={isConfirmingImport}
+            onConfirm={handleConfirmCertificationImport}
+            onClose={() => {
+              setImportPreview(null);
+              setSelectedImportFile(null);
+              setImportError(null);
+            }}
+          />
+        )}
+        {/* =====================================================
           LOADING
          ===================================================== */}
 
-      {isLoading && (
-        <div className="page-state" aria-live="polite">
-          <RefreshCw
-            className="page-state__spinner"
-            size={29}
-            aria-hidden="true"
-          />
+        {isLoading && (
+          <div className="page-state" aria-live="polite">
+            <RefreshCw
+              className="page-state__spinner"
+              size={29}
+              aria-hidden="true"
+            />
 
-          <h2>Loading certifications</h2>
+            <h2>Loading certifications</h2>
 
-          <p>Retrieving certification records from the API...</p>
-        </div>
-      )}
+            <p>Retrieving certification records from the API...</p>
+          </div>
+        )}
 
-      {/* =====================================================
+        {/* =====================================================
           ERROR
          ===================================================== */}
 
-      {!isLoading && loadError && (
-        <div className="page-state page-state--error" role="alert">
-          <AlertCircle size={31} aria-hidden="true" />
+        {!isLoading && loadError && (
+          <div className="page-state page-state--error" role="alert">
+            <AlertCircle size={31} aria-hidden="true" />
 
-          <h2>Unable to load certifications</h2>
+            <h2>Unable to load certifications</h2>
 
-          <p>{loadError}</p>
+            <p>{loadError}</p>
 
-          <button
-            type="button"
-            className="secondary-button"
-            onClick={() => void loadCertifications()}
-          >
-            <RefreshCw size={15} aria-hidden="true" />
-            Try again
-          </button>
-        </div>
-      )}
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={() => void loadCertifications()}
+            >
+              <RefreshCw size={15} aria-hidden="true" />
+              Try again
+            </button>
+          </div>
+        )}
 
-      {!isLoading && !loadError && (
-        <>
-          {/* =================================================
+        {!isLoading && !loadError && (
+          <>
+            {/* =================================================
                 OVERVIEW
                ================================================= */}
 
-          {activeSection === "overview" && (
-            <section className="certifications-section">
-              <CertificationStats
-                summary={summary}
-                onSectionChange={handleSectionChange}
-              />
+            {activeSection === "overview" && (
+              <section className="certifications-section">
+                <CertificationStats
+                  summary={summary}
+                  onSectionChange={handleSectionChange}
+                />
 
-              <CertificationCharts
-                certifications={activeCertificationRecords}
-              />
+                <CertificationCharts
+                  certifications={activeCertificationRecords}
+                />
 
-              <CertificationVendorCards
-                certifications={activeCertificationRecords}
-              />
-            </section>
-          )}
+                <CertificationVendorCards
+                  certifications={activeCertificationRecords}
+                />
+              </section>
+            )}
 
-          {/* =================================================
+            {/* =================================================
                 ALL CERTIFICATIONS
                ================================================= */}
 
-          {activeSection === "certifications" && (
-            <section className="certifications-section">
-              <div className="certification-table-card">
-                <header className="certification-table-card__header">
-                  <div>
-                    <h2>
-                      {showArchived
-                        ? "All certifications including archived"
-                        : "All certifications"}
-                    </h2>
+            {activeSection === "certifications" && (
+              <section className="certifications-section">
+                <div className="certification-table-card">
+                  <header className="certification-table-card__header">
+                    <div>
+                      <h2>
+                        {showArchived
+                          ? "All certifications including archived"
+                          : "All certifications"}
+                      </h2>
 
-                    {showArchived && (
-                      <p>Archived records are included in this view.</p>
+                      {showArchived && (
+                        <p>Archived records are included in this view.</p>
+                      )}
+                    </div>
+
+                    {canManageCertifications && (
+                      <label className="certification-archived-toggle">
+                        <input
+                          type="checkbox"
+                          checked={showArchived}
+                          onChange={(event) =>
+                            handleArchivedToggle(event.target.checked)
+                          }
+                        />
+
+                        <span className="certification-archived-toggle__content">
+                          <Archive size={15} aria-hidden="true" />
+                          Show archived
+                        </span>
+                      </label>
                     )}
-                  </div>
+                  </header>
 
-                  {canManageCertifications && (
-                    <label className="certification-archived-toggle">
-                      <input
-                        type="checkbox"
-                        checked={showArchived}
-                        onChange={(event) =>
-                          handleArchivedToggle(event.target.checked)
-                        }
-                      />
-
-                      <span className="certification-archived-toggle__content">
-                        <Archive size={15} aria-hidden="true" />
-                        Show archived
-                      </span>
-                    </label>
-                  )}
-                </header>
-
-                <CertificationFilters
-                  search={search}
-                  vendor={vendorFilter}
-                  status={statusFilter}
-                  practiceLead={practiceLeadFilter}
-                  vendors={vendorOptions}
-                  practiceLeads={practiceLeadOptions}
-                  resultCount={filteredAndSortedCertifications.length}
-                  totalCount={
-                    certifications.filter(
-                      (certification) =>
-                        showArchived || certification.status !== "Archived",
-                    ).length
-                  }
-                  onSearchChange={(value) => {
-                    setSearch(value);
-
-                    setPage(1);
-                  }}
-                  onVendorChange={(value) => {
-                    setVendorFilter(value);
-
-                    setPage(1);
-                  }}
-                  onStatusChange={(value) => {
-                    /*
-                     * If an admin
-                     * selects Archived,
-                     * automatically make
-                     * sure archived
-                     * records are loaded.
-                     */
-                    if (value === "Archived" && canManageCertifications) {
-                      setShowArchived(true);
+                  <CertificationFilters
+                    search={search}
+                    vendor={vendorFilter}
+                    status={statusFilter}
+                    practiceLead={practiceLeadFilter}
+                    vendors={vendorOptions}
+                    practiceLeads={practiceLeadOptions}
+                    resultCount={filteredAndSortedCertifications.length}
+                    totalCount={
+                      certifications.filter(
+                        (certification) =>
+                          showArchived || certification.status !== "Archived",
+                      ).length
                     }
+                    onSearchChange={(value) => {
+                      setSearch(value);
 
-                    setStatusFilter(value);
+                      setPage(1);
+                    }}
+                    onVendorChange={(value) => {
+                      setVendorFilter(value);
 
-                    setPage(1);
-                  }}
-                  onPracticeLeadChange={(value) => {
-                    setPracticeLeadFilter(value);
+                      setPage(1);
+                    }}
+                    onStatusChange={(value) => {
+                      /*
+                       * If an admin
+                       * selects Archived,
+                       * automatically make
+                       * sure archived
+                       * records are loaded.
+                       */
+                      if (value === "Archived" && canManageCertifications) {
+                        setShowArchived(true);
+                      }
 
-                    setPage(1);
-                  }}
-                  onReset={resetCertificationFilters}
-                />
+                      setStatusFilter(value);
 
-                <CertificationTable
-                  certifications={paginatedCertifications}
-                  sortField={sortField}
-                  sortDirection={sortDirection}
-                  onSort={handleSort}
-                  canManage={canManageCertifications}
-                  onEdit={openEditCertification}
-                  onDelete={requestDeleteCertification}
-                />
+                      setPage(1);
+                    }}
+                    onPracticeLeadChange={(value) => {
+                      setPracticeLeadFilter(value);
 
-                <CertificationPagination
-                  page={page}
-                  pageSize={pageSize}
-                  totalItems={filteredAndSortedCertifications.length}
-                  onPageChange={setPage}
-                  onPageSizeChange={handlePageSizeChange}
-                />
-              </div>
-            </section>
-          )}
+                      setPage(1);
+                    }}
+                    onReset={resetCertificationFilters}
+                  />
 
-          {/* =================================================
+                  <CertificationTable
+                    certifications={paginatedCertifications}
+                    sortField={sortField}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                    canManage={canManageCertifications}
+                    onEdit={openEditCertification}
+                    onDelete={requestDeleteCertification}
+                  />
+
+                  <CertificationPagination
+                    page={page}
+                    pageSize={pageSize}
+                    totalItems={filteredAndSortedCertifications.length}
+                    onPageChange={setPage}
+                    onPageSizeChange={handlePageSizeChange}
+                  />
+                </div>
+              </section>
+            )}
+
+            {/* =================================================
                 PEOPLE
                ================================================= */}
 
-          {activeSection === "people" && (
-            <section className="certifications-section">
-              <PeopleCoverageGrid people={peopleCoverage} />
-            </section>
-          )}
+            {activeSection === "people" && (
+              <section className="certifications-section">
+                <PeopleCoverageGrid people={peopleCoverage} />
+              </section>
+            )}
 
-          {/* =================================================
+            {/* =================================================
                 GAPS
                ================================================= */}
 
-          {activeSection === "gaps" && (
-            <section className="certifications-section">
-              <CertificationGapsView
-                certifications={activeCertificationRecords}
-                canManage={canManageCertifications}
-                onEdit={openEditCertification}
-              />
-            </section>
-          )}
+            {activeSection === "gaps" && (
+              <section className="certifications-section">
+                <CertificationGapsView
+                  certifications={activeCertificationRecords}
+                  canManage={canManageCertifications}
+                  onEdit={openEditCertification}
+                />
+              </section>
+            )}
 
-          {/* =================================================
+            {/* =================================================
                 EXPIRING
                ================================================= */}
 
-          {activeSection === "expiring" && (
-            <section className="certifications-section">
-              <ExpiringCertificationsView
-                certifications={activeCertificationRecords}
-                canManage={canManageCertifications}
-                onEdit={openEditCertification}
-              />
-            </section>
-          )}
+            {activeSection === "expiring" && (
+              <section className="certifications-section">
+                <ExpiringCertificationsView
+                  certifications={activeCertificationRecords}
+                  canManage={canManageCertifications}
+                  onEdit={openEditCertification}
+                />
+              </section>
+            )}
 
-          {/* =================================================
+            {/* =================================================
                 VENDORS
                ================================================= */}
 
-          {activeSection === "vendors" && (
-            <section className="certifications-section">
-              <VendorIntelligenceView
-                certifications={activeCertificationRecords}
-                canManage={canManageCertifications}
-                onEdit={openEditCertification}
-              />
-            </section>
-          )}
-        </>
-      )}
+            {activeSection === "vendors" && (
+              <section className="certifications-section">
+                <VendorIntelligenceView
+                  certifications={activeCertificationRecords}
+                  canManage={canManageCertifications}
+                  onEdit={openEditCertification}
+                />
+              </section>
+            )}
+          </>
+        )}
 
-      {/* =====================================================
+        {/* =====================================================
           ADD / EDIT
          ===================================================== */}
 
-      {canManageCertifications && modalIsOpen && (
-        <CertificationFormModal
-          isOpen={modalIsOpen}
-          certification={selectedCertification}
-          vendors={vendors}
-          isSaving={isSaving}
-          serverError={formError}
-          onClose={closeCertificationModal}
-          onSubmit={handleCertificationSubmit}
-        />
-      )}
+        {canManageCertifications && modalIsOpen && (
+          <CertificationFormModal
+            isOpen={modalIsOpen}
+            certification={selectedCertification}
+            vendors={vendors}
+            isSaving={isSaving}
+            serverError={formError}
+            onClose={closeCertificationModal}
+            onSubmit={handleCertificationSubmit}
+          />
+        )}
 
-      {/* =====================================================
+        {/* =====================================================
           DELETE
          ===================================================== */}
 
-      {canManageCertifications && (
-        <ConfirmDialog
-          isOpen={certificationPendingDelete !== null}
-          title="Delete certification?"
-          description={
-            certificationPendingDelete
-              ? `"${certificationPendingDelete.certificationName}" for ${certificationPendingDelete.personName} will be permanently removed.`
-              : ""
-          }
-          confirmLabel="Delete certification"
-          isConfirming={isDeleting}
-          onCancel={() => {
-            if (!isDeleting) {
-              setCertificationPendingDelete(null);
+        {canManageCertifications && (
+          <ConfirmDialog
+            isOpen={certificationPendingDelete !== null}
+            title="Delete certification?"
+            description={
+              certificationPendingDelete
+                ? `"${certificationPendingDelete.certificationName}" for ${certificationPendingDelete.personName} will be permanently removed.`
+                : ""
             }
-          }}
-          onConfirm={() => void confirmDeleteCertification()}
-        />
-      )}
-    </CertificationsLayout>
+            confirmLabel="Delete certification"
+            isConfirming={isDeleting}
+            onCancel={() => {
+              if (!isDeleting) {
+                setCertificationPendingDelete(null);
+              }
+            }}
+            onConfirm={() => void confirmDeleteCertification()}
+          />
+        )}
+      </CertificationsLayout>
+    </>
   );
 }
 
