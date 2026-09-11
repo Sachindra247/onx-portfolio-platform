@@ -37,7 +37,7 @@ import {
   updateCertification,
 } from "../api/certificationsApi";
 
-import { getVendors } from "../api/vendorsApi";
+import { getVendors, updateVendor } from "../api/vendorsApi";
 
 import { useAuth } from "../auth/AuthContext";
 
@@ -741,6 +741,54 @@ export default function CertificationsPage() {
     }
   }
 
+  async function handleRenameVendor(vendorName: string) {
+    if (!canManageCertifications) {
+      return;
+    }
+
+    const vendor = vendors.find(
+      (item) =>
+        item.name.trim().toLocaleLowerCase() ===
+        vendorName.trim().toLocaleLowerCase(),
+    );
+
+    if (!vendor) {
+      showToast("Unable to find this vendor.", "error");
+      return;
+    }
+
+    const newName = window.prompt(
+      `Rename vendor "${vendor.name}" to:`,
+      vendor.name,
+    );
+
+    if (newName === null) {
+      return;
+    }
+
+    const normalizedName = newName.trim();
+
+    if (!normalizedName || normalizedName === vendor.name) {
+      return;
+    }
+
+    try {
+      await updateVendor(vendor.id, normalizedName);
+
+      showToast(
+        `Vendor renamed from "${vendor.name}" to "${normalizedName}".`,
+        "success",
+      );
+
+      await loadCertifications();
+    } catch (error) {
+      showToast(
+        getApiErrorMessage(error, "Unable to rename the vendor."),
+        "error",
+      );
+    }
+  }
+
   // =========================================================
   // ARCHIVED TOGGLE
   // =========================================================
@@ -1055,6 +1103,7 @@ export default function CertificationsPage() {
                   certifications={activeCertificationRecords}
                   canManage={canManageCertifications}
                   onEdit={openEditCertification}
+                  onRenameVendor={handleRenameVendor}
                 />
               </section>
             )}

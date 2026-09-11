@@ -231,6 +231,111 @@ public sealed class VendorsController :
             result);
     }
 
+    [HttpPut("{id:guid}")]
+[ProducesResponseType(
+    typeof(VendorDto),
+    StatusCodes.Status200OK)]
+[ProducesResponseType(
+    StatusCodes.Status400BadRequest)]
+[ProducesResponseType(
+    StatusCodes.Status401Unauthorized)]
+[ProducesResponseType(
+    StatusCodes.Status403Forbidden)]
+[ProducesResponseType(
+    StatusCodes.Status404NotFound)]
+public async Task<ActionResult<VendorDto>>
+    UpdateVendor(
+        Guid id,
+        UpdateVendorRequest request,
+        CancellationToken cancellationToken)
+{
+    var currentUser =
+        await _currentUserService
+            .GetUserAsync(
+                cancellationToken);
+
+    if (currentUser is null)
+    {
+        return Unauthorized();
+    }
+
+    if (!CanManageVendors(
+            currentUser))
+    {
+        return Forbid();
+    }
+
+    var vendor =
+        await _dbContext.Vendors
+            .SingleOrDefaultAsync(
+                vendor =>
+                    vendor.Id == id,
+                cancellationToken);
+
+    if (vendor is null)
+    {
+        return NotFound();
+    }
+
+    var normalizedName =
+        request.Name.Trim();
+
+    if (string.IsNullOrWhiteSpace(
+            normalizedName))
+    {
+        ModelState.AddModelError(
+            nameof(request.Name),
+            "Vendor name is required.");
+
+        return ValidationProblem(
+            ModelState);
+    }
+
+    var duplicateExists =
+        await _dbContext.Vendors
+            .AnyAsync(
+                otherVendor =>
+                    otherVendor.Id != id &&
+                    otherVendor.Name
+                        .ToLower() ==
+                    normalizedName
+                        .ToLower(),
+                cancellationToken);
+
+    if (duplicateExists)
+    {
+        ModelState.AddModelError(
+            nameof(request.Name),
+            "A vendor with this name already exists.");
+
+        return ValidationProblem(
+            ModelState);
+    }
+
+    vendor.Name =
+        normalizedName;
+
+    vendor.UpdatedAtUtc =
+        DateTimeOffset.UtcNow;
+
+    await _dbContext
+        .SaveChangesAsync(
+            cancellationToken);
+
+    return Ok(
+        new VendorDto
+        {
+            Id =
+                vendor.Id,
+
+            Name =
+                vendor.Name,
+
+            IsActive =
+                vendor.IsActive
+        });
+}
+
     private static bool CanManageEvents(
         ApplicationUser user)
     {
@@ -239,4 +344,15 @@ public sealed class VendorsController :
             user.EventsAccess ==
                 ModuleAccess.Admin;
     }
+
+    private static bool CanManageVendors(
+    ApplicationUser user)
+{
+    return
+        user.IsGlobalAdministrator ||
+        user.EventsAccess ==
+            ModuleAccess.Admin ||
+        user.CertificationsAccess ==
+            ModuleAccess.Admin;
+}
 }

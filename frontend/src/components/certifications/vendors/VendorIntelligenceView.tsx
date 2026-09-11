@@ -18,12 +18,14 @@ interface VendorIntelligenceViewProps {
   canManage: boolean;
   certifications: CertificationDto[];
   onEdit: (certification: CertificationDto) => void;
+  onRenameVendor: (vendorName: string) => void;
 }
 
 export default function VendorIntelligenceView({
   certifications,
   canManage,
   onEdit,
+  onRenameVendor,
 }: VendorIntelligenceViewProps) {
   const [search, setSearch] = useState("");
   const [riskFilter, setRiskFilter] = useState("");
@@ -197,6 +199,16 @@ export default function VendorIntelligenceView({
                   <div>
                     <h3>{vendor.vendorName}</h3>
 
+                    {canManage && (
+                      <button
+                        type="button"
+                        className="vendor-intelligence-card__rename"
+                        onClick={() => onRenameVendor(vendor.vendorName)}
+                      >
+                        <Pencil size={13} aria-hidden="true" />
+                        Rename vendor
+                      </button>
+                    )}
                     <span
                       className={[
                         "vendor-health-badge",
