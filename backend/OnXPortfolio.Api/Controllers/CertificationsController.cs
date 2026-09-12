@@ -2186,41 +2186,6 @@ ManagerEmail =
     }
 
     // =========================================================
-    // EFFECTIVE STATUS
-    //
-    // Archived always wins.
-    //
-    // Otherwise, if the expiry date has already passed,
-    // the API reports Expired even when older imported data
-    // still contains Complete/InProgress/etc.
-    //
-    // This does not silently rewrite historical database rows.
-    // =========================================================
-
-    private static CertificationStatus
-        GetEffectiveStatus(
-            CertificationStatus storedStatus,
-            DateOnly? expiryDate)
-    {
-        if (
-            storedStatus ==
-            CertificationStatus.Archived)
-        {
-            return CertificationStatus.Archived;
-        }
-
-        if (
-            expiryDate.HasValue &&
-            expiryDate.Value <
-                GetToday())
-        {
-            return CertificationStatus.Expired;
-        }
-
-        return storedStatus;
-    }
-
-    // =========================================================
     // RENEWAL STATUS
     //
     // Example:
