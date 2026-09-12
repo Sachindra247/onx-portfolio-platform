@@ -2304,9 +2304,7 @@ ManagerEmail =
                 certification.CertificationName,
 
             Status =
-                GetEffectiveStatus(
-                    certification.Status,
-                    certification.ExpiryDate),
+                certification.Status,
 
             Program =
                 certification.Program,
