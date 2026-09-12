@@ -42,6 +42,10 @@ export interface CertificationDto {
   vendorName: string;
   createdAtUtc: string;
   updatedAtUtc: string;
+  program?: string | null;
+  category?: string | null;
+  location?: string | null;
+  fee?: string | null;
 }
 
 export interface CertificationRequest {
@@ -155,8 +159,12 @@ export interface CertificationImportPreviewRowDto {
   personName: string;
   personEmail: string | null;
   vendorName: string;
+  program: string | null;
   certificationName: string;
   status: string;
+  category: string | null;
+  location: string | null;
+  fee: string | null;
   dateCompleted: string | null;
   expiryDate: string | null;
   practiceLead: string | null;

@@ -192,6 +192,18 @@ public sealed class CertificationsController : ControllerBase
                             Status =
                                 certification.Status,
 
+                            Program =
+                                certification.Program,
+
+                            Category =
+                                certification.Category,
+
+                            Fee =
+                                certification.Fee,
+
+                            Location =
+                                certification.Location,
+
                             DateCompleted =
                                 certification.DateCompleted,
 
@@ -678,6 +690,22 @@ PersonName =
                 Status =
                     request.Status,
 
+                Program =
+                    NormalizeOptionalText(
+                        request.Program),
+
+                Category =
+                    NormalizeOptionalText(
+                        request.Category),
+
+                Fee =
+                    NormalizeOptionalText(
+                        request.Fee),
+
+                Location =
+                    NormalizeOptionalText(
+                        request.Location),
+
                 DateCompleted =
                     request.DateCompleted,
 
@@ -859,6 +887,22 @@ certification.PersonName =
                 request.Status,
                 request.ExpiryDate);
 
+        certification.Program =
+            NormalizeOptionalText(
+                request.Program);
+
+        certification.Category =
+            NormalizeOptionalText(
+                request.Category);
+
+        certification.Fee =
+            NormalizeOptionalText(
+                request.Fee);
+
+        certification.Location =
+            NormalizeOptionalText(
+                request.Location);
+
         certification.DateCompleted =
             request.DateCompleted;
 
@@ -962,8 +1006,12 @@ public async Task<ActionResult<CertificationImportPreviewDto>>
             "Person",
             "Person Email",
             "Vendor",
+            "Program",
             "Certification",
             "Status",
+            "Category",
+            "Location",
+            "Fee",
             "Date Completed",
             "Expiry",
             "Lead",
@@ -1093,29 +1141,45 @@ public async Task<ActionResult<CertificationImportPreviewDto>>
                     VendorName =
                         fields[3].Trim(),
 
-                    CertificationName =
-                        fields[4].Trim(),
+                    Program =
+                        NormalizeOptionalText(
+                            fields[4]),
 
-                    StatusText =
+                    CertificationName =
                         fields[5].Trim(),
 
-                    DateCompletedText =
+                    StatusText =
                         fields[6].Trim(),
 
-                    ExpiryDateText =
-                        fields[7].Trim(),
+                    Category =
+                        NormalizeOptionalText(
+                            fields[7]),
 
-                    PracticeLead =
+                    Location =
                         NormalizeOptionalText(
                             fields[8]),
 
-                    RebateImpact =
+                    Fee =
                         NormalizeOptionalText(
                             fields[9]),
 
+                    DateCompletedText =
+                        fields[10].Trim(),
+
+                    ExpiryDateText =
+                        fields[11].Trim(),
+
+                    PracticeLead =
+                        NormalizeOptionalText(
+                            fields[12]),
+
+                    RebateImpact =
+                        NormalizeOptionalText(
+                            fields[13]),
+
                     Notes =
                         NormalizeOptionalText(
-                            fields[10])
+                            fields[14])
                 });
         }
     }
@@ -1201,11 +1265,23 @@ public async Task<ActionResult<CertificationImportPreviewDto>>
                 VendorName =
                     parsedRow.VendorName,
 
+                Program =
+                    parsedRow.Program,
+
                 CertificationName =
                     parsedRow.CertificationName,
 
                 Status =
                     parsedRow.StatusText,
+
+                Category =
+                    parsedRow.Category,
+
+                Location =
+                    parsedRow.Location,
+
+                Fee =
+                    parsedRow.Fee,
 
                 PracticeLead =
                     parsedRow.PracticeLead,
@@ -1690,6 +1766,22 @@ public async Task<ActionResult<CertificationImportResultDto>>
                         Status =
                             requestedStatus,
 
+                        Program =
+                            NormalizeOptionalText(
+                                row.Program),
+
+                        Category =
+                            NormalizeOptionalText(
+                                row.Category),
+
+                        Fee =
+                            NormalizeOptionalText(
+                                row.Fee),
+
+                        Location =
+                            NormalizeOptionalText(
+                                row.Location),
+
                         DateCompleted =
                             row.DateCompleted,
 
@@ -1796,6 +1888,22 @@ public async Task<ActionResult<CertificationImportResultDto>>
                 ResolveUpdatedStatus(
                     requestedStatus,
                     row.ExpiryDate);
+
+            existingCertification.Program =
+                NormalizeOptionalText(
+                    row.Program);
+
+            existingCertification.Category =
+                NormalizeOptionalText(
+                    row.Category);
+
+            existingCertification.Fee =
+                NormalizeOptionalText(
+                    row.Fee);
+
+            existingCertification.Location =
+                NormalizeOptionalText(
+                    row.Location);
 
             existingCertification.DateCompleted =
                 row.DateCompleted;
@@ -1981,6 +2089,18 @@ public async Task<ActionResult<CertificationImportResultDto>>
 
                             Status =
                                 certification.Status,
+
+                            Program =
+                                certification.Program,
+
+                            Category =
+                                certification.Category,
+
+                            Fee =
+                                certification.Fee,
+
+                            Location =
+                                certification.Location,
 
                             DateCompleted =
                                 certification.DateCompleted,
@@ -2187,6 +2307,18 @@ ManagerEmail =
                 GetEffectiveStatus(
                     certification.Status,
                     certification.ExpiryDate),
+
+            Program =
+                certification.Program,
+
+            Category =
+                certification.Category,
+
+            Fee =
+                certification.Fee,
+
+            Location =
+                certification.Location,
 
             DateCompleted =
                 certification.DateCompleted,
@@ -2762,6 +2894,14 @@ private static string BuildUserName(
     public string? RebateImpact { get; set; }
 
     public string? Notes { get; set; }
+
+    public string? Program { get; set; }
+
+    public string? Category { get; set; }
+
+    public string? Location { get; set; }
+
+    public string? Fee { get; set; }
 
     public string? ParseError { get; set; }
 }

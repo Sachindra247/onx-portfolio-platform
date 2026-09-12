@@ -37,6 +37,26 @@ public sealed class CertificationConfiguration :
             .IsRequired();
 
         builder.Property(
+        certification =>
+            certification.Program)
+    .HasMaxLength(300);
+
+        builder.Property(
+                certification =>
+                    certification.Category)
+            .HasMaxLength(100);
+
+        builder.Property(
+                certification =>
+                    certification.Fee)
+            .HasMaxLength(100);
+
+        builder.Property(
+                certification =>
+                    certification.Location)
+            .HasMaxLength(100);
+
+        builder.Property(
                 certification =>
                     certification.PracticeLead)
             .HasMaxLength(300);

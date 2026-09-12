@@ -26,6 +26,14 @@ public sealed class Certification : AuditableEntity
             set;
         }
 
+    public string? Program { get; set; }
+
+    public string? Category { get; set; }
+
+    public string? Fee { get; set; }
+
+    public string? Location { get; set; }
+
     public string CertificationName { get; set; } =
         string.Empty;
 

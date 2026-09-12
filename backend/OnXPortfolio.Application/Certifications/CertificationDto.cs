@@ -6,12 +6,14 @@ public sealed class CertificationDto
 {
     public Guid Id { get; set; }
 
-    public Guid? CertificationPersonId {
+    public Guid? CertificationPersonId
+    {
         get;
         set;
     }
 
-    public Guid? PersonApplicationUserId {
+    public Guid? PersonApplicationUserId
+    {
         get;
         set;
     }
@@ -21,12 +23,14 @@ public sealed class CertificationDto
 
     public string? PersonEmail { get; set; }
 
-    public Guid? ManagerCertificationPersonId {
+    public Guid? ManagerCertificationPersonId
+    {
         get;
         set;
     }
 
-    public Guid? ManagerApplicationUserId {
+    public Guid? ManagerApplicationUserId
+    {
         get;
         set;
     }
@@ -46,6 +50,14 @@ public sealed class CertificationDto
         string.Empty;
 
     public CertificationStatus Status { get; set; }
+
+    public string? Program { get; set; }
+
+    public string? Category { get; set; }
+
+    public string? Fee { get; set; }
+
+    public string? Location { get; set; }
 
     public DateOnly? DateCompleted { get; set; }
 

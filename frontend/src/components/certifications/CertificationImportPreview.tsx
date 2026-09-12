@@ -121,8 +121,12 @@ export function CertificationImportPreview({
               <th>Action</th>
               <th>Person</th>
               <th>Vendor</th>
+              <th>Program</th>
               <th>Certification</th>
               <th>Status</th>
+              <th>Category</th>
+              <th>Location</th>
+              <th>Fee</th>
               <th>Validation</th>
             </tr>
           </thead>
@@ -138,9 +142,17 @@ export function CertificationImportPreview({
 
                 <td>{row.vendorName || "—"}</td>
 
+                <td>{row.program || "—"}</td>
+
                 <td>{row.certificationName || "—"}</td>
 
                 <td>{row.status || "—"}</td>
+
+                <td>{row.category || "—"}</td>
+
+                <td>{row.location || "—"}</td>
+
+                <td>{row.fee || "—"}</td>
 
                 <td>
                   {row.errors.length > 0 ? (

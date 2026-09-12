@@ -31,9 +31,17 @@ public sealed class CertificationImportPreviewRowDto
 
     public string VendorName { get; set; } = string.Empty;
 
+    public string? Program { get; set; }
+
     public string CertificationName { get; set; } = string.Empty;
 
     public string Status { get; set; } = string.Empty;
+
+    public string? Category { get; set; }
+
+    public string? Location { get; set; }
+
+    public string? Fee { get; set; }
 
     public DateOnly? DateCompleted { get; set; }
 

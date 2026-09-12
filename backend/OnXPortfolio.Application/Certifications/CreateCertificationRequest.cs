@@ -9,7 +9,8 @@ public sealed class CreateCertificationRequest
      * Existing Certification directory record,
      * when one was selected from autocomplete.
      */
-    public Guid? CertificationPersonId {
+    public Guid? CertificationPersonId
+    {
         get;
         set;
     }
@@ -19,7 +20,8 @@ public sealed class CreateCertificationRequest
      * autocomplete when no CertificationPerson
      * record exists yet.
      */
-    public Guid? PersonApplicationUserId {
+    public Guid? PersonApplicationUserId
+    {
         get;
         set;
     }
@@ -33,12 +35,14 @@ public sealed class CreateCertificationRequest
     [StringLength(320)]
     public string? PersonEmail { get; set; }
 
-    public Guid? ManagerCertificationPersonId {
+    public Guid? ManagerCertificationPersonId
+    {
         get;
         set;
     }
 
-    public Guid? ManagerApplicationUserId {
+    public Guid? ManagerApplicationUserId
+    {
         get;
         set;
     }
@@ -74,4 +78,16 @@ public sealed class CreateCertificationRequest
 
     [Required]
     public Guid VendorId { get; set; }
+
+    [MaxLength(300)]
+    public string? Program { get; set; }
+
+    [MaxLength(100)]
+    public string? Category { get; set; }
+
+    [MaxLength(100)]
+    public string? Fee { get; set; }
+
+    [MaxLength(100)]
+    public string? Location { get; set; }
 }
