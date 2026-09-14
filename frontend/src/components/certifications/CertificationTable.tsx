@@ -74,6 +74,11 @@ export default function CertificationTable({
               onSort={onSort}
             />
 
+            <th>Program</th>
+            <th>Category</th>
+            <th>Location</th>
+            <th>Fee</th>
+
             <SortableHeading
               field="status"
               label="Status"
@@ -136,6 +141,11 @@ export default function CertificationTable({
                   )}
                 </div>
               </td>
+
+              <td>{certification.program ?? "—"}</td>
+              <td>{certification.category ?? "—"}</td>
+              <td>{certification.location ?? "—"}</td>
+              <td>{certification.fee ?? "—"}</td>
 
               <td>
                 <span

@@ -59,6 +59,10 @@ function createEmptyForm(): CertificationFormValues {
     managerEmail: "",
 
     certificationName: "",
+    program: "",
+    category: "",
+    fee: "",
+    location: "",
     status: "Complete",
     dateCompleted: "",
     expiryDate: "",
@@ -91,6 +95,14 @@ function mapCertificationToForm(
     managerEmail: certification.managerEmail ?? "",
 
     certificationName: certification.certificationName,
+
+    program: certification.program ?? "",
+
+    category: certification.category ?? "",
+
+    fee: certification.fee ?? "",
+
+    location: certification.location ?? "",
 
     status: certification.status,
 
@@ -895,6 +907,60 @@ export default function CertificationFormModal({
                   {errors.certificationName}
                 </span>
               )}
+            </div>
+          </div>
+
+          {/* =================================================
+              PROGRAM / CATEGORY / FEE / LOCATION
+             ================================================= */}
+
+          <div className="certification-form__grid">
+            <div className="form-field">
+              <label htmlFor="cert-program">Program</label>
+              <input
+                id="cert-program"
+                type="text"
+                maxLength={300}
+                value={values.program}
+                placeholder="Example: Partner tier program"
+                onChange={(event) => updateField("program", event.target.value)}
+              />
+            </div>
+
+            <div className="form-field">
+              <label htmlFor="cert-category">Category</label>
+              <input
+                id="cert-category"
+                type="text"
+                maxLength={100}
+                value={values.category}
+                placeholder="Example: Certification"
+                onChange={(event) => updateField("category", event.target.value)}
+              />
+            </div>
+
+            <div className="form-field">
+              <label htmlFor="cert-location">Location</label>
+              <input
+                id="cert-location"
+                type="text"
+                maxLength={100}
+                value={values.location}
+                placeholder="Example: Online"
+                onChange={(event) => updateField("location", event.target.value)}
+              />
+            </div>
+
+            <div className="form-field">
+              <label htmlFor="cert-fee">Fee</label>
+              <input
+                id="cert-fee"
+                type="text"
+                maxLength={100}
+                value={values.fee}
+                placeholder="Example: Free"
+                onChange={(event) => updateField("fee", event.target.value)}
+              />
             </div>
           </div>
 

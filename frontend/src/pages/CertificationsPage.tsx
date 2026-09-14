@@ -641,6 +641,14 @@ export default function CertificationsPage() {
 
       certificationName: values.certificationName.trim(),
 
+      program: values.program.trim() || null,
+
+      category: values.category.trim() || null,
+
+      fee: values.fee.trim() || null,
+
+      location: values.location.trim() || null,
+
       status: values.status,
 
       dateCompleted: values.dateCompleted || null,

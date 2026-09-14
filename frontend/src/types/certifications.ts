@@ -61,6 +61,10 @@ export interface CertificationRequest {
   managerEmail: string | null;
 
   certificationName: string;
+  program: string | null;
+  category: string | null;
+  fee: string | null;
+  location: string | null;
   status: CertificationStatus;
   dateCompleted: string | null;
   expiryDate: string | null;
@@ -83,6 +87,10 @@ export interface CertificationFormValues {
   managerEmail: string;
 
   certificationName: string;
+  program: string;
+  category: string;
+  fee: string;
+  location: string;
   status: CertificationStatus;
   dateCompleted: string;
   expiryDate: string;
