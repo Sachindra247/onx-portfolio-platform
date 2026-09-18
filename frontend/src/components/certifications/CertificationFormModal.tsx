@@ -64,6 +64,7 @@ function createEmptyForm(): CertificationFormValues {
     fee: "",
     location: "",
     status: "Complete",
+    assignedDate: "",
     dateCompleted: "",
     expiryDate: "",
     practiceLead: "",
@@ -105,6 +106,8 @@ function mapCertificationToForm(
     location: certification.location ?? "",
 
     status: certification.status,
+
+    assignedDate: certification.assignedDate ?? "",
 
     dateCompleted: certification.dateCompleted ?? "",
 
@@ -935,7 +938,9 @@ export default function CertificationFormModal({
                 maxLength={100}
                 value={values.category}
                 placeholder="Example: Certification"
-                onChange={(event) => updateField("category", event.target.value)}
+                onChange={(event) =>
+                  updateField("category", event.target.value)
+                }
               />
             </div>
 
@@ -947,7 +952,9 @@ export default function CertificationFormModal({
                 maxLength={100}
                 value={values.location}
                 placeholder="Example: Online"
-                onChange={(event) => updateField("location", event.target.value)}
+                onChange={(event) =>
+                  updateField("location", event.target.value)
+                }
               />
             </div>
 
@@ -967,6 +974,21 @@ export default function CertificationFormModal({
           {/* =================================================
               STATUS / DATES
              ================================================= */}
+
+          <div className="certification-form__grid">
+            <div className="form-field">
+              <label htmlFor="cert-assigned">Assigned date</label>
+
+              <input
+                id="cert-assigned"
+                type="date"
+                value={values.assignedDate}
+                onChange={(event) =>
+                  updateField("assignedDate", event.target.value)
+                }
+              />
+            </div>
+          </div>
 
           <div className="certification-form__grid certification-form__grid--three">
             <div className="form-field">

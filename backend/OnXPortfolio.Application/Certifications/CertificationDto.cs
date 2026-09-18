@@ -59,6 +59,8 @@ public sealed class CertificationDto
 
     public string? Location { get; set; }
 
+    public DateOnly? AssignedDate { get; set; }
+
     public DateOnly? DateCompleted { get; set; }
 
     public DateOnly? ExpiryDate { get; set; }

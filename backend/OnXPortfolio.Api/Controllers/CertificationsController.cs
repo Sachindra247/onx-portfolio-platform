@@ -204,6 +204,9 @@ public sealed class CertificationsController : ControllerBase
                             Location =
                                 certification.Location,
 
+                            AssignedDate =
+                                certification.AssignedDate,
+
                             DateCompleted =
                                 certification.DateCompleted,
 
@@ -706,6 +709,9 @@ PersonName =
                     NormalizeOptionalText(
                         request.Location),
 
+                AssignedDate =
+                    request.AssignedDate,
+
                 DateCompleted =
                     request.DateCompleted,
 
@@ -902,6 +908,9 @@ certification.PersonName =
         certification.Location =
             NormalizeOptionalText(
                 request.Location);
+
+        certification.AssignedDate =
+            request.AssignedDate;
 
         certification.DateCompleted =
             request.DateCompleted;
@@ -2102,6 +2111,10 @@ public async Task<ActionResult<CertificationImportResultDto>>
                             Location =
                                 certification.Location,
 
+                            AssignedDate =
+                          certification.AssignedDate,
+
+
                             DateCompleted =
                                 certification.DateCompleted,
 
@@ -2282,6 +2295,9 @@ ManagerEmail =
 
             Location =
                 certification.Location,
+
+            AssignedDate =
+                certification.AssignedDate,
 
             DateCompleted =
                 certification.DateCompleted,

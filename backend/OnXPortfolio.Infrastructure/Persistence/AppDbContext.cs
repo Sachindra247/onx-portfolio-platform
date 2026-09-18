@@ -28,6 +28,9 @@ public sealed class AppDbContext : DbContext
     public DbSet<Certification> Certifications =>
         Set<Certification>();
 
+    public DbSet<CertificationReminderLog> CertificationReminderLogs =>
+        Set<CertificationReminderLog>();
+
     public DbSet<CertificationPerson> CertificationPeople =>
         Set<CertificationPerson>();
 

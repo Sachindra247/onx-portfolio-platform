@@ -33,6 +33,7 @@ export interface CertificationDto {
 
   certificationName: string;
   status: CertificationStatus;
+  assignedDate: string | null;
   dateCompleted: string | null;
   expiryDate: string | null;
   practiceLead: string | null;
@@ -66,6 +67,7 @@ export interface CertificationRequest {
   fee: string | null;
   location: string | null;
   status: CertificationStatus;
+  assignedDate: string | null;
   dateCompleted: string | null;
   expiryDate: string | null;
   practiceLead: string | null;
@@ -92,6 +94,7 @@ export interface CertificationFormValues {
   fee: string;
   location: string;
   status: CertificationStatus;
+  assignedDate: string;
   dateCompleted: string;
   expiryDate: string;
   practiceLead: string;

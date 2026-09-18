@@ -651,6 +651,8 @@ export default function CertificationsPage() {
 
       status: values.status,
 
+      assignedDate: values.assignedDate || null,
+
       dateCompleted: values.dateCompleted || null,
 
       expiryDate: values.expiryDate || null,

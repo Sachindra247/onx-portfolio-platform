@@ -87,6 +87,8 @@ export default function CertificationTable({
               onSort={onSort}
             />
 
+            <th>Assigned</th>
+
             <SortableHeading
               field="dateCompleted"
               label="Completed"
@@ -159,6 +161,8 @@ export default function CertificationTable({
                   {formatCertificationStatus(certification.status)}
                 </span>
               </td>
+
+              <td>{formatDate(certification.assignedDate)}</td>
 
               <td>{formatDate(certification.dateCompleted)}</td>
 

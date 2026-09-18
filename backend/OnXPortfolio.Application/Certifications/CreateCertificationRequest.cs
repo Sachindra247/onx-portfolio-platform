@@ -63,6 +63,8 @@ public sealed class CreateCertificationRequest
     public CertificationStatus Status { get; set; } =
         CertificationStatus.Complete;
 
+    public DateOnly? AssignedDate { get; set; }
+
     public DateOnly? DateCompleted { get; set; }
 
     public DateOnly? ExpiryDate { get; set; }

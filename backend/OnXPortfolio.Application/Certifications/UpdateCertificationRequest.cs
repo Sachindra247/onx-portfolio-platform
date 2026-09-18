@@ -53,6 +53,8 @@ public sealed class UpdateCertificationRequest
     [Required]
     public CertificationStatus Status { get; set; }
 
+    public DateOnly? AssignedDate { get; set; }
+
     public DateOnly? DateCompleted { get; set; }
 
     public DateOnly? ExpiryDate { get; set; }
