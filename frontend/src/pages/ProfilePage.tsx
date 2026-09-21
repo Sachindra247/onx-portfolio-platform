@@ -56,6 +56,8 @@ export default function ProfilePage() {
     null,
   );
 
+  const [showAllCertifications, setShowAllCertifications] = useState(false);
+
   // =========================================================
   // VACATION
   // =========================================================
@@ -537,7 +539,10 @@ export default function ProfilePage() {
               </div>
 
               <div className="profile-record-list">
-                {certificationHistory.slice(0, 5).map((certification) => (
+                {(showAllCertifications
+                  ? certificationHistory
+                  : certificationHistory.slice(0, 5)
+                ).map((certification) => (
                   <button
                     type="button"
                     className="profile-record-item profile-record-item--link"
@@ -573,6 +578,19 @@ export default function ProfilePage() {
                   </button>
                 ))}
               </div>
+              {certificationHistory.length > 5 && (
+                <button
+                  type="button"
+                  className="profile-certifications-toggle"
+                  onClick={() =>
+                    setShowAllCertifications((current) => !current)
+                  }
+                >
+                  {showAllCertifications
+                    ? "Show less"
+                    : `View all ${certificationHistory.length} certifications`}
+                </button>
+              )}
             </>
           )}
         </article>
