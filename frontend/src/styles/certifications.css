@@ -3638,16 +3638,18 @@
 
 .people-coverage-certification {
     display: grid;
-    grid-template-columns: minmax(260px, 1fr) 120px 180px;
+    grid-template-columns:
+        minmax(260px, 1.8fr) minmax(100px, 0.7fr) minmax(110px, 0.8fr) minmax(110px, 0.8fr) minmax(110px, 0.8fr);
     align-items: center;
-    gap: 16px;
-    padding: 11px 14px;
+    gap: 20px;
+    padding: 12px 14px;
     border: 1px solid var(--color-border);
     border-radius: 9px;
     background: var(--color-surface);
 }
 
-.people-coverage-certification>div {
+.people-coverage-certification>div,
+.people-coverage-certification>span {
     display: flex;
     min-width: 0;
     flex-direction: column;
@@ -3658,6 +3660,14 @@
 .people-coverage-certification>span {
     color: var(--color-muted);
     font-size: 0.75rem;
+}
+
+.people-coverage-certification>span>strong {
+    color: var(--color-muted);
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
 }
 
 /* =========================================================
@@ -3937,6 +3947,17 @@
     .people-coverage-table {
         min-width: 850px;
     }
+
+    .people-coverage-certification {
+        grid-template-columns:
+            minmax(220px, 1.5fr) minmax(90px, 0.7fr) minmax(100px, 0.8fr) minmax(100px, 0.8fr) minmax(100px, 0.8fr);
+        gap: 12px;
+    }
+
+    .people-coverage-details {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
 }
 
 @media (max-width: 1200px) {
@@ -3967,6 +3988,11 @@
 
     .people-certification-row {
         grid-template-columns: 1fr;
+    }
+
+    .people-coverage-certification {
+        grid-template-columns: minmax(220px, 1.5fr) repeat(4, minmax(90px, 1fr));
+        gap: 10px;
     }
 }
 

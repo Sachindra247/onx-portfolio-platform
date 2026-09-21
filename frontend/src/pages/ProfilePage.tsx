@@ -79,6 +79,10 @@ export default function ProfilePage() {
 
     const fullName = normalizeName(`${user.firstName} ${user.lastName}`);
 
+    const normalizedEmail = user.email.trim().toLocaleLowerCase();
+
+    const userId = user.id;
+
     async function loadProfileData() {
       setEventsLoading(true);
       setCertificationsLoading(true);
@@ -113,10 +117,24 @@ export default function ProfilePage() {
 
         if (!controller.signal.aborted) {
           setCertifications(
-            loadedCertifications.filter(
-              (certification) =>
-                normalizeName(certification.personName) === fullName,
-            ),
+            loadedCertifications.filter((certification) => {
+              if (
+                certification.personApplicationUserId &&
+                certification.personApplicationUserId === userId
+              ) {
+                return true;
+              }
+
+              if (
+                certification.personEmail &&
+                certification.personEmail.trim().toLocaleLowerCase() ===
+                  normalizedEmail
+              ) {
+                return true;
+              }
+
+              return normalizeName(certification.personName) === fullName;
+            }),
           );
         }
       } catch (error) {
@@ -188,6 +206,19 @@ export default function ProfilePage() {
             certification.status !== "Expired" &&
             certification.status !== "Tbd",
         )
+        .sort((firstCertification, secondCertification) =>
+          compareNullableDates(
+            firstCertification.expiryDate,
+            secondCertification.expiryDate,
+          ),
+        ),
+    [certifications],
+  );
+
+  const certificationHistory = useMemo(
+    () =>
+      [...certifications]
+        .filter((certification) => certification.status !== "Archived")
         .sort((firstCertification, secondCertification) =>
           compareNullableDates(
             firstCertification.expiryDate,
@@ -486,7 +517,7 @@ export default function ProfilePage() {
               <strong>No certifications found.</strong>
 
               <span>
-                Certifications recorded under your name will appear here.
+                Certifications associated with your profile will appear here.
               </span>
             </div>
           ) : (
@@ -506,7 +537,7 @@ export default function ProfilePage() {
               </div>
 
               <div className="profile-record-list">
-                {activeCertifications.slice(0, 5).map((certification) => (
+                {certificationHistory.slice(0, 5).map((certification) => (
                   <button
                     type="button"
                     className="profile-record-item profile-record-item--link"

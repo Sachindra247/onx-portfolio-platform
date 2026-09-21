@@ -10,6 +10,7 @@ export function buildPeopleCoverage(
   const groupedCertifications = new Map<
     string,
     {
+      certificationPersonId: string;
       displayName: string;
       certifications: CertificationDto[];
     }
@@ -24,23 +25,26 @@ export function buildPeopleCoverage(
         return;
       }
 
-      const normalizedName = displayName.toLocaleLowerCase();
+      const certificationPersonId = certification.certificationPersonId;
+      const personKey =
+        certificationPersonId ?? `name:${displayName.toLocaleLowerCase()}`;
 
-      const existing = groupedCertifications.get(normalizedName);
+      const existing = groupedCertifications.get(personKey);
 
       if (existing) {
         existing.certifications.push(certification);
         return;
       }
 
-      groupedCertifications.set(normalizedName, {
+      groupedCertifications.set(personKey, {
+        certificationPersonId: personKey,
         displayName,
         certifications: [certification],
       });
     });
 
   return Array.from(groupedCertifications.values())
-    .map(({ displayName, certifications: records }) => {
+    .map(({ certificationPersonId, displayName, certifications: records }) => {
       const expiredCount = records.filter(isCertificationExpired).length;
 
       const expiringSoonCount = records.filter(
@@ -60,6 +64,8 @@ export function buildPeopleCoverage(
       ).sort((first, second) => first.localeCompare(second));
 
       return {
+        certificationPersonId,
+
         personName: displayName,
         certifications: [...records].sort(compareCertifications),
         certificationCount: records.length,

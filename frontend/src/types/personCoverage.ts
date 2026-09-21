@@ -3,6 +3,7 @@ import type { CertificationDto } from "./certifications";
 export type PersonHealth = "healthy" | "warning" | "critical";
 
 export interface PersonCoverage {
+  certificationPersonId: string;
   personName: string;
   certifications: CertificationDto[];
   certificationCount: number;

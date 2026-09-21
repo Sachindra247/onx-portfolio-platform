@@ -184,7 +184,7 @@ export default function PeopleCoverageGrid({
 
             <tbody>
               {filteredPeople.map((person) => {
-                const key = person.personName.toLocaleLowerCase();
+                const key = person.certificationPersonId;
 
                 const isExpanded = expandedPerson === key;
 
@@ -251,20 +251,33 @@ export default function PeopleCoverageGrid({
                                   <strong>
                                     {certification.certificationName}
                                   </strong>
-
                                   <span>{certification.vendorName}</span>
                                 </div>
 
                                 <span>
+                                  <strong>Status</strong>
                                   {formatStatus(certification.status)}
                                 </span>
 
                                 <span>
+                                  <strong>Assigned</strong>
+                                  {certification.assignedDate
+                                    ? formatDate(certification.assignedDate)
+                                    : "—"}
+                                </span>
+
+                                <span>
+                                  <strong>Completed</strong>
+                                  {certification.dateCompleted
+                                    ? formatDate(certification.dateCompleted)
+                                    : "—"}
+                                </span>
+
+                                <span>
+                                  <strong>Expiry</strong>
                                   {certification.expiryDate
-                                    ? `Expires ${formatDate(
-                                        certification.expiryDate,
-                                      )}`
-                                    : "No expiry date"}
+                                    ? formatDate(certification.expiryDate)
+                                    : "—"}
                                 </span>
                               </div>
                             ))}
