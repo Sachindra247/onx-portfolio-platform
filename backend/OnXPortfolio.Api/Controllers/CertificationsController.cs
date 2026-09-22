@@ -8,6 +8,7 @@ using OnXPortfolio.Domain.Users;
 using OnXPortfolio.Infrastructure.Persistence;
 using System.Globalization;
 using Microsoft.VisualBasic.FileIO;
+using OnXPortfolio.Infrastructure.Certifications;
 
 namespace OnXPortfolio.Api.Controllers;
 
@@ -16,15 +17,21 @@ namespace OnXPortfolio.Api.Controllers;
 [Route("api/certifications")]
 public sealed class CertificationsController : ControllerBase
 {
-    private readonly AppDbContext _dbContext;
+        private readonly AppDbContext _dbContext;
     private readonly CurrentUserService _currentUserService;
+    private readonly CertificationReminderProcessor
+        _certificationReminderProcessor;
 
     public CertificationsController(
         AppDbContext dbContext,
-        CurrentUserService currentUserService)
+        CurrentUserService currentUserService,
+        CertificationReminderProcessor
+            certificationReminderProcessor)
     {
         _dbContext = dbContext;
         _currentUserService = currentUserService;
+        _certificationReminderProcessor =
+            certificationReminderProcessor;
     }
 
     // =========================================================
@@ -2043,6 +2050,216 @@ public async Task<ActionResult<CertificationImportResultDto>>
 
         return NoContent();
     }
+
+    // =========================================================
+// REMINDER PREVIEW
+//
+// Certification Admin / Global Admin only.
+//
+// Returns reminders that would be created for the supplied
+// date and thresholds. Does not write to the database and
+// does not send email.
+// =========================================================
+
+[HttpGet("reminders/preview")]
+[ProducesResponseType(
+    typeof(IReadOnlyList<CertificationReminderPreviewDto>),
+    StatusCodes.Status200OK)]
+[ProducesResponseType(
+    StatusCodes.Status400BadRequest)]
+[ProducesResponseType(
+    StatusCodes.Status401Unauthorized)]
+[ProducesResponseType(
+    StatusCodes.Status403Forbidden)]
+public async Task<
+    ActionResult<IReadOnlyList<CertificationReminderPreviewDto>>>
+    PreviewCertificationReminders(
+        [FromQuery] DateOnly? date,
+        [FromQuery] int[]? reminderDays,
+        CancellationToken cancellationToken = default)
+{
+    var currentUser =
+        await _currentUserService.GetUserAsync(
+            cancellationToken);
+
+    if (currentUser is null)
+    {
+        return Unauthorized();
+    }
+
+    if (!CanManageCertifications(currentUser))
+    {
+        return Forbid();
+    }
+
+    if (reminderDays is null ||
+        reminderDays.Length == 0)
+    {
+        return BadRequest(
+            "At least one reminderDays value is required.");
+    }
+
+    if (reminderDays.Any(days => days < 0))
+    {
+        return BadRequest(
+            "Reminder days cannot be negative.");
+    }
+
+    var previewDate =
+        date ?? DateOnly.FromDateTime(
+            DateTime.UtcNow);
+
+    var reminders =
+        await _certificationReminderProcessor
+            .PreviewRemindersAsync(
+                reminderDays,
+                previewDate,
+                cancellationToken);
+
+    return Ok(reminders);
+}
+
+// =========================================================
+// CREATE PENDING REMINDERS
+//
+// Certification Admin / Global Admin only.
+//
+// Creates Pending reminder log records for certifications
+// matching the supplied date and reminder thresholds.
+//
+// Does not send email.
+// =========================================================
+
+[HttpPost("reminders/create-pending")]
+[ProducesResponseType(
+    StatusCodes.Status200OK)]
+[ProducesResponseType(
+    StatusCodes.Status400BadRequest)]
+[ProducesResponseType(
+    StatusCodes.Status401Unauthorized)]
+[ProducesResponseType(
+    StatusCodes.Status403Forbidden)]
+public async Task<ActionResult>
+    CreatePendingCertificationReminders(
+        [FromQuery] DateOnly? date,
+        [FromQuery] int[]? reminderDays,
+        CancellationToken cancellationToken = default)
+{
+    if (!HttpContext.RequestServices
+        .GetRequiredService<IWebHostEnvironment>()
+        .IsDevelopment())
+{
+    return NotFound();
+}
+    var currentUser =
+        await _currentUserService.GetUserAsync(
+            cancellationToken);
+
+    if (currentUser is null)
+    {
+        return Unauthorized();
+    }
+
+    if (!CanManageCertifications(currentUser))
+    {
+        return Forbid();
+    }
+
+    if (reminderDays is null ||
+        reminderDays.Length == 0)
+    {
+        return BadRequest(
+            "At least one reminderDays value is required.");
+    }
+
+    if (reminderDays.Any(days => days < 0))
+    {
+        return BadRequest(
+            "Reminder days cannot be negative.");
+    }
+
+    var processingDate =
+        date ?? DateOnly.FromDateTime(
+            DateTime.UtcNow);
+
+    var createdCount =
+        await _certificationReminderProcessor
+            .CreatePendingRemindersAsync(
+                reminderDays,
+                processingDate,
+                cancellationToken);
+
+    return Ok(
+        new
+        {
+            createdCount,
+            processingDate,
+            reminderDays
+        });
+}
+
+// =========================================================
+// SEND PENDING REMINDERS - DEVELOPMENT TEST ONLY
+//
+// Certification Admin / Global Admin only.
+//
+// Uses the Development email sender to exercise the
+// Pending -> Sent / Failed lifecycle.
+//
+// No real email is delivered while LoggingEmailSender
+// is configured.
+// =========================================================
+
+[HttpPost("reminders/send-pending")]
+[ProducesResponseType(
+    StatusCodes.Status200OK)]
+[ProducesResponseType(
+    StatusCodes.Status404NotFound)]
+[ProducesResponseType(
+    StatusCodes.Status401Unauthorized)]
+[ProducesResponseType(
+    StatusCodes.Status403Forbidden)]
+public async Task<ActionResult>
+    SendPendingCertificationReminders(
+        CancellationToken cancellationToken = default)
+{
+    if (!HttpContext.RequestServices
+            .GetRequiredService<IWebHostEnvironment>()
+            .IsDevelopment())
+    {
+        return NotFound();
+    }
+
+    var currentUser =
+        await _currentUserService.GetUserAsync(
+            cancellationToken);
+
+    if (currentUser is null)
+    {
+        return Unauthorized();
+    }
+
+    if (!CanManageCertifications(currentUser))
+    {
+        return Forbid();
+    }
+
+    var deliveryProcessor =
+    HttpContext.RequestServices
+        .GetRequiredService<
+            CertificationReminderDeliveryProcessor>();
+
+var sentCount =
+    await deliveryProcessor
+        .SendPendingRemindersAsync(
+            cancellationToken);
+
+    return Ok(
+        new
+        {
+            sentCount
+        });
+}
 
     // =========================================================
     // AUTHORIZATION

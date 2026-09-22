@@ -10,6 +10,11 @@ using Microsoft.IdentityModel.Tokens;
 using OnXPortfolio.Api.Auth;
 using OnXPortfolio.Domain.Users;
 
+using OnXPortfolio.Application.Email;
+using OnXPortfolio.Infrastructure.Email;
+
+using OnXPortfolio.Infrastructure.Certifications;
+
 var builder = WebApplication.CreateBuilder(args);
 
 const string FrontendCorsPolicy = "FrontendCors";
@@ -92,6 +97,18 @@ builder.Services.AddAuthorization();
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<CurrentUserService>();
+
+builder.Services.AddScoped<CertificationReminderProcessor>();
+
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddScoped<
+        IEmailSender,
+        LoggingEmailSender>();
+
+    builder.Services.AddScoped<
+        CertificationReminderDeliveryProcessor>();
+}
 
 var connectionString =
     builder.Configuration.GetConnectionString("DefaultConnection")
