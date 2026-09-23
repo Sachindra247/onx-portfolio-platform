@@ -16,4 +16,8 @@ public sealed class CertificationReminderPreviewDto
     public DateOnly ExpiryDate { get; set; }
 
     public int ReminderDays { get; set; }
+
+    public bool HasRecipientEmail { get; set; }
+
+    public string? SkipReason { get; set; }
 }

@@ -96,35 +96,41 @@ public sealed class CertificationReminderProcessor
             continue;
         }
 
-        var recipientEmail =
-            ResolveRecipientEmail(certification);
+       var recipientEmail =
+    ResolveRecipientEmail(certification);
 
-        if (recipientEmail is null)
-        {
-            continue;
-        }
+var reminderKey = BuildReminderKey(
+    certification.Id,
+    expiryDate,
+    daysUntilExpiry);
 
-        var reminderKey = BuildReminderKey(
-            certification.Id,
-            expiryDate,
-            daysUntilExpiry);
+if (existingKeys.Contains(reminderKey))
+{
+    continue;
+}
 
-        if (existingKeys.Contains(reminderKey))
-        {
-            continue;
-        }
+previews.Add(
+    new CertificationReminderPreviewDto
+    {
+        CertificationId = certification.Id,
+        PersonName = certification.PersonName,
+        CertificationName =
+            certification.CertificationName,
+        RecipientEmail =
+            recipientEmail ?? string.Empty,
+        ExpiryDate = expiryDate,
+        ReminderDays = daysUntilExpiry,
+        HasRecipientEmail =
+            recipientEmail is not null,
+        SkipReason =
+            recipientEmail is null
+                ? "No recipient email is available."
+                : null
+    });
 
-        previews.Add(
-            new CertificationReminderPreviewDto
-            {
-                CertificationId = certification.Id,
-                PersonName = certification.PersonName,
-                CertificationName =
-                    certification.CertificationName,
-                RecipientEmail = recipientEmail,
-                ExpiryDate = expiryDate,
-                ReminderDays = daysUntilExpiry
-            });
+
+
+
     }
 
     return previews
