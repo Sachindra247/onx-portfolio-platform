@@ -2,21 +2,28 @@ using Microsoft.EntityFrameworkCore;
 using OnXPortfolio.Application.Email;
 using OnXPortfolio.Domain.Certifications;
 using OnXPortfolio.Infrastructure.Persistence;
+using Microsoft.Extensions.Options;
+
+using OnXPortfolio.Application.Certifications;
 
 namespace OnXPortfolio.Infrastructure.Certifications;
 
 public sealed class CertificationReminderDeliveryProcessor
 {
     private readonly AppDbContext _dbContext;
-    private readonly IEmailSender _emailSender;
+private readonly IEmailSender _emailSender;
+private readonly CertificationReminderOptions
+    _options;
 
-    public CertificationReminderDeliveryProcessor(
-        AppDbContext dbContext,
-        IEmailSender emailSender)
-    {
-        _dbContext = dbContext;
-        _emailSender = emailSender;
-    }
+public CertificationReminderDeliveryProcessor(
+    AppDbContext dbContext,
+    IEmailSender emailSender,
+    IOptions<CertificationReminderOptions> options)
+{
+    _dbContext = dbContext;
+    _emailSender = emailSender;
+    _options = options.Value;
+}
 
     public async Task<int> SendPendingRemindersAsync(
         CancellationToken cancellationToken = default)
@@ -82,25 +89,30 @@ public sealed class CertificationReminderDeliveryProcessor
         return sentCount;
     }
 
-    private static string BuildSubject(
-        CertificationReminderLog reminder)
-    {
-        return
-            $"Certification expiry reminder: " +
-            $"{reminder.Certification.CertificationName}";
-    }
+    private string BuildSubject(
+    CertificationReminderLog reminder)
+{
+    return _options.SubjectTemplate
+        .Replace(
+            "{CertificationName}",
+            reminder.Certification.CertificationName);
+}
 
-    private static string BuildBody(
-        CertificationReminderLog reminder)
-    {
-        return
-            $"Your certification " +
-            $"\"{reminder.Certification.CertificationName}\" " +
-            $"is scheduled to expire on " +
-            $"{reminder.ExpiryDate:MMMM d, yyyy}. " +
-            $"This reminder is being sent " +
-            $"{reminder.ReminderDays} day(s) before expiry.";
-    }
+    private string BuildBody(
+    CertificationReminderLog reminder)
+{
+    return _options.BodyTemplate
+        .Replace(
+            "{CertificationName}",
+            reminder.Certification.CertificationName)
+        .Replace(
+            "{ExpiryDate}",
+            reminder.ExpiryDate.ToString(
+                "MMMM d, yyyy"))
+        .Replace(
+            "{ReminderDays}",
+            reminder.ReminderDays.ToString());
+}
 
     private static string TruncateFailureReason(
         string message)

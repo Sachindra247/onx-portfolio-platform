@@ -10,6 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 using OnXPortfolio.Api.Auth;
 using OnXPortfolio.Domain.Users;
 
+using OnXPortfolio.Application.Certifications;
 using OnXPortfolio.Application.Email;
 using OnXPortfolio.Infrastructure.Email;
 
@@ -97,6 +98,10 @@ builder.Services.AddAuthorization();
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<CurrentUserService>();
+
+builder.Services.Configure<CertificationReminderOptions>(
+    builder.Configuration.GetSection(
+        CertificationReminderOptions.SectionName));
 
 builder.Services.AddScoped<CertificationReminderProcessor>();
 

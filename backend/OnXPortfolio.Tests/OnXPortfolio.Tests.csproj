@@ -21,6 +21,7 @@
   <ItemGroup>
     <ProjectReference Include="..\OnXPortfolio.Domain\OnXPortfolio.Domain.csproj" />
     <ProjectReference Include="..\OnXPortfolio.Application\OnXPortfolio.Application.csproj" />
+    <ProjectReference Include="..\OnXPortfolio.Infrastructure\OnXPortfolio.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

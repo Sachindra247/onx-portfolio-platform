@@ -3,17 +3,36 @@ using OnXPortfolio.Domain.Certifications;
 using OnXPortfolio.Infrastructure.Persistence;
 using OnXPortfolio.Application.Certifications;
 
+using Microsoft.Extensions.Options;
+
 namespace OnXPortfolio.Infrastructure.Certifications;
 
 public sealed class CertificationReminderProcessor
 {
-    private readonly AppDbContext _dbContext;
 
-    public CertificationReminderProcessor(
-        AppDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
+
+   private readonly AppDbContext _dbContext;
+private readonly CertificationReminderOptions
+    _options;
+
+public CertificationReminderProcessor(
+    AppDbContext dbContext,
+    IOptions<CertificationReminderOptions> options)
+{
+    _dbContext = dbContext;
+    _options = options.Value;
+}
+
+    public Task<IReadOnlyList<CertificationReminderPreviewDto>>
+    PreviewRemindersAsync(
+        DateOnly today,
+        CancellationToken cancellationToken = default)
+{
+    return PreviewRemindersAsync(
+        _options.ReminderDays,
+        today,
+        cancellationToken);
+}
 
     public async Task<IReadOnlyList<CertificationReminderPreviewDto>>
     PreviewRemindersAsync(
@@ -138,6 +157,16 @@ previews.Add(
         .ThenBy(preview => preview.PersonName)
         .ThenBy(preview => preview.CertificationName)
         .ToArray();
+}
+
+    public Task<int> CreatePendingRemindersAsync(
+    DateOnly today,
+    CancellationToken cancellationToken = default)
+{
+    return CreatePendingRemindersAsync(
+        _options.ReminderDays,
+        today,
+        cancellationToken);
 }
 
     public async Task<int> CreatePendingRemindersAsync(
