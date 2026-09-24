@@ -2252,6 +2252,7 @@ public async Task<ActionResult>
 var sentCount =
     await deliveryProcessor
         .SendPendingRemindersAsync(
+            DateOnly.FromDateTime(DateTime.UtcNow),
             cancellationToken);
 
     return Ok(

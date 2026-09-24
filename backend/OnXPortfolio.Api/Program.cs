@@ -113,6 +113,9 @@ if (builder.Environment.IsDevelopment())
 
     builder.Services.AddScoped<
         CertificationReminderDeliveryProcessor>();
+
+    builder.Services.AddHostedService<
+        CertificationReminderBackgroundService>();
 }
 
 var connectionString =

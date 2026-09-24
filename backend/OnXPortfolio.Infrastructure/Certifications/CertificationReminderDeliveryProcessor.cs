@@ -26,15 +26,19 @@ public CertificationReminderDeliveryProcessor(
 }
 
     public async Task<int> SendPendingRemindersAsync(
-        CancellationToken cancellationToken = default)
+    DateOnly processingDate,
+    CancellationToken cancellationToken = default)
     {
         var pendingReminders =
             await _dbContext.CertificationReminderLogs
                 .Include(reminder =>
                     reminder.Certification)
                 .Where(reminder =>
-                    reminder.Status ==
-                        CertificationReminderStatus.Pending)
+    reminder.Status ==
+        CertificationReminderStatus.Pending &&
+    reminder.ExpiryDate.AddDays(
+        -reminder.ReminderDays) ==
+        processingDate)
                 .OrderBy(reminder =>
                     reminder.ExpiryDate)
                 .ToListAsync(cancellationToken);

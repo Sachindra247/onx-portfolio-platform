@@ -8,6 +8,10 @@ public sealed class CertificationReminderOptions
     public int[] ReminderDays { get; set; } =
         Array.Empty<int>();
 
+    public bool Enabled { get; set; }
+
+    public int ProcessingHourUtc { get; set; } = 13;
+
     public string SubjectTemplate { get; set; } =
         "Certification expiry reminder: {CertificationName}";
 
