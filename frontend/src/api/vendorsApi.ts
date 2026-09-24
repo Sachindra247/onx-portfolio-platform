@@ -15,6 +15,19 @@ export async function getVendors(
   return response.data;
 }
 
+export async function createVendor(
+  name: string,
+): Promise<CertificationVendorDto> {
+  const response = await httpClient.post<CertificationVendorDto>(
+    "/api/vendors",
+    {
+      name,
+    },
+  );
+
+  return response.data;
+}
+
 export async function updateVendor(
   id: string,
   name: string,

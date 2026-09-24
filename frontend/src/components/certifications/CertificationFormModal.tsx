@@ -1,4 +1,4 @@
-import { X } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 
 import type {
@@ -23,6 +23,7 @@ interface CertificationFormModalProps {
   onClose: () => void;
 
   onSubmit: (values: CertificationFormValues) => Promise<void>;
+  onCreateVendor: (name: string) => Promise<CertificationVendorDto>;
 }
 
 interface CertificationFormErrors {
@@ -131,11 +132,22 @@ export default function CertificationFormModal({
   serverError,
   onClose,
   onSubmit,
+  onCreateVendor,
 }: CertificationFormModalProps) {
   const [values, setValues] =
     useState<CertificationFormValues>(createEmptyForm);
 
   const [errors, setErrors] = useState<CertificationFormErrors>({});
+
+  const [showVendorCreator, setShowVendorCreator] = useState(false);
+
+  const [newVendorName, setNewVendorName] = useState("");
+
+  const [isCreatingVendor, setIsCreatingVendor] = useState(false);
+
+  const [vendorCreationError, setVendorCreationError] = useState<string | null>(
+    null,
+  );
 
   const [personMatches, setPersonMatches] = useState<
     CertificationPersonLookupDto[]
@@ -296,7 +308,11 @@ export default function CertificationFormModal({
 
     setPersonDropdownOpen(false);
     setManagerDropdownOpen(false);
-  }, [certification, isOpen, vendors]);
+
+    setShowVendorCreator(false);
+    setNewVendorName("");
+    setVendorCreationError(null);
+  }, [certification, isOpen]);
 
   // =========================================================
   // ESCAPE / BODY SCROLL
@@ -596,6 +612,34 @@ export default function CertificationFormModal({
     await onSubmit(values);
   }
 
+  async function handleCreateVendor() {
+    const name = newVendorName.trim();
+
+    if (name.length < 2) {
+      setVendorCreationError("Enter a vendor name.");
+
+      return;
+    }
+
+    setIsCreatingVendor(true);
+    setVendorCreationError(null);
+
+    try {
+      const createdVendor = await onCreateVendor(name);
+
+      updateField("vendorId", createdVendor.id);
+
+      setNewVendorName("");
+      setShowVendorCreator(false);
+    } catch (error) {
+      setVendorCreationError(
+        error instanceof Error ? error.message : "Unable to create the vendor.",
+      );
+    } finally {
+      setIsCreatingVendor(false);
+    }
+  }
+
   // =========================================================
   // RENDER
   // =========================================================
@@ -884,7 +928,40 @@ export default function CertificationFormModal({
                   </option>
                 ))}
               </select>
+              <button
+                className="event-form__add-vendor"
+                type="button"
+                onClick={() => setShowVendorCreator((current) => !current)}
+              >
+                <Plus size={14} aria-hidden="true" />
+                Add new vendor
+              </button>
 
+              {showVendorCreator && (
+                <div className="event-vendor-creator">
+                  <input
+                    type="text"
+                    maxLength={200}
+                    value={newVendorName}
+                    placeholder="Vendor name"
+                    disabled={isCreatingVendor}
+                    onChange={(event) => setNewVendorName(event.target.value)}
+                  />
+
+                  <button
+                    type="button"
+                    className="secondary-button"
+                    disabled={isCreatingVendor}
+                    onClick={() => void handleCreateVendor()}
+                  >
+                    {isCreatingVendor ? "Adding..." : "Add"}
+                  </button>
+                </div>
+              )}
+
+              {vendorCreationError && (
+                <span className="form-field__error">{vendorCreationError}</span>
+              )}
               {errors.vendorId && (
                 <span className="form-field__error">{errors.vendorId}</span>
               )}

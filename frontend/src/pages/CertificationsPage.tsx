@@ -37,7 +37,7 @@ import {
   updateCertification,
 } from "../api/certificationsApi";
 
-import { getVendors, updateVendor } from "../api/vendorsApi";
+import { createVendor, getVendors, updateVendor } from "../api/vendorsApi";
 
 import { useAuth } from "../auth/AuthContext";
 
@@ -751,6 +751,30 @@ export default function CertificationsPage() {
     }
   }
 
+  async function handleCreateVendor(
+    name: string,
+  ): Promise<CertificationVendorDto> {
+    try {
+      const vendor = await createVendor(name);
+
+      setVendors((currentVendors) =>
+        [...currentVendors, vendor].sort((a, b) =>
+          a.name.localeCompare(b.name),
+        ),
+      );
+
+      showToast(`"${vendor.name}" was added to the vendor list.`, "success");
+
+      return vendor;
+    } catch (error) {
+      const message = getApiErrorMessage(error, "Unable to create the vendor.");
+
+      showToast(message, "error");
+
+      throw new Error(message);
+    }
+  }
+
   async function handleRenameVendor(vendorName: string) {
     if (!canManageCertifications) {
       return;
@@ -1133,6 +1157,7 @@ export default function CertificationsPage() {
             serverError={formError}
             onClose={closeCertificationModal}
             onSubmit={handleCertificationSubmit}
+            onCreateVendor={handleCreateVendor}
           />
         )}
 

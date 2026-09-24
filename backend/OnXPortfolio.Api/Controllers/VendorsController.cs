@@ -123,7 +123,7 @@ public sealed class VendorsController :
 
     // =========================================================
     // CREATE VENDOR
-    // Global Admins and Events Admins only.
+    // Global Admins, Events Admins, and Certifications Admins only.
     // =========================================================
 
     [HttpPost]
@@ -151,11 +151,11 @@ public sealed class VendorsController :
             return Unauthorized();
         }
 
-        if (!CanManageEvents(
-                currentUser))
-        {
-            return Forbid();
-        }
+        if (!CanManageVendors(
+        currentUser))
+{
+    return Forbid();
+}
 
         var normalizedName =
             request.Name.Trim();
