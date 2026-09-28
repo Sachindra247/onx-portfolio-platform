@@ -18,6 +18,34 @@ using OnXPortfolio.Infrastructure.Certifications;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var deploymentMode =
+    builder.Configuration["DeploymentMode"]
+    ?? throw new InvalidOperationException(
+        "DeploymentMode is missing.");
+
+var isLocalDeployment =
+    deploymentMode.Equals(
+        "Local",
+        StringComparison.OrdinalIgnoreCase);
+
+var isBetaDeployment =
+    deploymentMode.Equals(
+        "Beta",
+        StringComparison.OrdinalIgnoreCase);
+
+var isProductionDeployment =
+    deploymentMode.Equals(
+        "Production",
+        StringComparison.OrdinalIgnoreCase);
+
+if (!isLocalDeployment &&
+    !isBetaDeployment &&
+    !isProductionDeployment)
+{
+    throw new InvalidOperationException(
+        $"Unsupported DeploymentMode: {deploymentMode}");
+}
+
 const string FrontendCorsPolicy = "FrontendCors";
 
 builder.Services
@@ -217,23 +245,34 @@ if (missingVendors.Any())
     await dbContext.SaveChangesAsync();
 }
 
-await CertificationPrototypeSeeder.SeedAsync(dbContext);
+if (isLocalDeployment ||
+    isBetaDeployment)
+{
+    await CertificationPrototypeSeeder.SeedAsync(
+        dbContext);
 
-await VacationPrototypeSeeder.SeedAsync(dbContext);
+    await VacationPrototypeSeeder.SeedAsync(
+        dbContext);
+}
 
-await ApplicationUserSeeder.SeedAsync(dbContext);
+await ApplicationUserSeeder.SeedAsync(
+    dbContext);
 
 await VacationUserLinkSeeder.SeedAsync(
     dbContext);
 
-var passwordHasher =
-    scope.ServiceProvider.GetRequiredService<
-        IPasswordHasher<ApplicationUser>>();
+if (isBetaDeployment ||
+    isLocalDeployment)
+{
+    var passwordHasher =
+        scope.ServiceProvider.GetRequiredService<
+            IPasswordHasher<ApplicationUser>>();
 
-await BetaAuthenticationSeeder.SeedAsync(
-    dbContext,
-    builder.Configuration,
-    passwordHasher);
+    await BetaAuthenticationSeeder.SeedAsync(
+        dbContext,
+        builder.Configuration,
+        passwordHasher);
+}
 
     if (app.Environment.IsDevelopment())
     {
