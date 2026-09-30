@@ -267,8 +267,12 @@ if (isLocalDeployment ||
 await ApplicationUserSeeder.SeedAsync(
     dbContext);
 
-await VacationUserLinkSeeder.SeedAsync(
-    dbContext);
+if (isLocalDeployment ||
+    isBetaDeployment)
+{
+    await VacationUserLinkSeeder.SeedAsync(
+        dbContext);
+}
 
 if (isBetaDeployment ||
     isLocalDeployment)
