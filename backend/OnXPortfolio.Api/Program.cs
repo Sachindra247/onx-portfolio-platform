@@ -232,27 +232,24 @@ else
     "Veeam"
 };
 
-var existingVendorNames = await dbContext.Vendors
-    .Select(v => v.Name)
-    .ToListAsync();
+var hasVendors =
+    await dbContext.Vendors.AnyAsync();
 
-var existingVendorNameSet = existingVendorNames
-    .ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-var missingVendors = vendorNames
-    .Where(name => !existingVendorNameSet.Contains(name))
-    .Select(name => new Vendor
-    {
-        Name = name,
-        IsActive = true
-    })
-    .ToList();
-
-if (missingVendors.Any())
+if (!hasVendors)
 {
-    dbContext.Vendors.AddRange(missingVendors);
+    var vendors = vendorNames
+        .Select(name => new Vendor
+        {
+            Name = name,
+            IsActive = true
+        })
+        .ToList();
+
+    dbContext.Vendors.AddRange(vendors);
+
     await dbContext.SaveChangesAsync();
 }
+
 
 if (isLocalDeployment ||
     isBetaDeployment)
