@@ -19,15 +19,19 @@ public sealed class AuthController : ControllerBase
         _passwordHasher;
     private readonly JwtTokenService _jwtTokenService;
 
+    private readonly IConfiguration _configuration;
+
     public AuthController(
         AppDbContext dbContext,
         IPasswordHasher<ApplicationUser>
             passwordHasher,
-        JwtTokenService jwtTokenService)
+        JwtTokenService jwtTokenService,
+        IConfiguration configuration)
     {
         _dbContext = dbContext;
         _passwordHasher = passwordHasher;
         _jwtTokenService = jwtTokenService;
+        _configuration = configuration;
     }
 
     [AllowAnonymous]
@@ -37,6 +41,18 @@ public sealed class AuthController : ControllerBase
             LoginRequest request,
             CancellationToken cancellationToken)
     {
+        var deploymentMode =
+            _configuration["DeploymentMode"];
+
+        if (string.Equals(
+                deploymentMode,
+                "Production",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            return StatusCode(
+                StatusCodes.Status404NotFound);
+        }
+
         var normalizedEmail =
             request.Email
                 .Trim()
