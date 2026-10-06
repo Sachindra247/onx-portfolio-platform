@@ -4,11 +4,16 @@ import type {
   EventAttendeeDto,
   EventDto,
   EventRegistrationDto,
+  EventRegistrationLinkDto,
   EventRequest,
+  PublicEventRegistrationDto,
+  PublicEventRegistrationRequest,
   VendorDto,
 } from "../types/events";
 
 import { httpClient } from "./httpClient";
+
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "";
 
 export async function getEvents(signal?: AbortSignal): Promise<EventDto[]> {
   const response = await httpClient.get<EventDto[]>("/api/events", {
@@ -94,6 +99,38 @@ export async function getEventRegistrations(
 ): Promise<EventAttendeeDto[]> {
   const response = await httpClient.get<EventAttendeeDto[]>(
     `/api/events/${id}/registrations`,
+  );
+
+  return response.data;
+}
+
+export async function getOrCreateEventRegistrationLink(
+  id: string,
+): Promise<EventRegistrationLinkDto> {
+  const response = await httpClient.post<EventRegistrationLinkDto>(
+    `/api/events/${id}/registration-link`,
+  );
+
+  return response.data;
+}
+
+export async function getPublicEventRegistration(
+  token: string,
+): Promise<PublicEventRegistrationDto> {
+  const response = await axios.get<PublicEventRegistrationDto>(
+    `${apiBaseUrl}/api/events/public-registration/${encodeURIComponent(token)}`,
+  );
+
+  return response.data;
+}
+
+export async function registerForEventPublicly(
+  token: string,
+  request: PublicEventRegistrationRequest,
+): Promise<EventRegistrationDto> {
+  const response = await axios.post<EventRegistrationDto>(
+    `${apiBaseUrl}/api/events/public-registration/${encodeURIComponent(token)}`,
+    request,
   );
 
   return response.data;

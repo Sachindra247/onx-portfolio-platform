@@ -22,6 +22,14 @@ public sealed class EventRegistrationConfiguration :
             .HasMaxLength(30)
             .IsRequired();
 
+        builder.Property(registration =>
+        registration.ExternalName)
+    .HasMaxLength(200);
+
+builder.Property(registration =>
+        registration.ExternalEmail)
+    .HasMaxLength(320);
+
         builder.HasOne(registration =>
                 registration.Event)
             .WithMany()

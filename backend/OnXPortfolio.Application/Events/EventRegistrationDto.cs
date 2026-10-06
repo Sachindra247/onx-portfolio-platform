@@ -6,7 +6,7 @@ public sealed class EventRegistrationDto
 {
     public Guid EventId { get; init; }
 
-    public Guid UserId { get; init; }
+    public Guid? UserId { get; init; }
 
     public EventRegistrationStatus Status {
         get;

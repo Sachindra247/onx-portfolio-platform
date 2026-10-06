@@ -9,6 +9,7 @@ import {
   getEventRegistrations,
   getEvents,
   getMyEventRegistration,
+  getOrCreateEventRegistrationLink,
   getVendors,
   registerForEvent,
   rejectEvent,
@@ -569,6 +570,31 @@ export default function EventsPage() {
   }
 
   // =========================================================
+  // EXTERNAL EVENT REGISTRATION LINK
+  // =========================================================
+
+  async function handleCopyRegistrationLink(
+    portfolioEvent: EventDto,
+  ): Promise<void> {
+    try {
+      const registrationLink = await getOrCreateEventRegistrationLink(
+        portfolioEvent.id,
+      );
+
+      const url = `${window.location.origin}/event-register/${registrationLink.token}`;
+
+      await navigator.clipboard.writeText(url);
+
+      showToast(
+        `Registration link for "${portfolioEvent.description}" copied to clipboard.`,
+        "success",
+      );
+    } catch (error) {
+      showToast(getApiErrorMessage(error), "error");
+    }
+  }
+
+  // =========================================================
   // EXPORT
   // =========================================================
 
@@ -804,6 +830,7 @@ export default function EventsPage() {
         attendees={attendees}
         attendeesLoading={attendeesLoading}
         onExportAttendees={handleExportAttendees}
+        onCopyRegistrationLink={handleCopyRegistrationLink}
         canManage={canManageEvents}
         canViewAttendees={canManageEvents}
         onClose={closeEventDetails}

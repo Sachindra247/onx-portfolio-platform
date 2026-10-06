@@ -703,6 +703,324 @@ public sealed class EventsController : ControllerBase
         return Ok(reviewedEvent);
     }
 
+        // =========================================================
+    // EXTERNAL REGISTRATION LINK
+    //
+    // Events Admins / Global Admins may generate or retrieve
+    // the external registration token for an approved event.
+    // =========================================================
+
+    [HttpPost("{id:guid}/registration-link")]
+    [ProducesResponseType(
+        typeof(EventRegistrationLinkDto),
+        StatusCodes.Status200OK)]
+    [ProducesResponseType(
+        StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(
+        StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(
+        StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(
+        StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<EventRegistrationLinkDto>>
+        GetOrCreateRegistrationLink(
+            Guid id,
+            CancellationToken cancellationToken)
+    {
+        var currentUser =
+            await _currentUserService.GetUserAsync(
+                cancellationToken);
+
+        if (currentUser is null)
+        {
+            return Unauthorized();
+        }
+
+        if (!CanManageEvents(currentUser))
+        {
+            return Forbid();
+        }
+
+        var portfolioEvent =
+            await _dbContext.Events
+                .SingleOrDefaultAsync(
+                    eventRecord =>
+                        eventRecord.Id == id,
+                    cancellationToken);
+
+        if (portfolioEvent is null)
+        {
+            return NotFound();
+        }
+
+        if (
+            portfolioEvent.ApprovalStatus !=
+                EventApprovalStatus.Approved)
+        {
+            return BadRequest(
+                new
+                {
+                    message =
+                        "Only approved events may have an external registration link."
+                });
+        }
+
+        if (
+            string.IsNullOrWhiteSpace(
+                portfolioEvent.PublicRegistrationToken))
+        {
+            portfolioEvent.PublicRegistrationToken =
+                Guid.NewGuid().ToString("N");
+
+            portfolioEvent.UpdatedAtUtc =
+                DateTimeOffset.UtcNow;
+
+            await _dbContext.SaveChangesAsync(
+                cancellationToken);
+        }
+
+        return Ok(
+            new EventRegistrationLinkDto
+            {
+                EventId =
+                    portfolioEvent.Id,
+
+                Token =
+                    portfolioEvent.PublicRegistrationToken
+            });
+    }
+
+        // =========================================================
+    // PUBLIC EVENT REGISTRATION DETAILS
+    //
+    // Allows an external recipient with a valid registration
+    // token to view the safe registration details for an event.
+    // =========================================================
+
+    [AllowAnonymous]
+    [HttpGet("public-registration/{token}")]
+    [ProducesResponseType(
+        typeof(PublicEventRegistrationDto),
+        StatusCodes.Status200OK)]
+    [ProducesResponseType(
+        StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<PublicEventRegistrationDto>>
+        GetPublicRegistrationEvent(
+            string token,
+            CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(token))
+        {
+            return NotFound();
+        }
+
+        var normalizedToken =
+            token.Trim();
+
+        var portfolioEvent =
+            await _dbContext.Events
+                .AsNoTracking()
+                .Where(eventRecord =>
+                    eventRecord.PublicRegistrationToken ==
+                        normalizedToken &&
+                    eventRecord.ApprovalStatus ==
+                        EventApprovalStatus.Approved)
+                .Select(eventRecord =>
+                    new PublicEventRegistrationDto
+                    {
+                        Description =
+                            eventRecord.Description,
+
+                        EventDate =
+                            eventRecord.EventDate,
+
+                        Venue =
+                            eventRecord.Venue,
+
+                        VendorName =
+                            eventRecord.Vendor.Name
+                    })
+                .SingleOrDefaultAsync(
+                    cancellationToken);
+
+        if (portfolioEvent is null)
+        {
+            return NotFound();
+        }
+
+        return Ok(portfolioEvent);
+    }
+
+        // =========================================================
+    // PUBLIC EVENT REGISTRATION
+    //
+    // Allows an external recipient with a valid registration
+    // token to register using their name and email address.
+    // =========================================================
+
+    [AllowAnonymous]
+    [HttpPost("public-registration/{token}")]
+    [ProducesResponseType(
+        typeof(EventRegistrationDto),
+        StatusCodes.Status200OK)]
+    [ProducesResponseType(
+        StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(
+        StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<EventRegistrationDto>>
+        RegisterForEventPublicly(
+            string token,
+            [FromBody] CreatePublicEventRegistrationRequest request,
+            CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(token))
+        {
+            return NotFound();
+        }
+
+        var name =
+            NormalizeOptionalText(request.Name);
+
+        var email =
+            NormalizeOptionalText(request.Email);
+
+        if (name is null)
+        {
+            return BadRequest(
+                new
+                {
+                    message =
+                        "Name is required."
+                });
+        }
+
+        if (email is null)
+        {
+            return BadRequest(
+                new
+                {
+                    message =
+                        "Email is required."
+                });
+        }
+
+        if (
+            name.Length > 200 ||
+            email.Length > 320)
+        {
+            return BadRequest(
+                new
+                {
+                    message =
+                        "The registration information exceeds the allowed length."
+                });
+        }
+
+        try
+        {
+            _ =
+                new System.Net.Mail.MailAddress(
+                    email);
+        }
+        catch (FormatException)
+        {
+            return BadRequest(
+                new
+                {
+                    message =
+                        "Please enter a valid email address."
+                });
+        }
+
+        var normalizedToken =
+            token.Trim();
+
+        var portfolioEvent =
+            await _dbContext.Events
+                .SingleOrDefaultAsync(
+                    eventRecord =>
+                        eventRecord.PublicRegistrationToken ==
+                            normalizedToken &&
+                        eventRecord.ApprovalStatus ==
+                            EventApprovalStatus.Approved,
+                    cancellationToken);
+
+        if (portfolioEvent is null)
+        {
+            return NotFound();
+        }
+
+        var existingRegistration =
+            await _dbContext.EventRegistrations
+                .SingleOrDefaultAsync(
+                    registration =>
+                        registration.EventId ==
+                            portfolioEvent.Id &&
+                        registration.UserId == null &&
+                        registration.ExternalEmail != null &&
+                        registration.ExternalEmail.ToLower() ==
+                            email.ToLower(),
+                    cancellationToken);
+
+        var now =
+            DateTimeOffset.UtcNow;
+
+        if (existingRegistration is null)
+        {
+            existingRegistration =
+                new EventRegistration
+                {
+                    Id =
+                        Guid.NewGuid(),
+
+                    EventId =
+                        portfolioEvent.Id,
+
+                    UserId =
+                        null,
+
+                    ExternalName =
+                        name,
+
+                    ExternalEmail =
+                        email,
+
+                    Status =
+                        EventRegistrationStatus.Registered,
+
+                    CreatedAtUtc =
+                        now,
+
+                    UpdatedAtUtc =
+                        now
+                };
+
+            _dbContext.EventRegistrations.Add(
+                existingRegistration);
+        }
+        else
+        {
+            existingRegistration.ExternalName =
+                name;
+
+            existingRegistration.ExternalEmail =
+                email;
+
+            existingRegistration.Status =
+                EventRegistrationStatus.Registered;
+
+            existingRegistration.UpdatedAtUtc =
+                now;
+        }
+
+        await _dbContext.SaveChangesAsync(
+            cancellationToken);
+
+        return Ok(
+            MapRegistrationToDto(
+                existingRegistration));
+    }
+
     // =========================================================
     // REGISTER FOR EVENT
     // Any authenticated user may register for an approved event.
@@ -997,7 +1315,7 @@ public sealed class EventsController : ControllerBase
             return NotFound();
         }
 
-        var attendees =
+            var attendees =
             await _dbContext.EventRegistrations
                 .AsNoTracking()
                 .Where(registration =>
@@ -1005,9 +1323,13 @@ public sealed class EventsController : ControllerBase
                     registration.Status ==
                         EventRegistrationStatus.Registered)
                 .OrderBy(registration =>
-                    registration.User.FirstName)
+                    registration.User != null
+                        ? registration.User.FirstName
+                        : registration.ExternalName)
                 .ThenBy(registration =>
-                    registration.User.LastName)
+                    registration.User != null
+                        ? registration.User.LastName
+                        : registration.ExternalName)
                 .Select(registration =>
                     new EventAttendeeDto
                     {
@@ -1015,20 +1337,25 @@ public sealed class EventsController : ControllerBase
                             registration.UserId,
 
                         Name =
-                            registration.User.FirstName +
-                            " " +
-                            registration.User.LastName,
+                            registration.User != null
+                                ? registration.User.FirstName +
+                                  " " +
+                                  registration.User.LastName
+                                : registration.ExternalName ??
+                                  string.Empty,
 
                         Email =
-                            registration.User.Email,
+                            registration.User != null
+                                ? registration.User.Email
+                                : registration.ExternalEmail ??
+                                  string.Empty,
 
                         RegisteredAtUtc =
                             registration.CreatedAtUtc
                     })
                 .ToListAsync(
                     cancellationToken);
-
-        return Ok(attendees);
+                            return Ok(attendees);
     }
 
     // =========================================================

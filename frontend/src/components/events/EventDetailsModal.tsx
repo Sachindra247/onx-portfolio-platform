@@ -2,6 +2,7 @@ import {
   CalendarDays,
   CheckCircle2,
   Download,
+  Link,
   MapPin,
   Pencil,
   UserCheck,
@@ -39,6 +40,8 @@ interface EventDetailsModalProps {
   onCancelRegistration: (event: EventDto) => Promise<void>;
 
   onExportAttendees: (event: EventDto, attendees: EventAttendeeDto[]) => void;
+
+  onCopyRegistrationLink: (event: EventDto) => Promise<void>;
 }
 
 export default function EventDetailsModal({
@@ -55,6 +58,7 @@ export default function EventDetailsModal({
   onRegister,
   onCancelRegistration,
   onExportAttendees,
+  onCopyRegistrationLink,
 }: EventDetailsModalProps) {
   if (!event) {
     return null;
@@ -172,15 +176,30 @@ export default function EventDetailsModal({
                 <span>{attendees.length}</span>
               </header>
 
-              {!attendeesLoading && attendees.length > 0 && (
-                <button
-                  type="button"
-                  className="event-attendees-export-button"
-                  onClick={() => onExportAttendees(event, attendees)}
-                >
-                  <Download size={15} aria-hidden="true" />
-                  Export Attendees CSV
-                </button>
+              {!attendeesLoading && (
+                <div className="event-attendees-actions">
+                  {attendees.length > 0 && (
+                    <button
+                      type="button"
+                      className="event-attendees-export-button"
+                      onClick={() => onExportAttendees(event, attendees)}
+                    >
+                      <Download size={15} aria-hidden="true" />
+                      Export Attendees CSV
+                    </button>
+                  )}
+
+                  {registrationAvailable && (
+                    <button
+                      type="button"
+                      className="event-attendees-export-button"
+                      onClick={() => void onCopyRegistrationLink(event)}
+                    >
+                      <Link size={15} aria-hidden="true" />
+                      Copy Registration Link
+                    </button>
+                  )}
+                </div>
               )}
 
               {attendeesLoading ? (
@@ -190,7 +209,7 @@ export default function EventDetailsModal({
               ) : (
                 <div className="event-details-attendee-list">
                   {attendees.map((attendee) => (
-                    <div key={attendee.userId}>
+                    <div key={attendee.userId ?? attendee.email}>
                       <strong>{attendee.name}</strong>
 
                       <span>{attendee.email}</span>

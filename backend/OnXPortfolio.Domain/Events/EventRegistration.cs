@@ -9,9 +9,13 @@ public sealed class EventRegistration : AuditableEntity
 
     public Event Event { get; set; } = null!;
 
-    public Guid UserId { get; set; }
+    public Guid? UserId { get; set; }
 
-    public ApplicationUser User { get; set; } = null!;
+    public ApplicationUser? User { get; set; }
+
+    public string? ExternalName { get; set; }
+
+    public string? ExternalEmail { get; set; }
 
     public EventRegistrationStatus Status { get; set; } =
         EventRegistrationStatus.Registered;

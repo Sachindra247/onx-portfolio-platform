@@ -58,7 +58,7 @@ export type EventRegistrationStatus =
 
 export interface EventRegistrationDto {
   eventId: string;
-  userId: string;
+  userId: string | null;
   status: EventRegistrationStatus;
   isRegistered: boolean;
   createdAtUtc: string;
@@ -66,10 +66,27 @@ export interface EventRegistrationDto {
 }
 
 export interface EventAttendeeDto {
-  userId: string;
+  userId: string | null;
   name: string;
   email: string;
   registeredAtUtc: string;
+}
+
+export interface EventRegistrationLinkDto {
+  eventId: string;
+  token: string;
+}
+
+export interface PublicEventRegistrationDto {
+  description: string;
+  eventDate: string | null;
+  venue: string | null;
+  vendorName: string;
+}
+
+export interface PublicEventRegistrationRequest {
+  name: string;
+  email: string;
 }
 
 export interface VendorDto {

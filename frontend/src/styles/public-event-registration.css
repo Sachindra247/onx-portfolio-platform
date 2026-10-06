@@ -1,0 +1,136 @@
+.public-event-registration {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 20px;
+    background:
+        radial-gradient(circle at top right, rgba(31, 78, 121, 0.12), transparent 34%),
+        #f4f6f8;
+    color: #17202a;
+}
+
+.public-event-registration__card {
+    width: 100%;
+    max-width: 620px;
+    padding: 40px;
+    background: #ffffff;
+    border: 1px solid #e1e5e9;
+    border-radius: 16px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
+}
+
+.public-event-registration__eyebrow {
+    margin: 0 0 10px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #52606d;
+}
+
+.public-event-registration h1 {
+    margin: 0 0 24px;
+    font-size: 2rem;
+    line-height: 1.2;
+}
+
+.public-event-registration__details {
+    display: grid;
+    gap: 12px;
+    margin: 0 0 30px;
+    padding: 20px;
+    background: #f7f8fa;
+    border-radius: 10px;
+}
+
+.public-event-registration__details div {
+    display: grid;
+    gap: 3px;
+}
+
+.public-event-registration__details span {
+    font-size: 0.8rem;
+    color: #667085;
+}
+
+.public-event-registration__details strong {
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.public-event-registration__form {
+    display: grid;
+    gap: 20px;
+}
+
+.public-event-registration__field {
+    display: grid;
+    gap: 7px;
+}
+
+.public-event-registration__field label {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.public-event-registration__field input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px 14px;
+    border: 1px solid #cfd6dd;
+    border-radius: 8px;
+    background: #ffffff;
+    color: inherit;
+    font: inherit;
+}
+
+.public-event-registration__field input:focus {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+}
+
+.public-event-registration__error {
+    margin: 0;
+    padding: 12px 14px;
+    border-radius: 8px;
+    background: #fff2f2;
+    color: #9b1c1c;
+    font-size: 0.9rem;
+}
+
+.public-event-registration__form button {
+    min-height: 46px;
+    padding: 11px 20px;
+    border: 0;
+    border-radius: 8px;
+    background: #17202a;
+    color: #ffffff;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.public-event-registration__form button:hover:not(:disabled) {
+    opacity: 0.9;
+}
+
+.public-event-registration__form button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+    .public-event-registration {
+        align-items: flex-start;
+        padding: 20px 14px;
+    }
+
+    .public-event-registration__card {
+        padding: 28px 20px;
+    }
+
+    .public-event-registration h1 {
+        font-size: 1.6rem;
+    }
+}

@@ -7,6 +7,7 @@ import EventsLayout from "../components/events/layout/EventsLayout";
 import CertificationsPage from "../pages/CertificationsPage";
 import VacationsPage from "../pages/VacationsPage";
 import LoginPage from "../pages/LoginPage";
+import PublicEventRegistrationPage from "../pages/PublicEventRegistrationPage";
 import RequireAuth from "../auth/RequireAuth";
 import ProfilePage from "../pages/ProfilePage";
 import RebatesPage from "../pages/RebatesPage";
@@ -18,6 +19,10 @@ export const router = createBrowserRouter(
     {
       path: "/login",
       element: <LoginPage />,
+    },
+    {
+      path: "/event-register/:token",
+      element: <PublicEventRegistrationPage />,
     },
 
     {

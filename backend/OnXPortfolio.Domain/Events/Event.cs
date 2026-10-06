@@ -22,6 +22,12 @@ public sealed class Event : AuditableEntity
 
     public string? Notes { get; set; }
 
+    public string? PublicRegistrationToken
+{
+    get;
+    set;
+}
+
     public Guid VendorId { get; set; }
 
     public Vendor Vendor { get; set; } =

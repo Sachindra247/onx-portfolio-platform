@@ -50,6 +50,14 @@ public sealed class EventConfiguration :
             .HasMaxLength(4000);
 
         builder.Property(eventRecord =>
+        eventRecord.PublicRegistrationToken)
+    .HasMaxLength(100);
+
+builder.HasIndex(eventRecord =>
+        eventRecord.PublicRegistrationToken)
+    .IsUnique();
+
+        builder.Property(eventRecord =>
                 eventRecord.ReviewNotes)
             .HasMaxLength(2000);
 

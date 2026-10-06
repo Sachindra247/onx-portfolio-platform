@@ -1054,6 +1054,18 @@
     font-weight: 700;
 }
 
+.event-attendees-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.event-attendees-actions .event-attendees-export-button {
+    margin-bottom: 0;
+}
+
 .event-attendees-export-button {
     display: inline-flex;
     align-items: center;
