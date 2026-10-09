@@ -17,6 +17,10 @@ public sealed class EventRegistration : AuditableEntity
 
     public string? ExternalEmail { get; set; }
 
+    public string? ExternalTitle { get; set; }
+
+    public string? ExternalOrganization { get; set; }
+
     public EventRegistrationStatus Status { get; set; } =
         EventRegistrationStatus.Registered;
 }

@@ -12,6 +12,13 @@ public sealed class CreateEventRequest
 
     public DateOnly? EventDate { get; init; }
 
+    public TimeOnly? StartTime { get; init; }
+
+    public TimeOnly? EndTime { get; init; }
+
+    [StringLength(100)]
+    public string? TimeZoneId { get; init; }
+
     public EventStage Stage { get; init; } =
         EventStage.Exploring;
 

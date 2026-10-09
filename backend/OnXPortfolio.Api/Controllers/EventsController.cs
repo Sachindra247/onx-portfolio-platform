@@ -129,10 +129,19 @@ public sealed class EventsController : ControllerBase
                         portfolioEvent.Description,
 
                     EventDate =
-                        portfolioEvent.EventDate,
+    portfolioEvent.EventDate,
 
-                    Stage =
-                        portfolioEvent.Stage,
+StartTime =
+    portfolioEvent.StartTime,
+
+EndTime =
+    portfolioEvent.EndTime,
+
+TimeZoneId =
+    portfolioEvent.TimeZoneId,
+
+Stage =
+    portfolioEvent.Stage,
 
                     Venue =
                         portfolioEvent.Venue,
@@ -298,6 +307,22 @@ public sealed class EventsController : ControllerBase
             return Forbid();
         }
 
+        var scheduleError =
+    ValidateEventSchedule(
+        request.EventDate,
+        request.StartTime,
+        request.EndTime,
+        request.TimeZoneId);
+
+if (scheduleError is not null)
+{
+    ModelState.AddModelError(
+        nameof(request.StartTime),
+        scheduleError);
+
+    return ValidationProblem(ModelState);
+}
+
         var vendorExists =
             await _dbContext.Vendors
                 .AnyAsync(
@@ -331,6 +356,16 @@ public sealed class EventsController : ControllerBase
 
                 EventDate =
                     request.EventDate,
+
+                StartTime =
+                    request.StartTime,
+
+                EndTime =
+                    request.EndTime,
+
+                TimeZoneId =
+                    NormalizeOptionalText(
+                    request.TimeZoneId),
 
                 Stage =
                     request.Stage,
@@ -445,6 +480,22 @@ public sealed class EventsController : ControllerBase
             return NotFound();
         }
 
+        var scheduleError =
+    ValidateEventSchedule(
+        request.EventDate,
+        request.StartTime,
+        request.EndTime,
+        request.TimeZoneId);
+
+if (scheduleError is not null)
+{
+    ModelState.AddModelError(
+        nameof(request.StartTime),
+        scheduleError);
+
+    return ValidationProblem(ModelState);
+}
+
         var vendorExists =
             await _dbContext.Vendors
                 .AnyAsync(
@@ -469,6 +520,16 @@ public sealed class EventsController : ControllerBase
 
         portfolioEvent.EventDate =
             request.EventDate;
+
+        portfolioEvent.StartTime =
+            request.StartTime;
+
+        portfolioEvent.EndTime =
+            request.EndTime;
+
+        portfolioEvent.TimeZoneId =
+            NormalizeOptionalText(
+            request.TimeZoneId);
 
         portfolioEvent.Stage =
             request.Stage;
@@ -884,6 +945,12 @@ public sealed class EventsController : ControllerBase
         var email =
             NormalizeOptionalText(request.Email);
 
+        var title =
+    NormalizeOptionalText(request.Title);
+
+var organization =
+    NormalizeOptionalText(request.Organization);
+
         if (name is null)
         {
             return BadRequest(
@@ -905,16 +972,19 @@ public sealed class EventsController : ControllerBase
         }
 
         if (
-            name.Length > 200 ||
-            email.Length > 320)
+    name.Length > 200 ||
+    email.Length > 320 ||
+    (title?.Length ?? 0) > 100 ||
+    (organization?.Length ?? 0) > 200)
+{
+    return BadRequest(
+        new
         {
-            return BadRequest(
-                new
-                {
-                    message =
-                        "The registration information exceeds the allowed length."
-                });
-        }
+            message =
+                "The registration information exceeds the allowed length."
+        });
+}
+
 
         try
         {
@@ -985,6 +1055,12 @@ public sealed class EventsController : ControllerBase
                     ExternalEmail =
                         email,
 
+                    ExternalTitle =
+                        title,
+
+                    ExternalOrganization =
+                        organization,
+
                     Status =
                         EventRegistrationStatus.Registered,
 
@@ -1005,6 +1081,12 @@ public sealed class EventsController : ControllerBase
 
             existingRegistration.ExternalEmail =
                 email;
+
+            existingRegistration.ExternalTitle =
+                title;
+
+            existingRegistration.ExternalOrganization =
+                organization;
 
             existingRegistration.Status =
                 EventRegistrationStatus.Registered;
@@ -1408,10 +1490,19 @@ public sealed class EventsController : ControllerBase
                             registration.Event.Description,
 
                         EventDate =
-                            registration.Event.EventDate,
+    registration.Event.EventDate,
 
-                        Stage =
-                            registration.Event.Stage,
+StartTime =
+    registration.Event.StartTime,
+
+EndTime =
+    registration.Event.EndTime,
+
+TimeZoneId =
+    registration.Event.TimeZoneId,
+
+Stage =
+    registration.Event.Stage,
 
                         Venue =
                             registration.Event.Venue,
@@ -1478,6 +1569,52 @@ public sealed class EventsController : ControllerBase
     // AUTHORIZATION
     // =========================================================
 
+    private static string? ValidateEventSchedule(
+    DateOnly? eventDate,
+    TimeOnly? startTime,
+    TimeOnly? endTime,
+    string? timeZoneId)
+{
+    var hasAnyScheduleField =
+        startTime.HasValue ||
+        endTime.HasValue ||
+        !string.IsNullOrWhiteSpace(timeZoneId);
+
+    if (!hasAnyScheduleField)
+    {
+        return null;
+    }
+
+    if (!eventDate.HasValue ||
+        !startTime.HasValue ||
+        !endTime.HasValue ||
+        string.IsNullOrWhiteSpace(timeZoneId))
+    {
+        return "Event date, start time, end time, and timezone must all be provided when specifying an event schedule.";
+    }
+
+    if (endTime.Value <= startTime.Value)
+    {
+        return "Event end time must be later than the start time.";
+    }
+
+    try
+    {
+        TimeZoneInfo.FindSystemTimeZoneById(
+            timeZoneId.Trim());
+    }
+    catch (TimeZoneNotFoundException)
+    {
+        return "The selected event timezone is not recognized.";
+    }
+    catch (InvalidTimeZoneException)
+    {
+        return "The selected event timezone is invalid.";
+    }
+
+    return null;
+}
+
     private static bool CanManageEvents(
         ApplicationUser user)
     {
@@ -1512,10 +1649,19 @@ public sealed class EventsController : ControllerBase
                         eventRecord.Description,
 
                     EventDate =
-                        eventRecord.EventDate,
+    eventRecord.EventDate,
 
-                    Stage =
-                        eventRecord.Stage,
+StartTime =
+    eventRecord.StartTime,
+
+EndTime =
+    eventRecord.EndTime,
+
+TimeZoneId =
+    eventRecord.TimeZoneId,
+
+Stage =
+    eventRecord.Stage,
 
                     Venue =
                         eventRecord.Venue,
@@ -1592,10 +1738,19 @@ public sealed class EventsController : ControllerBase
                 eventRecord.Description,
 
             EventDate =
-                eventRecord.EventDate,
+    eventRecord.EventDate,
 
-            Stage =
-                eventRecord.Stage,
+StartTime =
+    eventRecord.StartTime,
+
+EndTime =
+    eventRecord.EndTime,
+
+TimeZoneId =
+    eventRecord.TimeZoneId,
+
+Stage =
+    eventRecord.Stage,
 
             Venue =
                 eventRecord.Venue,

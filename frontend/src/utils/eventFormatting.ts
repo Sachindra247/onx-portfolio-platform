@@ -58,6 +58,9 @@ export function createEmptyEventForm(): EventFormValues {
   return {
     description: "",
     eventDate: "",
+    startTime: "",
+    endTime: "",
+    timeZoneId: "",
     stage: "Exploring",
     venue: "",
     businessPurpose: "",
@@ -72,6 +75,12 @@ export function mapFormToRequest(values: EventFormValues): EventRequest {
     description: values.description.trim(),
 
     eventDate: values.eventDate || null,
+
+    startTime: values.startTime || null,
+
+    endTime: values.endTime || null,
+
+    timeZoneId: values.timeZoneId.trim() || null,
 
     stage: values.stage,
 

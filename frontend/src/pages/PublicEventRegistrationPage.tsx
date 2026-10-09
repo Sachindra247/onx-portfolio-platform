@@ -17,6 +17,8 @@ export default function PublicEventRegistrationPage() {
   const [event, setEvent] = useState<PublicEventRegistrationDto | null>(null);
 
   const [name, setName] = useState("");
+  const [title, setTitle] = useState("");
+  const [organization, setOrganization] = useState("");
   const [email, setEmail] = useState("");
 
   const [isLoading, setIsLoading] = useState(true);
@@ -92,6 +94,8 @@ export default function PublicEventRegistrationPage() {
     try {
       await registerForEventPublicly(token, {
         name: trimmedName,
+        title: title.trim() || null,
+        organization: organization.trim() || null,
         email: trimmedEmail,
       });
 
@@ -190,6 +194,37 @@ export default function PublicEventRegistrationPage() {
               required
               value={name}
               onChange={(event) => setName(event.target.value)}
+              disabled={isSubmitting}
+            />
+          </div>
+
+          <div className="public-event-registration__field">
+            <label htmlFor="registration-title">Title</label>
+
+            <input
+              id="registration-title"
+              name="title"
+              type="text"
+              maxLength={100}
+              placeholder="e.g., IT Manager"
+              value={title}
+              onChange={(event) => setTitle(event.target.value)}
+              disabled={isSubmitting}
+            />
+          </div>
+
+          <div className="public-event-registration__field">
+            <label htmlFor="registration-organization">Organization</label>
+
+            <input
+              id="registration-organization"
+              name="organization"
+              type="text"
+              autoComplete="organization"
+              maxLength={200}
+              placeholder="e.g., OnX"
+              value={organization}
+              onChange={(event) => setOrganization(event.target.value)}
               disabled={isSubmitting}
             />
           </div>

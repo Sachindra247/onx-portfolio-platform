@@ -11,6 +11,12 @@ public sealed class Event : AuditableEntity
 
     public DateOnly? EventDate { get; set; }
 
+    public TimeOnly? StartTime { get; set; }
+
+    public TimeOnly? EndTime { get; set; }
+
+    public string? TimeZoneId { get; set; }
+
     public EventStage Stage { get; set; } =
         EventStage.Planning;
 

@@ -33,6 +33,16 @@ public sealed class EventConfiguration :
             .IsRequired();
 
         builder.Property(eventRecord =>
+                eventRecord.StartTime);
+
+        builder.Property(eventRecord =>
+                eventRecord.EndTime);
+
+        builder.Property(eventRecord =>
+                eventRecord.TimeZoneId)
+            .HasMaxLength(100);
+
+        builder.Property(eventRecord =>
                 eventRecord.Venue)
             .HasMaxLength(300);
 

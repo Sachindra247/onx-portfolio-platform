@@ -20,6 +20,9 @@ export interface EventDto {
   id: string;
   description: string;
   eventDate: string | null;
+  startTime: string | null;
+  endTime: string | null;
+  timeZoneId: string | null;
   stage: EventStage;
 
   venue: string | null;
@@ -86,6 +89,8 @@ export interface PublicEventRegistrationDto {
 
 export interface PublicEventRegistrationRequest {
   name: string;
+  title: string | null;
+  organization: string | null;
   email: string;
 }
 
@@ -98,6 +103,9 @@ export interface VendorDto {
 export interface EventRequest {
   description: string;
   eventDate: string | null;
+  startTime: string | null;
+  endTime: string | null;
+  timeZoneId: string | null;
   stage: EventStage;
   venue: string | null;
   businessPurpose: string;
@@ -109,6 +117,9 @@ export interface EventRequest {
 export interface EventFormValues {
   description: string;
   eventDate: string;
+  startTime: string;
+  endTime: string;
+  timeZoneId: string;
   stage: EventStage;
   venue: string;
   businessPurpose: string;

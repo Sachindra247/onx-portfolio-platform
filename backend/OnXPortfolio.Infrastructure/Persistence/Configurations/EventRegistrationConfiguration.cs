@@ -30,6 +30,14 @@ builder.Property(registration =>
         registration.ExternalEmail)
     .HasMaxLength(320);
 
+    builder.Property(registration =>
+        registration.ExternalTitle)
+    .HasMaxLength(100);
+
+builder.Property(registration =>
+        registration.ExternalOrganization)
+    .HasMaxLength(200);
+
         builder.HasOne(registration =>
                 registration.Event)
             .WithMany()

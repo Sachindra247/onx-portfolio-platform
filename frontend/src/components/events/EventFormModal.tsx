@@ -28,18 +28,19 @@ interface EventFormModalProps {
   onCreateVendor: (name: string) => Promise<VendorDto>;
 }
 
-interface FormErrors {
-  description?: string;
-  businessPurpose?: string;
-  budgetCad?: string;
-  vendorId?: string;
-}
+type FormErrors = Partial<Record<keyof EventFormValues, string>>;
 
 function mapEventToForm(event: EventDto): EventFormValues {
   return {
     description: event.description,
 
     eventDate: event.eventDate ?? "",
+
+    startTime: event.startTime?.slice(0, 5) ?? "",
+
+    endTime: event.endTime?.slice(0, 5) ?? "",
+
+    timeZoneId: event.timeZoneId ?? "",
 
     stage: event.stage,
 
@@ -144,6 +145,37 @@ export default function EventFormModal({
     const nextErrors: FormErrors = {};
 
     const parsedBudget = Number(values.budgetCad);
+
+    const hasSchedule =
+      values.startTime !== "" ||
+      values.endTime !== "" ||
+      values.timeZoneId.trim() !== "";
+
+    if (hasSchedule) {
+      if (!values.eventDate) {
+        nextErrors.eventDate = "Select an event date for the schedule.";
+      }
+
+      if (!values.startTime) {
+        nextErrors.startTime = "Select a start time.";
+      }
+
+      if (!values.endTime) {
+        nextErrors.endTime = "Select an end time.";
+      }
+
+      if (!values.timeZoneId.trim()) {
+        nextErrors.timeZoneId = "Select a time zone.";
+      }
+
+      if (
+        values.startTime &&
+        values.endTime &&
+        values.endTime <= values.startTime
+      ) {
+        nextErrors.endTime = "End time must be later than start time.";
+      }
+    }
 
     if (values.description.trim().length < 2) {
       nextErrors.description =
@@ -367,10 +399,80 @@ export default function EventFormModal({
                 id="event-date"
                 type="date"
                 value={values.eventDate}
+                aria-invalid={Boolean(errors.eventDate)}
                 onChange={(event) =>
                   updateField("eventDate", event.target.value)
                 }
               />
+              {errors.eventDate && (
+                <span className="form-field__error">{errors.eventDate}</span>
+              )}
+            </div>
+
+            <div className="form-field">
+              <label htmlFor="event-start-time">Start time</label>
+
+              <input
+                id="event-start-time"
+                type="time"
+                value={values.startTime}
+                aria-invalid={Boolean(errors.startTime)}
+                onChange={(event) =>
+                  updateField("startTime", event.target.value)
+                }
+              />
+
+              {errors.startTime && (
+                <span className="form-field__error">{errors.startTime}</span>
+              )}
+            </div>
+
+            <div className="form-field">
+              <label htmlFor="event-end-time">End time</label>
+
+              <input
+                id="event-end-time"
+                type="time"
+                value={values.endTime}
+                aria-invalid={Boolean(errors.endTime)}
+                onChange={(event) => updateField("endTime", event.target.value)}
+              />
+
+              {errors.endTime && (
+                <span className="form-field__error">{errors.endTime}</span>
+              )}
+            </div>
+
+            <div className="form-field">
+              <label htmlFor="event-time-zone">Time zone</label>
+
+              <select
+                id="event-time-zone"
+                value={values.timeZoneId}
+                aria-invalid={Boolean(errors.timeZoneId)}
+                onChange={(event) =>
+                  updateField("timeZoneId", event.target.value)
+                }
+              >
+                <option value="">Select time zone</option>
+                <option value="America/Toronto">Eastern Time (Toronto)</option>
+                <option value="America/Winnipeg">
+                  Central Time (Winnipeg)
+                </option>
+                <option value="America/Edmonton">
+                  Mountain Time (Edmonton)
+                </option>
+                <option value="America/Vancouver">
+                  Pacific Time (Vancouver)
+                </option>
+                <option value="America/Halifax">Atlantic Time (Halifax)</option>
+                <option value="America/St_Johns">Newfoundland Time</option>
+                <option value="UTC">UTC</option>
+              </select>
+
+              {errors.timeZoneId && (
+                <span className="form-field__error">{errors.timeZoneId}</span>
+              )}
             </div>
 
             <div className="form-field">
