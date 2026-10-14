@@ -889,6 +889,9 @@ if (scheduleError is not null)
                 .Select(eventRecord =>
                     new PublicEventRegistrationDto
                     {
+                        Id =
+                            eventRecord.Id,
+
                         Description =
                             eventRecord.Description,
 

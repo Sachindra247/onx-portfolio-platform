@@ -81,6 +81,7 @@ export interface EventRegistrationLinkDto {
 }
 
 export interface PublicEventRegistrationDto {
+  id: string;
   description: string;
   eventDate: string | null;
   venue: string | null;

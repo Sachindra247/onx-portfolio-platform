@@ -22,7 +22,9 @@ export default function LoginPage() {
   }
 
   if (isAuthenticated) {
-    return <Navigate to="/" replace />;
+    const state = location.state as { from?: string } | null;
+
+    return <Navigate to={state?.from ?? "/"} replace />;
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {

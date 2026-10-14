@@ -1,18 +1,24 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
-import { useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import "../styles/public-event-registration.css";
 
 import {
   getPublicEventRegistration,
+  registerForEvent,
   registerForEventPublicly,
 } from "../api/eventsApi";
+
+import { useAuth } from "../auth/AuthContext";
 
 import type { PublicEventRegistrationDto } from "../types/events";
 
 export default function PublicEventRegistrationPage() {
   const { token } = useParams<{ token: string }>();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { user, isAuthenticated, isInitializing } = useAuth();
 
   const [event, setEvent] = useState<PublicEventRegistrationDto | null>(null);
 
@@ -28,6 +34,8 @@ export default function PublicEventRegistrationPage() {
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const [isRegistered, setIsRegistered] = useState(false);
+
+  const [registeredWithOnX, setRegisteredWithOnX] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -73,6 +81,39 @@ export default function PublicEventRegistrationPage() {
     };
   }, [token]);
 
+  async function handleOnXRegistration() {
+    if (!event || !isAuthenticated || isInitializing || isSubmitting) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmitError(null);
+
+    try {
+      await registerForEvent(event.id);
+      setRegisteredWithOnX(true);
+      setIsRegistered(true);
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const message =
+          typeof error.response?.data?.message === "string"
+            ? error.response.data.message
+            : null;
+
+        setSubmitError(
+          message ??
+            "We could not complete your registration. Please try again.",
+        );
+      } else {
+        setSubmitError(
+          "We could not complete your registration. Please try again.",
+        );
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -99,6 +140,7 @@ export default function PublicEventRegistrationPage() {
         email: trimmedEmail,
       });
 
+      setRegisteredWithOnX(false);
       setIsRegistered(true);
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -153,8 +195,12 @@ export default function PublicEventRegistrationPage() {
           <h1>You're registered</h1>
 
           <p>
-            Thank you, {name.trim()}. Your registration for{" "}
-            <strong>{event.description}</strong> has been received.
+            Thank you,{" "}
+            {registeredWithOnX && user
+              ? `${user.firstName} ${user.lastName}`.trim()
+              : name.trim()}
+            . Your registration for <strong>{event.description}</strong> has
+            been received.
           </p>
 
           <div className="public-event-registration__details">
@@ -177,6 +223,49 @@ export default function PublicEventRegistrationPage() {
         <div className="public-event-registration__details">
           <EventDetails event={event} />
         </div>
+
+        {!isInitializing && !isAuthenticated && (
+          <div className="public-event-registration__form">
+            <p>
+              Already have an OnX account? Sign in to register this event under
+              your profile.
+            </p>
+
+            <button
+              type="button"
+              onClick={() =>
+                navigate("/login", {
+                  state: {
+                    from: location.pathname + location.search,
+                  },
+                })
+              }
+            >
+              Sign in with OnX to register
+            </button>
+          </div>
+        )}
+
+        {!isInitializing && isAuthenticated && (
+          <div className="public-event-registration__form">
+            <p>
+              You're signed in to OnX as <strong>{user?.email}</strong>.
+            </p>
+
+            <button
+              type="button"
+              onClick={() => void handleOnXRegistration()}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Registering..." : "Register with my OnX account"}
+            </button>
+
+            <p>
+              Registering with your OnX account will add this event to your
+              registered events.
+            </p>
+          </div>
+        )}
 
         <form
           className="public-event-registration__form"

@@ -2,6 +2,8 @@ namespace OnXPortfolio.Application.Events;
 
 public sealed class PublicEventRegistrationDto
 {
+
+    public Guid Id { get; init; }
     public string Description { get; init; } =
         string.Empty;
 
