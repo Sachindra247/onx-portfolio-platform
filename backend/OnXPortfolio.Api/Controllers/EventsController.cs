@@ -17,13 +17,19 @@ public sealed class EventsController : ControllerBase
 {
     private readonly AppDbContext _dbContext;
     private readonly CurrentUserService _currentUserService;
+    private readonly ILogger<EventsController> _logger;
+    private readonly EventRegistrationNotificationService? _notificationService;
 
     public EventsController(
-        AppDbContext dbContext,
-        CurrentUserService currentUserService)
+    AppDbContext dbContext,
+    CurrentUserService currentUserService,
+    ILogger<EventsController> logger,
+    EventRegistrationNotificationService? notificationService = null)
     {
         _dbContext = dbContext;
         _currentUserService = currentUserService;
+        _logger = logger;
+        _notificationService = notificationService;
     }
 
     // =========================================================
@@ -131,16 +137,16 @@ public sealed class EventsController : ControllerBase
                     EventDate =
     portfolioEvent.EventDate,
 
-StartTime =
+                    StartTime =
     portfolioEvent.StartTime,
 
-EndTime =
+                    EndTime =
     portfolioEvent.EndTime,
 
-TimeZoneId =
+                    TimeZoneId =
     portfolioEvent.TimeZoneId,
 
-Stage =
+                    Stage =
     portfolioEvent.Stage,
 
                     Venue =
@@ -314,14 +320,14 @@ Stage =
         request.EndTime,
         request.TimeZoneId);
 
-if (scheduleError is not null)
-{
-    ModelState.AddModelError(
-        nameof(request.StartTime),
-        scheduleError);
+        if (scheduleError is not null)
+        {
+            ModelState.AddModelError(
+                nameof(request.StartTime),
+                scheduleError);
 
-    return ValidationProblem(ModelState);
-}
+            return ValidationProblem(ModelState);
+        }
 
         var vendorExists =
             await _dbContext.Vendors
@@ -487,14 +493,14 @@ if (scheduleError is not null)
         request.EndTime,
         request.TimeZoneId);
 
-if (scheduleError is not null)
-{
-    ModelState.AddModelError(
-        nameof(request.StartTime),
-        scheduleError);
+        if (scheduleError is not null)
+        {
+            ModelState.AddModelError(
+                nameof(request.StartTime),
+                scheduleError);
 
-    return ValidationProblem(ModelState);
-}
+            return ValidationProblem(ModelState);
+        }
 
         var vendorExists =
             await _dbContext.Vendors
@@ -764,7 +770,7 @@ if (scheduleError is not null)
         return Ok(reviewedEvent);
     }
 
-        // =========================================================
+    // =========================================================
     // EXTERNAL REGISTRATION LINK
     //
     // Events Admins / Global Admins may generate or retrieve
@@ -851,7 +857,7 @@ if (scheduleError is not null)
             });
     }
 
-        // =========================================================
+    // =========================================================
     // PUBLIC EVENT REGISTRATION DETAILS
     //
     // Allows an external recipient with a valid registration
@@ -915,7 +921,7 @@ if (scheduleError is not null)
         return Ok(portfolioEvent);
     }
 
-        // =========================================================
+    // =========================================================
     // PUBLIC EVENT REGISTRATION
     //
     // Allows an external recipient with a valid registration
@@ -951,8 +957,8 @@ if (scheduleError is not null)
         var title =
     NormalizeOptionalText(request.Title);
 
-var organization =
-    NormalizeOptionalText(request.Organization);
+        var organization =
+            NormalizeOptionalText(request.Organization);
 
         if (name is null)
         {
@@ -979,14 +985,14 @@ var organization =
     email.Length > 320 ||
     (title?.Length ?? 0) > 100 ||
     (organization?.Length ?? 0) > 200)
-{
-    return BadRequest(
-        new
         {
-            message =
-                "The registration information exceeds the allowed length."
-        });
-}
+            return BadRequest(
+                new
+                {
+                    message =
+                        "The registration information exceeds the allowed length."
+                });
+        }
 
 
         try
@@ -1034,6 +1040,11 @@ var organization =
                         registration.ExternalEmail.ToLower() ==
                             email.ToLower(),
                     cancellationToken);
+
+        var shouldNotify =
+    existingRegistration is null ||
+    existingRegistration.Status !=
+        EventRegistrationStatus.Registered;
 
         var now =
             DateTimeOffset.UtcNow;
@@ -1100,6 +1111,43 @@ var organization =
 
         await _dbContext.SaveChangesAsync(
             cancellationToken);
+
+        if (shouldNotify && _notificationService is not null)
+        {
+            try
+            {
+                await _notificationService.SendRegistrationConfirmationAsync(
+                    email,
+                    name,
+                    portfolioEvent.Description,
+                    portfolioEvent.EventDate,
+                    portfolioEvent.StartTime,
+                    portfolioEvent.EndTime,
+                    portfolioEvent.TimeZoneId,
+                    portfolioEvent.Venue,
+                    cancellationToken);
+
+                await _notificationService.SendAdministratorNotificationAsync(
+                    email,
+                    name,
+                    portfolioEvent.Description,
+                    cancellationToken);
+            }
+            catch (OperationCanceledException)
+            when (cancellationToken.IsCancellationRequested)
+            {
+                throw;
+            }
+            catch (Exception exception)
+            {
+                // Registration has already been saved.
+                // Notification failure must not invalidate it.
+                _logger.LogError(
+            exception,
+            "Event registration notification failed for event {EventId}",
+            portfolioEvent.Id);
+            }
+        }
 
         return Ok(
             MapRegistrationToDto(
@@ -1169,6 +1217,11 @@ var organization =
                             currentUser.Id,
                     cancellationToken);
 
+        var shouldNotify =
+    existingRegistration is null ||
+    existingRegistration.Status !=
+        EventRegistrationStatus.Registered;
+
         var now =
             DateTimeOffset.UtcNow;
 
@@ -1210,6 +1263,44 @@ var organization =
 
         await _dbContext.SaveChangesAsync(
             cancellationToken);
+
+        if (shouldNotify && _notificationService is not null)
+        {
+            var attendeeName =
+                $"{currentUser.FirstName} {currentUser.LastName}".Trim();
+
+            try
+            {
+                await _notificationService.SendRegistrationConfirmationAsync(
+                    currentUser.Email,
+                    attendeeName,
+                    portfolioEvent.Description,
+                    portfolioEvent.EventDate,
+                    portfolioEvent.StartTime,
+                    portfolioEvent.EndTime,
+                    portfolioEvent.TimeZoneId,
+                    portfolioEvent.Venue,
+                    cancellationToken);
+
+                await _notificationService.SendAdministratorNotificationAsync(
+                    currentUser.Email,
+                    attendeeName,
+                    portfolioEvent.Description,
+                    cancellationToken);
+            }
+            catch (OperationCanceledException)
+                when (cancellationToken.IsCancellationRequested)
+            {
+                throw;
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError(
+            exception,
+            "Event registration notification failed for event {EventId}",
+            portfolioEvent.Id);
+            }
+        }
 
         return Ok(
             MapRegistrationToDto(
@@ -1400,47 +1491,47 @@ var organization =
             return NotFound();
         }
 
-            var attendees =
-            await _dbContext.EventRegistrations
-                .AsNoTracking()
-                .Where(registration =>
-                    registration.EventId == id &&
-                    registration.Status ==
-                        EventRegistrationStatus.Registered)
-                .OrderBy(registration =>
-                    registration.User != null
-                        ? registration.User.FirstName
-                        : registration.ExternalName)
-                .ThenBy(registration =>
-                    registration.User != null
-                        ? registration.User.LastName
-                        : registration.ExternalName)
-                .Select(registration =>
-                    new EventAttendeeDto
-                    {
-                        UserId =
-                            registration.UserId,
+        var attendees =
+        await _dbContext.EventRegistrations
+            .AsNoTracking()
+            .Where(registration =>
+                registration.EventId == id &&
+                registration.Status ==
+                    EventRegistrationStatus.Registered)
+            .OrderBy(registration =>
+                registration.User != null
+                    ? registration.User.FirstName
+                    : registration.ExternalName)
+            .ThenBy(registration =>
+                registration.User != null
+                    ? registration.User.LastName
+                    : registration.ExternalName)
+            .Select(registration =>
+                new EventAttendeeDto
+                {
+                    UserId =
+                        registration.UserId,
 
-                        Name =
-                            registration.User != null
-                                ? registration.User.FirstName +
-                                  " " +
-                                  registration.User.LastName
-                                : registration.ExternalName ??
-                                  string.Empty,
+                    Name =
+                        registration.User != null
+                            ? registration.User.FirstName +
+                              " " +
+                              registration.User.LastName
+                            : registration.ExternalName ??
+                              string.Empty,
 
-                        Email =
-                            registration.User != null
-                                ? registration.User.Email
-                                : registration.ExternalEmail ??
-                                  string.Empty,
+                    Email =
+                        registration.User != null
+                            ? registration.User.Email
+                            : registration.ExternalEmail ??
+                              string.Empty,
 
-                        RegisteredAtUtc =
-                            registration.CreatedAtUtc
-                    })
-                .ToListAsync(
-                    cancellationToken);
-                            return Ok(attendees);
+                    RegisteredAtUtc =
+                        registration.CreatedAtUtc
+                })
+            .ToListAsync(
+                cancellationToken);
+        return Ok(attendees);
     }
 
     // =========================================================
@@ -1495,16 +1586,16 @@ var organization =
                         EventDate =
     registration.Event.EventDate,
 
-StartTime =
+                        StartTime =
     registration.Event.StartTime,
 
-EndTime =
+                        EndTime =
     registration.Event.EndTime,
 
-TimeZoneId =
+                        TimeZoneId =
     registration.Event.TimeZoneId,
 
-Stage =
+                        Stage =
     registration.Event.Stage,
 
                         Venue =
@@ -1577,46 +1668,46 @@ Stage =
     TimeOnly? startTime,
     TimeOnly? endTime,
     string? timeZoneId)
-{
-    var hasAnyScheduleField =
-        startTime.HasValue ||
-        endTime.HasValue ||
-        !string.IsNullOrWhiteSpace(timeZoneId);
-
-    if (!hasAnyScheduleField)
     {
+        var hasAnyScheduleField =
+            startTime.HasValue ||
+            endTime.HasValue ||
+            !string.IsNullOrWhiteSpace(timeZoneId);
+
+        if (!hasAnyScheduleField)
+        {
+            return null;
+        }
+
+        if (!eventDate.HasValue ||
+            !startTime.HasValue ||
+            !endTime.HasValue ||
+            string.IsNullOrWhiteSpace(timeZoneId))
+        {
+            return "Event date, start time, end time, and timezone must all be provided when specifying an event schedule.";
+        }
+
+        if (endTime.Value <= startTime.Value)
+        {
+            return "Event end time must be later than the start time.";
+        }
+
+        try
+        {
+            TimeZoneInfo.FindSystemTimeZoneById(
+                timeZoneId.Trim());
+        }
+        catch (TimeZoneNotFoundException)
+        {
+            return "The selected event timezone is not recognized.";
+        }
+        catch (InvalidTimeZoneException)
+        {
+            return "The selected event timezone is invalid.";
+        }
+
         return null;
     }
-
-    if (!eventDate.HasValue ||
-        !startTime.HasValue ||
-        !endTime.HasValue ||
-        string.IsNullOrWhiteSpace(timeZoneId))
-    {
-        return "Event date, start time, end time, and timezone must all be provided when specifying an event schedule.";
-    }
-
-    if (endTime.Value <= startTime.Value)
-    {
-        return "Event end time must be later than the start time.";
-    }
-
-    try
-    {
-        TimeZoneInfo.FindSystemTimeZoneById(
-            timeZoneId.Trim());
-    }
-    catch (TimeZoneNotFoundException)
-    {
-        return "The selected event timezone is not recognized.";
-    }
-    catch (InvalidTimeZoneException)
-    {
-        return "The selected event timezone is invalid.";
-    }
-
-    return null;
-}
 
     private static bool CanManageEvents(
         ApplicationUser user)
@@ -1654,16 +1745,16 @@ Stage =
                     EventDate =
     eventRecord.EventDate,
 
-StartTime =
+                    StartTime =
     eventRecord.StartTime,
 
-EndTime =
+                    EndTime =
     eventRecord.EndTime,
 
-TimeZoneId =
+                    TimeZoneId =
     eventRecord.TimeZoneId,
 
-Stage =
+                    Stage =
     eventRecord.Stage,
 
                     Venue =
@@ -1743,16 +1834,16 @@ Stage =
             EventDate =
     eventRecord.EventDate,
 
-StartTime =
+            StartTime =
     eventRecord.StartTime,
 
-EndTime =
+            EndTime =
     eventRecord.EndTime,
 
-TimeZoneId =
+            TimeZoneId =
     eventRecord.TimeZoneId,
 
-Stage =
+            Stage =
     eventRecord.Stage,
 
             Venue =

@@ -149,6 +149,9 @@ if (builder.Environment.IsDevelopment())
         LoggingEmailSender>();
 
     builder.Services.AddScoped<
+        OnXPortfolio.Application.Events.EventRegistrationNotificationService>();
+
+    builder.Services.AddScoped<
         CertificationReminderDeliveryProcessor>();
 
     builder.Services.AddHostedService<
