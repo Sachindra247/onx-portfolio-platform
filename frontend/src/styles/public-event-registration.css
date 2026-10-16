@@ -120,6 +120,40 @@
     cursor: not-allowed;
 }
 
+.public-event-registration__submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 46px;
+    padding: 12px 22px;
+    border: 1px solid #17202a;
+    border-radius: 8px;
+    background: #17202a;
+    color: #ffffff;
+    font: inherit;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.public-event-registration__submit:hover {
+    background: #263d52;
+    box-shadow: 0 6px 16px rgba(23, 32, 42, 0.16);
+    transform: translateY(-1px);
+}
+
+.public-event-registration__submit:active {
+    transform: translateY(0);
+}
+
+.public-event-registration__submit:focus-visible {
+    outline: 3px solid #729fc5;
+    outline-offset: 3px;
+}
+
 @media (max-width: 640px) {
     .public-event-registration {
         align-items: flex-start;

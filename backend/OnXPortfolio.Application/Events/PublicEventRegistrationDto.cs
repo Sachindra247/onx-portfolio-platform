@@ -9,6 +9,12 @@ public sealed class PublicEventRegistrationDto
 
     public DateOnly? EventDate { get; init; }
 
+    public TimeOnly? StartTime { get; init; }
+
+    public TimeOnly? EndTime { get; init; }
+
+    public string? TimeZoneId { get; init; }
+
     public string? Venue { get; init; }
 
     public string VendorName { get; init; } =

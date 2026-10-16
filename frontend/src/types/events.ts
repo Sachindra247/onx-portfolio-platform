@@ -84,6 +84,9 @@ export interface PublicEventRegistrationDto {
   id: string;
   description: string;
   eventDate: string | null;
+  startTime: string | null;
+  endTime: string | null;
+  timeZoneId: string | null;
   venue: string | null;
   vendorName: string;
 }

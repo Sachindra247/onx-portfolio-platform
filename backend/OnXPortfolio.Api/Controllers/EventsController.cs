@@ -904,6 +904,15 @@ public sealed class EventsController : ControllerBase
                         EventDate =
                             eventRecord.EventDate,
 
+                        StartTime =
+                            eventRecord.StartTime,
+
+                        EndTime =
+                            eventRecord.EndTime,
+
+                        TimeZoneId =
+                            eventRecord.TimeZoneId,
+
                         Venue =
                             eventRecord.Venue,
 
