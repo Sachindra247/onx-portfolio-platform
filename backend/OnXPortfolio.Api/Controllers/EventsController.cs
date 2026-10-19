@@ -1123,39 +1123,52 @@ public sealed class EventsController : ControllerBase
 
         if (shouldNotify && _notificationService is not null)
         {
-            try
-            {
-                await _notificationService.SendRegistrationConfirmationAsync(
-                    email,
-                    name,
-                    portfolioEvent.Description,
-                    portfolioEvent.EventDate,
-                    portfolioEvent.StartTime,
-                    portfolioEvent.EndTime,
-                    portfolioEvent.TimeZoneId,
-                    portfolioEvent.Venue,
-                    cancellationToken);
+           try
+{
+    await _notificationService.SendRegistrationConfirmationAsync(
+        email,
+        name,
+        portfolioEvent.Description,
+        portfolioEvent.EventDate,
+        portfolioEvent.StartTime,
+        portfolioEvent.EndTime,
+        portfolioEvent.TimeZoneId,
+        portfolioEvent.Venue,
+        cancellationToken);
+}
+catch (OperationCanceledException)
+    when (cancellationToken.IsCancellationRequested)
+{
+    throw;
+}
+catch (Exception exception)
+{
+    _logger.LogError(
+        exception,
+        "Attendee confirmation failed for event {EventId}",
+        portfolioEvent.Id);
+}
 
-                await _notificationService.SendAdministratorNotificationAsync(
-                    email,
-                    name,
-                    portfolioEvent.Description,
-                    cancellationToken);
-            }
-            catch (OperationCanceledException)
-            when (cancellationToken.IsCancellationRequested)
-            {
-                throw;
-            }
-            catch (Exception exception)
-            {
-                // Registration has already been saved.
-                // Notification failure must not invalidate it.
-                _logger.LogError(
-            exception,
-            "Event registration notification failed for event {EventId}",
-            portfolioEvent.Id);
-            }
+try
+{
+    await _notificationService.SendAdministratorNotificationAsync(
+        email,
+        name,
+        portfolioEvent.Description,
+        cancellationToken);
+}
+catch (OperationCanceledException)
+    when (cancellationToken.IsCancellationRequested)
+{
+    throw;
+}
+catch (Exception exception)
+{
+    _logger.LogError(
+        exception,
+        "Administrator notification failed for event {EventId}",
+        portfolioEvent.Id);
+}
         }
 
         return Ok(
@@ -1278,37 +1291,52 @@ public sealed class EventsController : ControllerBase
             var attendeeName =
                 $"{currentUser.FirstName} {currentUser.LastName}".Trim();
 
-            try
-            {
-                await _notificationService.SendRegistrationConfirmationAsync(
-                    currentUser.Email,
-                    attendeeName,
-                    portfolioEvent.Description,
-                    portfolioEvent.EventDate,
-                    portfolioEvent.StartTime,
-                    portfolioEvent.EndTime,
-                    portfolioEvent.TimeZoneId,
-                    portfolioEvent.Venue,
-                    cancellationToken);
+           try
+{
+    await _notificationService.SendRegistrationConfirmationAsync(
+        currentUser.Email,
+        attendeeName,
+        portfolioEvent.Description,
+        portfolioEvent.EventDate,
+        portfolioEvent.StartTime,
+        portfolioEvent.EndTime,
+        portfolioEvent.TimeZoneId,
+        portfolioEvent.Venue,
+        cancellationToken);
+}
+catch (OperationCanceledException)
+    when (cancellationToken.IsCancellationRequested)
+{
+    throw;
+}
+catch (Exception exception)
+{
+    _logger.LogError(
+        exception,
+        "Attendee confirmation failed for event {EventId}",
+        portfolioEvent.Id);
+}
 
-                await _notificationService.SendAdministratorNotificationAsync(
-                    currentUser.Email,
-                    attendeeName,
-                    portfolioEvent.Description,
-                    cancellationToken);
-            }
-            catch (OperationCanceledException)
-                when (cancellationToken.IsCancellationRequested)
-            {
-                throw;
-            }
-            catch (Exception exception)
-            {
-                _logger.LogError(
-            exception,
-            "Event registration notification failed for event {EventId}",
-            portfolioEvent.Id);
-            }
+try
+{
+    await _notificationService.SendAdministratorNotificationAsync(
+        currentUser.Email,
+        attendeeName,
+        portfolioEvent.Description,
+        cancellationToken);
+}
+catch (OperationCanceledException)
+    when (cancellationToken.IsCancellationRequested)
+{
+    throw;
+}
+catch (Exception exception)
+{
+    _logger.LogError(
+        exception,
+        "Administrator notification failed for event {EventId}",
+        portfolioEvent.Id);
+}
         }
 
         return Ok(
