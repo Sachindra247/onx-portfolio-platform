@@ -60,6 +60,8 @@ import type {
 
 import { getCertificationSummary } from "../utils/certificationAnalytics";
 
+import CertificationDetailsModal from "../components/certifications/CertificationDetailsModal";
+
 export default function CertificationsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -140,6 +142,9 @@ export default function CertificationsPage() {
   const [modalIsOpen, setModalIsOpen] = useState(false);
 
   const [selectedCertification, setSelectedCertification] =
+    useState<CertificationDto | null>(null);
+
+  const [viewingCertification, setViewingCertification] =
     useState<CertificationDto | null>(null);
 
   const [certificationPendingDelete, setCertificationPendingDelete] =
@@ -1074,6 +1079,7 @@ export default function CertificationsPage() {
                     sortDirection={sortDirection}
                     onSort={handleSort}
                     canManage={canManageCertifications}
+                    onView={setViewingCertification}
                     onEdit={openEditCertification}
                     onDelete={requestDeleteCertification}
                   />
@@ -1142,6 +1148,13 @@ export default function CertificationsPage() {
               </section>
             )}
           </>
+        )}
+
+        {viewingCertification && (
+          <CertificationDetailsModal
+            certification={viewingCertification}
+            onClose={() => setViewingCertification(null)}
+          />
         )}
 
         {/* =====================================================

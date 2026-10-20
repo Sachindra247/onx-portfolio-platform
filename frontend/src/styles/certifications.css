@@ -4003,3 +4003,127 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* Certification details */
+
+.certification-table__details-link {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    padding: 0;
+    color: #2563eb;
+    font: inherit;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+}
+
+.certification-table__details-link:hover {
+    text-decoration: underline;
+}
+
+.certification-table__details-link:focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: 3px;
+    border-radius: 2px;
+}
+
+.certification-details-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(15, 23, 42, 0.6);
+}
+
+.certification-details-modal {
+    width: 100%;
+    max-width: 720px;
+    max-height: 90vh;
+    overflow-y: auto;
+    background: #fff;
+    color: #0f172a;
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+.certification-details-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.certification-details-header h2 {
+    margin: 0 0 6px;
+    font-size: 22px;
+}
+
+.certification-details-header p {
+    margin: 0;
+    color: #64748b;
+}
+
+.certification-details-header button {
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 6px;
+}
+
+.certification-details-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.certification-details-field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+}
+
+.certification-details-field span {
+    color: #64748b;
+    font-size: 12px;
+}
+
+.certification-details-field strong {
+    font-size: 14px;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+}
+
+.certification-details-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 28px;
+}
+
+.certification-details-footer button {
+    padding: 10px 20px;
+    border: 0;
+    border-radius: 8px;
+    background: #2563eb;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+@media (max-width: 600px) {
+    .certification-details-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .certification-details-modal {
+        padding: 18px;
+    }
+}

@@ -14,6 +14,7 @@ interface CertificationTableProps {
   sortDirection: SortDirection;
   onSort: (field: CertificationSortField) => void;
   canManage: boolean;
+  onView: (certification: CertificationDto) => void;
   onEdit: (certification: CertificationDto) => void;
   onDelete: (certification: CertificationDto) => void;
 }
@@ -32,6 +33,7 @@ export default function CertificationTable({
   sortDirection,
   onSort,
   canManage,
+  onView,
   onEdit,
 
   onDelete,
@@ -136,7 +138,15 @@ export default function CertificationTable({
 
               <td>
                 <div className="certification-table__certification">
-                  <strong>{certification.certificationName}</strong>
+                  <button
+                    type="button"
+                    className="certification-table__details-link"
+                    onClick={() => onView(certification)}
+                    aria-label={`View details for ${certification.certificationName}`}
+                    title="View certification details"
+                  >
+                    {certification.certificationName}
+                  </button>
 
                   {certification.rebateImpact && (
                     <span>{certification.rebateImpact}</span>
