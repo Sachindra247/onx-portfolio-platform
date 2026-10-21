@@ -5,14 +5,14 @@ namespace OnXPortfolio.Infrastructure.Email;
 
 public sealed class RestrictedEmailSender : IEmailSender
 {
-    private readonly MicrosoftGraphEmailSender _graphSender;
+    private readonly IEmailSender _innerSender;
     private readonly HashSet<string> _allowedRecipients;
 
     public RestrictedEmailSender(
-        MicrosoftGraphEmailSender graphSender,
+        IEmailSender innerSender,
         IEnumerable<string> allowedRecipients)
     {
-        _graphSender = graphSender;
+        _innerSender = innerSender;
 
         _allowedRecipients = new HashSet<string>(
             allowedRecipients
@@ -34,7 +34,7 @@ public sealed class RestrictedEmailSender : IEmailSender
             return Task.CompletedTask;
         }
 
-        return _graphSender.SendAsync(
+        return _innerSender.SendAsync(
             recipientEmail.Trim(),
             subject,
             body,
