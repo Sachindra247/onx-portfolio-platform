@@ -142,14 +142,51 @@ builder.Services.Configure<CertificationReminderOptions>(
 
 builder.Services.AddScoped<CertificationReminderProcessor>();
 
+builder.Services.Configure<MicrosoftGraphEmailOptions>(
+    builder.Configuration.GetSection(
+        MicrosoftGraphEmailOptions.SectionName));
+
 if (builder.Environment.IsDevelopment())
 {
     builder.Services.AddScoped<
-        IEmailSender,
-        LoggingEmailSender>();
+    OnXPortfolio.Application.Events.EventRegistrationNotificationService>(
+    serviceProvider =>
+        new OnXPortfolio.Application.Events.EventRegistrationNotificationService(
+            serviceProvider.GetRequiredService<IEmailSender>(),
+            builder.Configuration[
+                "MicrosoftGraphEmail:AdministratorEmail"]));
+}
+else if (
+    builder.Configuration.GetValue<bool>(
+        "MicrosoftGraphEmail:Enabled"))
+{
+    builder.Services.AddHttpClient<MicrosoftGraphEmailSender>();
 
+builder.Services.AddScoped<IEmailSender>(serviceProvider =>
+{
+    var graphSender = serviceProvider
+        .GetRequiredService<MicrosoftGraphEmailSender>();
+
+    var allowedRecipients = builder.Configuration
+        .GetSection("MicrosoftGraphEmail:AllowedRecipients")
+        .Get<string[]>() ?? Array.Empty<string>();
+
+    return new RestrictedEmailSender(
+        graphSender,
+        allowedRecipients);
+});
     builder.Services.AddScoped<
-        OnXPortfolio.Application.Events.EventRegistrationNotificationService>();
+    OnXPortfolio.Application.Events.EventRegistrationNotificationService>(
+    serviceProvider =>
+        new OnXPortfolio.Application.Events.EventRegistrationNotificationService(
+            serviceProvider.GetRequiredService<IEmailSender>(),
+            builder.Configuration[
+                "MicrosoftGraphEmail:AdministratorEmail"]));
+}
+
+if (builder.Environment.IsDevelopment())
+{
+
 
     builder.Services.AddScoped<
         CertificationReminderDeliveryProcessor>();

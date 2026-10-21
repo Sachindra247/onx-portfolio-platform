@@ -1,16 +1,20 @@
 using OnXPortfolio.Application.Email;
 
+
 namespace OnXPortfolio.Application.Events;
 
 public sealed class EventRegistrationNotificationService
 {
     private readonly IEmailSender _emailSender;
+    private readonly string? _administratorEmail;
 
-    public EventRegistrationNotificationService(
-        IEmailSender emailSender)
-    {
-        _emailSender = emailSender;
-    }
+public EventRegistrationNotificationService(
+    IEmailSender emailSender,
+    string? administratorEmail = null)
+{
+    _emailSender = emailSender;
+    _administratorEmail = administratorEmail;
+}
 
     public async Task SendRegistrationConfirmationAsync(
     string attendeeEmail,
@@ -72,7 +76,10 @@ public sealed class EventRegistrationNotificationService
     string eventName,
     CancellationToken cancellationToken = default)
 {
-    const string administratorEmail = "sabrina.jubran@onx.com";
+    if (string.IsNullOrWhiteSpace(_administratorEmail))
+{
+    return;
+}
 
     var subject = $"New Event Registration: {eventName}";
 
@@ -90,7 +97,7 @@ public sealed class EventRegistrationNotificationService
         """;
 
     await _emailSender.SendAsync(
-        administratorEmail,
+        _administratorEmail,
         subject,
         body,
         cancellationToken);
