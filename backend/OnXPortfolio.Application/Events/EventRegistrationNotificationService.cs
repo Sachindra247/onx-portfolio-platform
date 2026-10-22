@@ -84,7 +84,7 @@ public EventRegistrationNotificationService(
     var subject = $"New Event Registration: {eventName}";
 
     var body = $"""
-        Hello Sabrina,
+        Hello,
 
         A new attendee has registered for an OnX event.
 
