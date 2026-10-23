@@ -23,12 +23,22 @@ export async function getEvents(signal?: AbortSignal): Promise<EventDto[]> {
   return response.data;
 }
 
+const excludedEventVendorNames = new Set([
+  "hpe networking",
+  "dell technologies",
+  "ibm hardware",
+  "redhat",
+  "vmware (broadcom)",
+]);
+
 export async function getVendors(signal?: AbortSignal): Promise<VendorDto[]> {
   const response = await httpClient.get<VendorDto[]>("/api/vendors", {
     signal,
   });
 
-  return response.data;
+  return response.data.filter(
+    (vendor) => !excludedEventVendorNames.has(vendor.name.trim().toLowerCase()),
+  );
 }
 
 export async function createEvent(request: EventRequest): Promise<EventDto> {

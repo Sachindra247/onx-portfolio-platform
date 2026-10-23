@@ -220,7 +220,25 @@ export default function EventFormModal({
 
     if (name.length < 2) {
       setVendorCreationError("Enter a vendor name.");
+      return;
+    }
 
+    const vendorName = name.toLowerCase().replace(/\s+/g, " ");
+
+    const preferredVendorNames: Record<string, string> = {
+      "hpe networking": "HPE",
+      "dell technologies": "Dell",
+      "ibm hardware": "IBM",
+      redhat: "Red Hat",
+      "vmware (broadcom)": "VMware or Broadcom",
+    };
+
+    if (
+      Object.prototype.hasOwnProperty.call(preferredVendorNames, vendorName)
+    ) {
+      setVendorCreationError(
+        `This vendor already has an approved name. Please select ${preferredVendorNames[vendorName]} from the vendor list.`,
+      );
       return;
     }
 
@@ -323,6 +341,13 @@ export default function EventFormModal({
                 }
               >
                 <option value="">Select a vendor</option>
+
+                {event &&
+                  !vendors.some((vendor) => vendor.id === event.vendorId) && (
+                    <option value={event.vendorId}>
+                      {event.vendorName} (existing vendor)
+                    </option>
+                  )}
 
                 {vendors.map((vendor) => (
                   <option value={vendor.id} key={vendor.id}>
