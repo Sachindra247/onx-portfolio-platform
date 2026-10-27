@@ -684,6 +684,36 @@
     font-size: 11px;
 }
 
+/* Clickable Events overview statistics */
+.event-stat-card--clickable {
+    width: 100%;
+    text-align: left;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.event-stat-card--clickable:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12);
+}
+
+.event-stat-card--clickable:focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .event-stat-card--clickable {
+        transition: none;
+    }
+
+    .event-stat-card--clickable:hover {
+        transform: none;
+    }
+}
+
 .event-table-card {
     position: relative;
     border: 1px solid var(--color-border);
@@ -1011,6 +1041,19 @@
 .event-table-empty p {
     margin: 0;
     font-size: 12px;
+}
+
+/* Interactive Events table rows */
+.event-table__clickable-row {
+    cursor: pointer;
+}
+
+.event-table__clickable-row:hover {
+    background-color: rgba(59, 130, 246, 0.06);
+}
+
+.event-table__clickable-row:focus-within {
+    background-color: rgba(59, 130, 246, 0.04);
 }
 
 .page-state {

@@ -1,13 +1,18 @@
 import { CalendarCheck2, CircleDollarSign, Layers3, Timer } from "lucide-react";
-import type { EventDto } from "../../types/events";
+import type { EventDto, EventsSection } from "../../types/events";
 import { formatBudget } from "../../utils/eventFormatting";
 
 interface EventStatsProps {
   events: EventDto[];
   canManage: boolean;
+  onNavigate: (section: EventsSection) => void;
 }
 
-export default function EventStats({ events, canManage }: EventStatsProps) {
+export default function EventStats({
+  events,
+  canManage,
+  onNavigate,
+}: EventStatsProps) {
   const totalBudget = events.reduce(
     (total, event) => total + event.budgetCad,
     0,
@@ -35,18 +40,21 @@ export default function EventStats({ events, canManage }: EventStatsProps) {
       value: events.length.toString(),
       detail: "Across all vendors",
       icon: Layers3,
+      section: "events" as const,
     },
     {
       label: "Active portfolio",
       value: activeEvents.toString(),
       detail: "Not yet completed",
       icon: Timer,
+      section: "upcoming" as const,
     },
     {
       label: "Upcoming",
       value: upcomingEvents.toString(),
       detail: "Scheduled future events",
       icon: CalendarCheck2,
+      section: "upcoming" as const,
     },
     canManage
       ? {
@@ -54,12 +62,14 @@ export default function EventStats({ events, canManage }: EventStatsProps) {
           value: formatBudget(totalBudget),
           detail: `${completedEvents} completed`,
           icon: CircleDollarSign,
+          section: "events" as const,
         }
       : {
           label: "Completed",
           value: completedEvents.toString(),
           detail: "Completed portfolio events",
           icon: CalendarCheck2,
+          section: "completed" as const,
         },
   ];
 
@@ -69,7 +79,13 @@ export default function EventStats({ events, canManage }: EventStatsProps) {
         const Icon = stat.icon;
 
         return (
-          <article className="event-stat-card" key={stat.label}>
+          <button
+            type="button"
+            className="event-stat-card event-stat-card--clickable"
+            key={stat.label}
+            onClick={() => onNavigate(stat.section)}
+            aria-label={`View ${stat.label.toLowerCase()} events`}
+          >
             <div className="event-stat-card__top">
               <span className="event-stat-card__label">{stat.label}</span>
 
@@ -81,7 +97,7 @@ export default function EventStats({ events, canManage }: EventStatsProps) {
             <strong className="event-stat-card__value">{stat.value}</strong>
 
             <span className="event-stat-card__detail">{stat.detail}</span>
-          </article>
+          </button>
         );
       })}
     </div>

@@ -201,7 +201,21 @@ export default function EventTable({
             const isReviewing = reviewingEventId === portfolioEvent.id;
 
             return (
-              <tr key={portfolioEvent.id}>
+              <tr
+                key={portfolioEvent.id}
+                className="event-table__clickable-row"
+                onClick={(event) => {
+                  if (
+                    (event.target as HTMLElement).closest(
+                      "button, a, input, select, textarea",
+                    )
+                  ) {
+                    return;
+                  }
+
+                  onView(portfolioEvent);
+                }}
+              >
                 <td>
                   <span className="vendor-name">
                     {portfolioEvent.vendorName}

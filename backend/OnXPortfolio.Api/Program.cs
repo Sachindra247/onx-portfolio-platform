@@ -148,6 +148,9 @@ builder.Services.Configure<MicrosoftGraphEmailOptions>(
 
 if (builder.Environment.IsDevelopment())
 {
+    // Local development: log emails without sending them.
+    builder.Services.AddScoped<IEmailSender, LoggingEmailSender>();
+
     builder.Services.AddScoped<
     OnXPortfolio.Application.Events.EventRegistrationNotificationService>(
     serviceProvider =>

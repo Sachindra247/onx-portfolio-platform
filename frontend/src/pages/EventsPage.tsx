@@ -688,7 +688,11 @@ export default function EventsPage() {
                     onEventClick={openEventDetails}
                   />
 
-                  <EventStats events={events} canManage={canManageEvents} />
+                  <EventStats
+                    events={events}
+                    canManage={canManageEvents}
+                    onNavigate={setActiveSection}
+                  />
 
                   <EventPortfolioCharts
                     events={events}
