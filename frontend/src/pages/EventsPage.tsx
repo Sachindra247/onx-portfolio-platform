@@ -697,6 +697,22 @@ export default function EventsPage() {
                   <EventPortfolioCharts
                     events={events}
                     canManage={canManageEvents}
+                    onStageClick={(selectedStage) => {
+                      setSearch("");
+                      setStage(selectedStage);
+                      setVendorId("");
+                      setViewMode("table");
+                      setPage(1);
+                      setActiveSection("events");
+                    }}
+                    onVendorClick={(selectedVendorId) => {
+                      setSearch("");
+                      setStage("");
+                      setVendorId(selectedVendorId);
+                      setViewMode("table");
+                      setPage(1);
+                      setActiveSection("events");
+                    }}
                   />
 
                   <EventHighlights

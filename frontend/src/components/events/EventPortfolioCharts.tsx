@@ -8,7 +8,7 @@ import {
   Tooltip,
 } from "chart.js";
 import { Bar, Doughnut } from "react-chartjs-2";
-import type { EventDto } from "../../types/events";
+import type { EventDto, EventStage } from "../../types/events";
 import { formatEventStage } from "../../utils/eventFormatting";
 import { getStageSummary, getVendorSummary } from "../../utils/eventAnalytics";
 
@@ -24,11 +24,15 @@ ChartJS.register(
 interface EventPortfolioChartsProps {
   events: EventDto[];
   canManage: boolean;
+  onStageClick: (stage: EventStage) => void;
+  onVendorClick: (vendorId: string) => void;
 }
 
 export default function EventPortfolioCharts({
   events,
   canManage,
+  onStageClick,
+  onVendorClick,
 }: EventPortfolioChartsProps) {
   const stageSummary = getStageSummary(events);
   const vendorSummary = getVendorSummary(events).slice(0, 6);
@@ -80,6 +84,27 @@ export default function EventPortfolioCharts({
               responsive: true,
               maintainAspectRatio: false,
               cutout: "68%",
+              onClick: (_event, elements) => {
+                const selectedIndex = elements[0]?.index;
+
+                if (selectedIndex === undefined) {
+                  return;
+                }
+
+                const selectedStage = stageSummary[selectedIndex];
+
+                if (selectedStage && selectedStage.count > 0) {
+                  onStageClick(selectedStage.stage);
+                }
+              },
+              onHover: (event, elements) => {
+                const canvas = event.native?.target;
+
+                if (canvas instanceof HTMLCanvasElement) {
+                  canvas.style.cursor =
+                    elements.length > 0 ? "pointer" : "default";
+                }
+              },
               plugins: {
                 legend: {
                   position: "bottom",
@@ -92,6 +117,27 @@ export default function EventPortfolioCharts({
             }}
           />
         </div>
+        {stageSummary.some((item) => item.count > 0) && (
+          <nav
+            className="event-chart-navigation"
+            aria-label="Navigate events by stage"
+          >
+            {stageSummary
+              .filter((item) => item.count > 0)
+              .map((item) => (
+                <button
+                  key={item.stage}
+                  type="button"
+                  className="event-chart-navigation__button"
+                  onClick={() => onStageClick(item.stage)}
+                  aria-label={`View ${item.count} ${formatEventStage(item.stage)} events`}
+                >
+                  {formatEventStage(item.stage)}
+                  <span>{item.count}</span>
+                </button>
+              ))}
+          </nav>
+        )}
       </article>
       {canManage && (
         <article className="event-chart-card">
@@ -109,6 +155,27 @@ export default function EventPortfolioCharts({
                 responsive: true,
                 maintainAspectRatio: false,
                 indexAxis: "y",
+                onClick: (_event, elements) => {
+                  const selectedIndex = elements[0]?.index;
+
+                  if (selectedIndex === undefined) {
+                    return;
+                  }
+
+                  const selectedVendor = vendorSummary[selectedIndex];
+
+                  if (selectedVendor) {
+                    onVendorClick(selectedVendor.vendorId);
+                  }
+                },
+                onHover: (event, elements) => {
+                  const canvas = event.native?.target;
+
+                  if (canvas instanceof HTMLCanvasElement) {
+                    canvas.style.cursor =
+                      elements.length > 0 ? "pointer" : "default";
+                  }
+                },
                 plugins: {
                   legend: {
                     display: false,
@@ -149,6 +216,24 @@ export default function EventPortfolioCharts({
               }}
             />
           </div>
+          {vendorSummary.length > 0 && (
+            <nav
+              className="event-chart-navigation"
+              aria-label="Navigate events by vendor"
+            >
+              {vendorSummary.map((vendor) => (
+                <button
+                  key={vendor.vendorId}
+                  type="button"
+                  className="event-chart-navigation__button"
+                  onClick={() => onVendorClick(vendor.vendorId)}
+                  aria-label={`View events for ${vendor.vendorName}`}
+                >
+                  {vendor.vendorName}
+                </button>
+              ))}
+            </nav>
+          )}
         </article>
       )}
     </section>
