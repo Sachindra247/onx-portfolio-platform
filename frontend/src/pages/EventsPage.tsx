@@ -699,7 +699,11 @@ export default function EventsPage() {
                     canManage={canManageEvents}
                   />
 
-                  <EventHighlights events={events} onView={openEventDetails} />
+                  <EventHighlights
+                    events={events}
+                    onView={openEventDetails}
+                    onNavigate={setActiveSection}
+                  />
                 </div>
               )}
 
@@ -768,6 +772,14 @@ export default function EventsPage() {
                     canManage={canManageEvents}
                     onView={openEventDetails}
                     onEdit={openEditModal}
+                    onVendorClick={(selectedVendorId) => {
+                      setSearch("");
+                      setStage("");
+                      setVendorId(selectedVendorId);
+                      setViewMode("table");
+                      setPage(1);
+                      setActiveSection("events");
+                    }}
                   />
                 </div>
               )}

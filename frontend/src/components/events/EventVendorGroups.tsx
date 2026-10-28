@@ -19,6 +19,8 @@ interface EventVendorGroupsProps {
   onView: (event: EventDto) => void;
 
   onEdit: (event: EventDto) => void;
+
+  onVendorClick?: (vendorId: string) => void;
 }
 
 export default function EventVendorGroups({
@@ -26,6 +28,7 @@ export default function EventVendorGroups({
   canManage,
   onView,
   onEdit,
+  onVendorClick,
 }: EventVendorGroupsProps) {
   const vendorGroups = groupEventsByVendor(events);
 
@@ -56,7 +59,20 @@ export default function EventVendorGroups({
                 </span>
 
                 <div>
-                  <h3>{vendorName}</h3>
+                  {onVendorClick && vendorEvents[0]?.vendorId ? (
+                    <h3>
+                      <button
+                        type="button"
+                        className="vendor-group__name-button"
+                        onClick={() => onVendorClick(vendorEvents[0].vendorId)}
+                        aria-label={`View all events for ${vendorName}`}
+                      >
+                        {vendorName}
+                      </button>
+                    </h3>
+                  ) : (
+                    <h3>{vendorName}</h3>
+                  )}
 
                   <p>
                     {vendorEvents.length} event

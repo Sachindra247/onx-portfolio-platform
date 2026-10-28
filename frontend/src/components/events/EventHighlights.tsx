@@ -1,7 +1,7 @@
 import { CalendarClock, CheckCircle2 } from "lucide-react";
 import type { ReactNode } from "react";
 
-import type { EventDto } from "../../types/events";
+import type { EventDto, EventsSection } from "../../types/events";
 
 import { formatBudget, formatEventDate } from "../../utils/eventFormatting";
 
@@ -12,13 +12,14 @@ import {
 
 interface EventHighlightsProps {
   events: EventDto[];
-
   onView: (event: EventDto) => void;
+  onNavigate: (section: EventsSection) => void;
 }
 
 export default function EventHighlights({
   events,
   onView,
+  onNavigate,
 }: EventHighlightsProps) {
   const upcomingEvents = getUpcomingEvents(events);
 
@@ -33,6 +34,8 @@ export default function EventHighlights({
         events={upcomingEvents}
         emptyMessage="No upcoming events are currently scheduled."
         onView={onView}
+        section="upcoming"
+        onNavigate={onNavigate}
       />
 
       <HighlightCard
@@ -42,6 +45,8 @@ export default function EventHighlights({
         events={completedEvents}
         emptyMessage="No completed events are available."
         onView={onView}
+        section="completed"
+        onNavigate={onNavigate}
       />
     </section>
   );
@@ -55,6 +60,8 @@ interface HighlightCardProps {
   emptyMessage: string;
 
   onView: (event: EventDto) => void;
+  section: EventsSection;
+  onNavigate: (section: EventsSection) => void;
 }
 
 function HighlightCard({
@@ -64,6 +71,8 @@ function HighlightCard({
   events,
   emptyMessage,
   onView,
+  section,
+  onNavigate,
 }: HighlightCardProps) {
   return (
     <article className="event-highlight-card">
@@ -71,7 +80,16 @@ function HighlightCard({
         <span className="event-highlight-card__icon">{icon}</span>
 
         <div>
-          <h2>{title}</h2>
+          <h2>
+            <button
+              type="button"
+              className="event-highlight-card__title-button"
+              onClick={() => onNavigate(section)}
+              aria-label={`View all ${title.toLowerCase()}`}
+            >
+              {title}
+            </button>
+          </h2>
 
           <p>{subtitle}</p>
         </div>
