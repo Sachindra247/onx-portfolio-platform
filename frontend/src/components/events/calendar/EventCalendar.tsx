@@ -86,6 +86,10 @@ export default function EventCalendar({
           today={today}
           eventsByDate={eventsByDate}
           onEventClick={onEventClick}
+          onSelectDay={(date) => {
+            setCurrentDate(date);
+            setView("day");
+          }}
         />
       )}
 
@@ -123,6 +127,7 @@ interface CalendarViewProps {
 interface MonthViewProps extends CalendarViewProps {
   currentDate: Date;
   today: Date;
+  onSelectDay: (date: Date) => void;
 }
 
 function MonthView({
@@ -130,6 +135,7 @@ function MonthView({
   today,
   eventsByDate,
   onEventClick,
+  onSelectDay,
 }: MonthViewProps) {
   const calendarDays = useMemo(
     () => buildMonthDays(currentDate, today),
@@ -148,6 +154,7 @@ function MonthView({
               calendarDay={calendarDay}
               events={eventsByDate.get(calendarDay.dateKey) ?? []}
               onEventClick={onEventClick}
+              onSelectDay={onSelectDay}
             />
           ))}
         </div>
@@ -286,12 +293,14 @@ interface CalendarDayCellProps {
   calendarDay: CalendarDay;
   events: EventDto[];
   onEventClick: (portfolioEvent: EventDto) => void;
+  onSelectDay: (date: Date) => void;
 }
 
 function CalendarDayCell({
   calendarDay,
   events,
   onEventClick,
+  onSelectDay,
 }: CalendarDayCellProps) {
   const visibleEvents = events.slice(0, 3);
   const hiddenEventCount = events.length - visibleEvents.length;
@@ -320,9 +329,14 @@ function CalendarDayCell({
         ))}
 
         {hiddenEventCount > 0 && (
-          <span className="event-calendar__more-events">
+          <button
+            type="button"
+            className="event-calendar__more-events event-calendar__more-events--button"
+            onClick={() => onSelectDay(calendarDay.date)}
+            aria-label={`View all ${events.length} events on ${fullDateFormatter.format(calendarDay.date)}`}
+          >
             +{hiddenEventCount} more
-          </span>
+          </button>
         )}
       </div>
     </div>
