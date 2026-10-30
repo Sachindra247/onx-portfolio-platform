@@ -33,6 +33,10 @@ import EventStats from "../components/events/EventStats";
 import EventTable from "../components/events/EventTable";
 import EventVendorGroups from "../components/events/EventVendorGroups";
 import EventCalendar from "../components/events/calendar/EventCalendar";
+import {
+  formatLocalDateKey,
+  normaliseApiDate,
+} from "../components/events/calendar/calendarUtils";
 import EventsDashboardNav from "../components/events/dashboard/EventsDashboardNav";
 
 import ConfirmDialog from "../components/feedback/ConfirmDialog";
@@ -205,15 +209,42 @@ export default function EventsPage() {
     return sortEvents(filteredEvents, sortField, sortDirection);
   }, [events, search, sortDirection, sortField, stage, vendorId]);
 
-  const upcomingEvents = useMemo(
-    () =>
-      sortEvents(
-        events.filter((portfolioEvent) => portfolioEvent.stage !== "Completed"),
-        sortField,
-        sortDirection,
-      ),
-    [events, sortDirection, sortField],
-  );
+  const { upcomingEvents, pastUnfinishedEvents, unscheduledEvents } =
+    useMemo(() => {
+      const todayKey = formatLocalDateKey(new Date());
+
+      const upcoming: EventDto[] = [];
+      const pastUnfinished: EventDto[] = [];
+      const unscheduled: EventDto[] = [];
+
+      for (const portfolioEvent of events) {
+        if (portfolioEvent.stage === "Completed") {
+          continue;
+        }
+
+        const dateKey = portfolioEvent.eventDate
+          ? normaliseApiDate(portfolioEvent.eventDate)
+          : null;
+
+        if (!dateKey) {
+          unscheduled.push(portfolioEvent);
+        } else if (dateKey < todayKey) {
+          pastUnfinished.push(portfolioEvent);
+        } else {
+          upcoming.push(portfolioEvent);
+        }
+      }
+
+      return {
+        upcomingEvents: sortEvents(upcoming, sortField, sortDirection),
+        pastUnfinishedEvents: sortEvents(
+          pastUnfinished,
+          sortField,
+          sortDirection,
+        ),
+        unscheduledEvents: sortEvents(unscheduled, sortField, sortDirection),
+      };
+    }, [events, sortField, sortDirection]);
 
   const completedEvents = useMemo(
     () =>
@@ -804,21 +835,76 @@ export default function EventsPage() {
                 <div className="events-dashboard__section">
                   <SectionHeading title="Upcoming & Active Events" />
 
-                  <section className="event-table-card">
-                    <EventTable
-                      events={upcomingEvents}
-                      sortField={sortField}
-                      sortDirection={sortDirection}
-                      onSort={handleSort}
-                      canManage={canManageEvents}
-                      canReview={canReviewEvents}
-                      onView={openEventDetails}
-                      onApprove={handleApproveEvent}
-                      onReject={handleRejectEvent}
-                      onEdit={openEditModal}
-                      onDelete={requestDelete}
-                    />
-                  </section>
+                  <h3>Upcoming & Today's Events ({upcomingEvents.length})</h3>
+                  {upcomingEvents.length === 0 ? (
+                    <p className="event-group__empty" role="status">
+                      No upcoming events scheduled.
+                    </p>
+                  ) : (
+                    <section className="event-table-card">
+                      <EventTable
+                        events={upcomingEvents}
+                        sortField={sortField}
+                        sortDirection={sortDirection}
+                        onSort={handleSort}
+                        canManage={canManageEvents}
+                        canReview={canReviewEvents}
+                        onView={openEventDetails}
+                        onApprove={handleApproveEvent}
+                        onReject={handleRejectEvent}
+                        onEdit={openEditModal}
+                        onDelete={requestDelete}
+                      />
+                    </section>
+                  )}
+
+                  <h3>
+                    Past & Unfinished Events ({pastUnfinishedEvents.length})
+                  </h3>
+                  {pastUnfinishedEvents.length === 0 ? (
+                    <p className="event-group__empty" role="status">
+                      No past unfinished events.
+                    </p>
+                  ) : (
+                    <section className="event-table-card">
+                      <EventTable
+                        events={pastUnfinishedEvents}
+                        sortField={sortField}
+                        sortDirection={sortDirection}
+                        onSort={handleSort}
+                        canManage={canManageEvents}
+                        canReview={canReviewEvents}
+                        onView={openEventDetails}
+                        onApprove={handleApproveEvent}
+                        onReject={handleRejectEvent}
+                        onEdit={openEditModal}
+                        onDelete={requestDelete}
+                      />
+                    </section>
+                  )}
+
+                  <h3>Unscheduled Events ({unscheduledEvents.length})</h3>
+                  {unscheduledEvents.length === 0 ? (
+                    <p className="event-group__empty" role="status">
+                      No unscheduled events.
+                    </p>
+                  ) : (
+                    <section className="event-table-card">
+                      <EventTable
+                        events={unscheduledEvents}
+                        sortField={sortField}
+                        sortDirection={sortDirection}
+                        onSort={handleSort}
+                        canManage={canManageEvents}
+                        canReview={canReviewEvents}
+                        onView={openEventDetails}
+                        onApprove={handleApproveEvent}
+                        onReject={handleRejectEvent}
+                        onEdit={openEditModal}
+                        onDelete={requestDelete}
+                      />
+                    </section>
+                  )}
                 </div>
               )}
 
