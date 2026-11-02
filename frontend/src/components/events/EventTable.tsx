@@ -3,6 +3,7 @@ import {
   ArrowUp,
   ArrowUpDown,
   Check,
+  LoaderCircle,
   MoreHorizontal,
   Pencil,
   Trash2,
@@ -281,11 +282,13 @@ export default function EventTable({
                         type="button"
                         aria-label={`Actions for ${portfolioEvent.description}`}
                         aria-expanded={menuIsOpen}
+                        disabled={reviewingEventId !== null}
+                        aria-busy={isReviewing}
                         onClick={() =>
                           setOpenMenuId(menuIsOpen ? null : portfolioEvent.id)
                         }
                       >
-                        <MoreHorizontal size={18} aria-hidden="true" />
+                        {isReviewing ? <LoaderCircle size={18} className="event-review-spinner" aria-hidden="true" /> : <MoreHorizontal size={18} aria-hidden="true" />}
                       </button>
 
                       {menuIsOpen && (

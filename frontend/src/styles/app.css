@@ -2014,3 +2014,24 @@
     outline: 2px solid #006b55;
     outline-offset: 2px;
 }
+/* Events approval and rejection processing indicator */
+.event-review-spinner {
+    animation: event-review-spin 0.9s linear infinite;
+}
+
+@keyframes event-review-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.row-menu__trigger:disabled {
+    cursor: wait;
+    opacity: 0.7;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .event-review-spinner {
+        animation: none;
+    }
+}
