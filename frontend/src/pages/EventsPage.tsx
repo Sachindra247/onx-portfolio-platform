@@ -542,9 +542,16 @@ export default function EventsPage() {
       );
 
       if (canManageEvents) {
-        const records = await getEventRegistrations(portfolioEvent.id);
+        try {
+          const records = await getEventRegistrations(portfolioEvent.id);
 
-        setAttendees(records);
+          setAttendees(records);
+        } catch {
+          showToast(
+            "Registration updated, but the attendee list could not be refreshed.",
+            "error",
+          );
+        }
       }
     } catch (error) {
       showToast(getApiErrorMessage(error), "error");
@@ -567,9 +574,16 @@ export default function EventsPage() {
       );
 
       if (canManageEvents) {
-        const records = await getEventRegistrations(portfolioEvent.id);
+        try {
+          const records = await getEventRegistrations(portfolioEvent.id);
 
-        setAttendees(records);
+          setAttendees(records);
+        } catch {
+          showToast(
+            "Registration updated, but the attendee list could not be refreshed.",
+            "error",
+          );
+        }
       }
     } catch (error) {
       showToast(getApiErrorMessage(error), "error");
