@@ -11,7 +11,12 @@ import {
 
 import { groupEventsByVendor } from "../../utils/eventAnalytics";
 
+import EventEmptyState from "./EventEmptyState";
+
 interface EventVendorGroupsProps {
+  hasEvents?: boolean;
+  filtersAreActive?: boolean;
+  onClearFilters?: () => void;
   events: EventDto[];
 
   canManage: boolean;
@@ -24,6 +29,9 @@ interface EventVendorGroupsProps {
 }
 
 export default function EventVendorGroups({
+  hasEvents = false,
+  filtersAreActive = false,
+  onClearFilters,
   events,
   canManage,
   onView,
@@ -33,13 +41,7 @@ export default function EventVendorGroups({
   const vendorGroups = groupEventsByVendor(events);
 
   if (vendorGroups.size === 0) {
-    return (
-      <div className="event-table-empty">
-        <h3>No events found</h3>
-
-        <p>Try changing or clearing the current filters.</p>
-      </div>
-    );
+    return <EventEmptyState hasEvents={hasEvents} filtersAreActive={filtersAreActive} onClearFilters={onClearFilters} />;
   }
 
   return (

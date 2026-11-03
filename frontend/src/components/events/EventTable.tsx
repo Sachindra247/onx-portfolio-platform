@@ -24,7 +24,12 @@ import {
   getStageClassName,
 } from "../../utils/eventFormatting";
 
+import EventEmptyState from "./EventEmptyState";
+
 interface EventTableProps {
+  hasEvents?: boolean;
+  filtersAreActive?: boolean;
+  onClearFilters?: () => void;
   events: EventDto[];
   sortField: EventSortField;
   sortDirection: SortDirection;
@@ -80,6 +85,9 @@ function SortButton({
 }
 
 export default function EventTable({
+  hasEvents = false,
+  filtersAreActive = false,
+  onClearFilters,
   events,
   sortField,
   sortDirection,
@@ -125,13 +133,7 @@ export default function EventTable({
   }
 
   if (events.length === 0) {
-    return (
-      <div className="event-table-empty">
-        <h3>No events found</h3>
-
-        <p>Try changing or clearing the current filters.</p>
-      </div>
-    );
+    return <EventEmptyState hasEvents={hasEvents} filtersAreActive={filtersAreActive} onClearFilters={onClearFilters} />;
   }
 
   return (

@@ -791,6 +791,9 @@ export default function EventsPage() {
                     {viewMode === "table" ? (
                       <>
                         <EventTable
+                          hasEvents={events.length > 0}
+                          filtersAreActive={search.trim().length > 0 || stage !== "" || vendorId !== ""}
+                          onClearFilters={resetFilters}
                           events={paginatedEvents}
                           sortField={sortField}
                           sortDirection={sortDirection}
@@ -814,6 +817,9 @@ export default function EventsPage() {
                       </>
                     ) : (
                       <EventVendorGroups
+                        hasEvents={events.length > 0}
+                        filtersAreActive={search.trim().length > 0 || stage !== "" || vendorId !== ""}
+                        onClearFilters={resetFilters}
                         events={filteredAndSortedEvents}
                         canManage={canManageEvents}
                         onView={openEventDetails}
