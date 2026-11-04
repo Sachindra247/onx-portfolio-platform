@@ -32,6 +32,8 @@ interface LeaveRequestsViewProps {
 
   canReview: boolean;
 
+  canSelfApprove: boolean;
+
   onApprove: (request: LeaveRequestDto) => Promise<void>;
 
   onReject: (request: LeaveRequestDto) => Promise<void>;
@@ -46,6 +48,7 @@ export default function LeaveRequestsView({
   onEdit,
   onDelete,
   canReview,
+  canSelfApprove,
   onApprove,
   onReject,
 }: LeaveRequestsViewProps) {
@@ -304,10 +307,15 @@ export default function LeaveRequestsView({
                    * ANOTHER person's Pending
                    * request.
                    */
-                  const canReviewRequest =
+                  const canApproveRequest =
+                    request.status === "Pending" &&
+                    ((canReview && !isOwner) || (canSelfApprove && isOwner));
+
+                  const canRejectRequest =
                     canReview && !isOwner && request.status === "Pending";
 
-                  const hasActions = canModify || canReviewRequest;
+                  const hasActions =
+                    canModify || canApproveRequest || canRejectRequest;
 
                   return (
                     <tr key={request.id}>
@@ -364,28 +372,28 @@ export default function LeaveRequestsView({
                                   APPROVE / REJECT
                                  ================================= */}
 
-                            {canReviewRequest && (
-                              <>
-                                <button
-                                  type="button"
-                                  className="leave-request-actions__approve"
-                                  title="Approve request"
-                                  disabled={isReviewing}
-                                  onClick={() => void handleApprove(request)}
-                                >
-                                  {isReviewing ? "..." : "Approve"}
-                                </button>
+                            {canApproveRequest && (
+                              <button
+                                type="button"
+                                className="leave-request-actions__approve"
+                                title="Approve request"
+                                disabled={isReviewing}
+                                onClick={() => void handleApprove(request)}
+                              >
+                                {isReviewing ? "..." : "Approve"}
+                              </button>
+                            )}
 
-                                <button
-                                  type="button"
-                                  className="leave-request-actions__reject"
-                                  title="Reject request"
-                                  disabled={isReviewing}
-                                  onClick={() => void handleReject(request)}
-                                >
-                                  {isReviewing ? "..." : "Reject"}
-                                </button>
-                              </>
+                            {canRejectRequest && (
+                              <button
+                                type="button"
+                                className="leave-request-actions__reject"
+                                title="Reject request"
+                                disabled={isReviewing}
+                                onClick={() => void handleReject(request)}
+                              >
+                                {isReviewing ? "..." : "Reject"}
+                              </button>
                             )}
 
                             {/* =================================

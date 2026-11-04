@@ -7,9 +7,15 @@ import type {
   LeaveType,
 } from "../../../types/vacations";
 
+import type { VacationEmployee } from "../../../api/vacationsApi";
+
 interface LeaveRequestFormModalProps {
   isOpen: boolean;
   request: LeaveRequestDto | null;
+  canSelectEmployee: boolean;
+  employees: VacationEmployee[];
+  isLoadingEmployees: boolean;
+  employeeLoadError: string | null;
   isSaving: boolean;
   error: string | null;
   onClose: () => void;
@@ -27,6 +33,10 @@ const defaultPayload: LeaveRequestPayload = {
 export default function LeaveRequestFormModal({
   isOpen,
   request,
+  canSelectEmployee,
+  employees,
+  isLoadingEmployees,
+  employeeLoadError,
   isSaving,
   error,
   onClose,
@@ -58,10 +68,16 @@ export default function LeaveRequestFormModal({
     return null;
   }
 
+  const requiresEmployee = canSelectEmployee && !request;
+
   const isValid =
     Boolean(form.startDate) &&
     Boolean(form.endDate) &&
-    form.endDate >= form.startDate;
+    form.endDate >= form.startDate &&
+    (!requiresEmployee ||
+      (!isLoadingEmployees &&
+        !employeeLoadError &&
+        Boolean(form.employeeUserId)));
 
   return (
     <div
@@ -117,6 +133,41 @@ export default function LeaveRequestFormModal({
             });
           }}
         >
+          {requiresEmployee && (
+            <label className="vacation-form__full">
+              <span>Employee</span>
+
+              <select
+                required
+                value={form.employeeUserId ?? ""}
+                disabled={isLoadingEmployees || Boolean(employeeLoadError)}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    employeeUserId: event.target.value || null,
+                  }))
+                }
+              >
+                <option value="">
+                  {isLoadingEmployees
+                    ? "Loading employees..."
+                    : "Select an employee"}
+                </option>
+
+                {employees.map((employee) => (
+                  <option key={employee.id} value={employee.id}>
+                    {employee.name} ({employee.email})
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+
+          {requiresEmployee && employeeLoadError && (
+            <div className="vacation-form__error" role="alert">
+              {employeeLoadError}
+            </div>
+          )}
           <div className="vacation-form__grid">
             <label>
               <span>Leave Type</span>

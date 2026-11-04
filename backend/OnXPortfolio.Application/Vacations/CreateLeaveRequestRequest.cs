@@ -5,6 +5,9 @@ namespace OnXPortfolio.Application.Vacations;
 
 public sealed class CreateLeaveRequestRequest
 {
+
+    public Guid? EmployeeUserId { get; set; }
+
     public LeaveType LeaveType { get; set; } =
         LeaveType.Vacation;
 

@@ -26,6 +26,51 @@ public sealed class LeaveRequestsController : ControllerBase
     }
 
     // =========================================================
+    // GET EMPLOYEES FOR VACATION REQUEST CREATION
+    // =========================================================
+
+    [HttpGet("employees")]
+    public async Task<IActionResult> GetVacationEmployees(
+        CancellationToken cancellationToken)
+    {
+        var currentUser = await _currentUserService
+            .GetUserAsync(cancellationToken);
+
+        if (currentUser is null)
+        {
+            return Unauthorized();
+        }
+
+        var isJoel =
+            currentUser.IsGlobalAdministrator &&
+            currentUser.VacationAccess == ModuleAccess.Admin &&
+            string.Equals(
+                currentUser.Email,
+                "joel.william@onx.com",
+                StringComparison.OrdinalIgnoreCase);
+
+        if (!isJoel)
+        {
+            return Forbid();
+        }
+
+        var employees = await _dbContext.ApplicationUsers
+            .AsNoTracking()
+            .Where(user => user.IsActive)
+            .OrderBy(user => user.FirstName)
+            .ThenBy(user => user.LastName)
+            .Select(user => new
+            {
+                id = user.Id,
+                name = user.FirstName + " " + user.LastName,
+                email = user.Email
+            })
+            .ToListAsync(cancellationToken);
+
+        return Ok(employees);
+    }
+
+    // =========================================================
     // GET ALL
     // =========================================================
 
@@ -219,11 +264,13 @@ public sealed class LeaveRequestsController : ControllerBase
     // =========================================================
     // CREATE
     //
-    // A leave request is always created for the currently
-    // authenticated user.
+    // Regular users can create leave requests only for themselves.
     //
-    // The browser cannot create a request for somebody else
-    // and cannot self-approve during creation.
+    // Joel (Global Administrator with Vacation Admin access)
+    // may create requests for other active employees.
+    //
+    // All new requests enter the Pending approval workflow.
+    // No request is automatically approved during creation.
     // =========================================================
 
     [HttpPost]
@@ -248,6 +295,41 @@ public sealed class LeaveRequestsController : ControllerBase
             return Unauthorized();
         }
 
+        var employee = currentUser;
+
+        if (request.EmployeeUserId.HasValue &&
+            request.EmployeeUserId.Value != currentUser.Id)
+        {
+            var canCreateForOthers =
+                currentUser.IsGlobalAdministrator &&
+                currentUser.VacationAccess == ModuleAccess.Admin &&
+                string.Equals(
+                    currentUser.Email,
+                    "joel.william@onx.com",
+                    StringComparison.OrdinalIgnoreCase);
+
+            if (!canCreateForOthers)
+            {
+                return Forbid();
+            }
+
+            var selectedEmployee = await _dbContext.ApplicationUsers
+                .Include(user => user.Manager)
+                .SingleOrDefaultAsync(
+                    user =>
+                        user.Id == request.EmployeeUserId.Value &&
+                        user.IsActive,
+                    cancellationToken);
+
+            if (selectedEmployee is null)
+            {
+                return NotFound(
+                    new { message = "Selected employee was not found." });
+            }
+
+            employee = selectedEmployee;
+        }
+
         if (!IsValidDateRange(
                 request.StartDate,
                 request.EndDate))
@@ -262,21 +344,21 @@ public sealed class LeaveRequestsController : ControllerBase
 
         var hasOverlap =
     await HasOverlappingLeaveRequestAsync(
-        currentUser.Id,
+        employee.Id,
         request.StartDate,
         request.EndDate,
         excludeRequestId: null,
         cancellationToken);
 
-if (hasOverlap)
-{
-    ModelState.AddModelError(
-        nameof(request.StartDate),
-        "This leave request overlaps an existing active leave request.");
+        if (hasOverlap)
+        {
+            ModelState.AddModelError(
+                nameof(request.StartDate),
+                "This leave request overlaps an existing active leave request.");
 
-    return ValidationProblem(
-        ModelState);
-}
+            return ValidationProblem(
+                ModelState);
+        }
 
         var now =
             DateTimeOffset.UtcNow;
@@ -287,11 +369,10 @@ if (hasOverlap)
                 Id =
                     Guid.NewGuid(),
 
-                EmployeeUserId =
-                    currentUser.Id,
+                EmployeeUserId = employee.Id,
 
                 EmployeeName =
-                    $"{currentUser.FirstName} {currentUser.LastName}",
+                    $"{employee.FirstName} {employee.LastName}",
 
                 LeaveType =
                     request.LeaveType,
@@ -314,9 +395,9 @@ if (hasOverlap)
                         request.Reason),
 
                 ApproverName =
-                    currentUser.Manager is null
-                        ? null
-                        : $"{currentUser.Manager.FirstName} {currentUser.Manager.LastName}",
+    employee.Manager is null
+        ? null
+        : $"{employee.Manager.FirstName} {employee.Manager.LastName}",
 
                 Notes =
                     NormalizeOptional(
@@ -446,15 +527,15 @@ if (hasOverlap)
         excludeRequestId: leaveRequest.Id,
         cancellationToken);
 
-if (hasOverlap)
-{
-    ModelState.AddModelError(
-        nameof(request.StartDate),
-        "This leave request overlaps an existing active leave request.");
+        if (hasOverlap)
+        {
+            ModelState.AddModelError(
+                nameof(request.StartDate),
+                "This leave request overlaps an existing active leave request.");
 
-    return ValidationProblem(
-        ModelState);
-}
+            return ValidationProblem(
+                ModelState);
+        }
 
         leaveRequest.LeaveType =
             request.LeaveType;
@@ -681,11 +762,19 @@ if (hasOverlap)
          * This applies to Managers AND
          * Global Administrators.
          */
-        var isOwner =
-            leaveRequest.EmployeeUserId ==
-                currentUser.Id;
+        var isOwner = leaveRequest.EmployeeUserId == currentUser.Id;
 
-        if (isOwner)
+        var isJoelSelfApproval =
+            isOwner &&
+            newStatus == LeaveRequestStatus.Approved &&
+            currentUser.IsGlobalAdministrator &&
+            currentUser.VacationAccess == ModuleAccess.Admin &&
+            string.Equals(
+                currentUser.Email,
+                "joel.william@onx.com",
+                StringComparison.OrdinalIgnoreCase);
+
+        if (isOwner && !isJoelSelfApproval)
         {
             return Forbid();
         }
@@ -787,35 +876,35 @@ if (hasOverlap)
         DateOnly endDate,
         Guid? excludeRequestId,
         CancellationToken cancellationToken)
-{
-    var query =
-        _dbContext.LeaveRequests
-            .AsNoTracking()
-            .Where(
-                request =>
-                    request.EmployeeUserId ==
-                        employeeUserId &&
-                    request.Status !=
-                        LeaveRequestStatus.Rejected &&
-                    request.Status !=
-                        LeaveRequestStatus.Cancelled &&
-                    request.StartDate <=
-                        endDate &&
-                    request.EndDate >=
-                        startDate);
-
-    if (excludeRequestId.HasValue)
     {
-        query =
-            query.Where(
-                request =>
-                    request.Id !=
-                        excludeRequestId.Value);
-    }
+        var query =
+            _dbContext.LeaveRequests
+                .AsNoTracking()
+                .Where(
+                    request =>
+                        request.EmployeeUserId ==
+                            employeeUserId &&
+                        request.Status !=
+                            LeaveRequestStatus.Rejected &&
+                        request.Status !=
+                            LeaveRequestStatus.Cancelled &&
+                        request.StartDate <=
+                            endDate &&
+                        request.EndDate >=
+                            startDate);
 
-    return await query.AnyAsync(
-        cancellationToken);
-}
+        if (excludeRequestId.HasValue)
+        {
+            query =
+                query.Where(
+                    request =>
+                        request.Id !=
+                            excludeRequestId.Value);
+        }
+
+        return await query.AnyAsync(
+            cancellationToken);
+    }
 
     private static bool IsValidDateRange(
         DateOnly startDate,

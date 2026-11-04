@@ -24,6 +24,24 @@ function getAuthHeaders(includeJson = false): HeadersInit {
   return headers;
 }
 
+export interface VacationEmployee {
+  id: string;
+  name: string;
+  email: string;
+}
+
+export async function getVacationEmployees(): Promise<VacationEmployee[]> {
+  const response = await fetch(buildUrl("/api/leave-requests/employees"), {
+    headers: getAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    throw new Error(await getApiError(response, "Unable to load employees."));
+  }
+
+  return response.json() as Promise<VacationEmployee[]>;
+}
+
 export async function getLeaveRequests(): Promise<LeaveRequestDto[]> {
   const response = await fetch(buildUrl("/api/leave-requests"), {
     headers: getAuthHeaders(),

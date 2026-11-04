@@ -25,9 +25,12 @@ import {
   createLeaveRequest,
   deleteLeaveRequest,
   getLeaveRequests,
+  getVacationEmployees,
   rejectLeaveRequest,
   updateLeaveRequest,
 } from "../api/vacationsApi";
+
+import type { VacationEmployee } from "../api/vacationsApi";
 
 import { useAuth } from "../auth/AuthContext";
 
@@ -51,6 +54,12 @@ export default function VacationsPage() {
     (user?.role === "Manager" && user?.vacationAccess === "Admin"),
   );
 
+  const canSelfApproveVacation = Boolean(
+    user?.email?.toLowerCase() === "joel.william@onx.com" &&
+    user?.isGlobalAdministrator &&
+    user?.vacationAccess === "Admin",
+  );
+
   // =========================================================
   // PAGE DATA
   // =========================================================
@@ -60,6 +69,16 @@ export default function VacationsPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   const [loadError, setLoadError] = useState<string | null>(null);
+
+  const [vacationEmployees, setVacationEmployees] = useState<
+    VacationEmployee[]
+  >([]);
+
+  const [isLoadingEmployees, setIsLoadingEmployees] = useState(false);
+
+  const [employeeLoadError, setEmployeeLoadError] = useState<string | null>(
+    null,
+  );
 
   // =========================================================
   // ACTIVE SECTION
@@ -183,12 +202,29 @@ export default function VacationsPage() {
   // CREATE
   // =========================================================
 
-  function handleAddLeaveRequest() {
+  async function handleAddLeaveRequest() {
     setSelectedLeaveRequest(null);
-
     setFormError(null);
-
+    setVacationEmployees([]);
+    setEmployeeLoadError(null);
     setModalIsOpen(true);
+
+    if (!canSelfApproveVacation) {
+      return;
+    }
+
+    setIsLoadingEmployees(true);
+
+    try {
+      const employees = await getVacationEmployees();
+      setVacationEmployees(employees);
+    } catch (error) {
+      setEmployeeLoadError(
+        error instanceof Error ? error.message : "Unable to load employees.",
+      );
+    } finally {
+      setIsLoadingEmployees(false);
+    }
   }
 
   // =========================================================
@@ -355,6 +391,7 @@ export default function VacationsPage() {
               onEdit={handleEditLeaveRequest}
               onDelete={setLeaveRequestPendingDelete}
               canReview={canReviewVacation}
+              canSelfApprove={canSelfApproveVacation}
               onApprove={handleApproveLeaveRequest}
               onReject={handleRejectLeaveRequest}
             />
@@ -393,6 +430,10 @@ export default function VacationsPage() {
       <LeaveRequestFormModal
         isOpen={modalIsOpen}
         request={selectedLeaveRequest}
+        canSelectEmployee={canSelfApproveVacation}
+        employees={vacationEmployees}
+        isLoadingEmployees={isLoadingEmployees}
+        employeeLoadError={employeeLoadError}
         isSaving={isSaving}
         error={formError}
         onClose={() => {

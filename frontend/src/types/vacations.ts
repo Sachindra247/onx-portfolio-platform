@@ -29,6 +29,7 @@ export interface LeaveRequestDto {
 }
 
 export interface LeaveRequestPayload {
+  employeeUserId?: string | null;
   leaveType: LeaveType;
   startDate: string;
   endDate: string;
