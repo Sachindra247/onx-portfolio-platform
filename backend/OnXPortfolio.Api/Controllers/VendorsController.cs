@@ -336,6 +336,79 @@ public async Task<ActionResult<VendorDto>>
         });
 }
 
+        // =========================================================
+    // UPDATE VENDOR ACTIVE STATUS
+    // Global Admins, Events Admins, and Certifications Admins only.
+    // =========================================================
+
+    [HttpPut("{id:guid}/active")]
+    [ProducesResponseType(
+        typeof(VendorDto),
+        StatusCodes.Status200OK)]
+    [ProducesResponseType(
+        StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(
+        StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(
+        StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<VendorDto>>
+        UpdateVendorActiveStatus(
+            Guid id,
+            UpdateVendorActiveStatusRequest request,
+            CancellationToken cancellationToken)
+    {
+        var currentUser =
+            await _currentUserService
+                .GetUserAsync(
+                    cancellationToken);
+
+        if (currentUser is null)
+        {
+            return Unauthorized();
+        }
+
+        if (!CanManageVendors(
+                currentUser))
+        {
+            return Forbid();
+        }
+
+        var vendor =
+            await _dbContext.Vendors
+                .SingleOrDefaultAsync(
+                    vendor =>
+                        vendor.Id == id,
+                    cancellationToken);
+
+        if (vendor is null)
+        {
+            return NotFound();
+        }
+
+        vendor.IsActive =
+            request.IsActive;
+
+        vendor.UpdatedAtUtc =
+            DateTimeOffset.UtcNow;
+
+        await _dbContext
+            .SaveChangesAsync(
+                cancellationToken);
+
+        return Ok(
+            new VendorDto
+            {
+                Id =
+                    vendor.Id,
+
+                Name =
+                    vendor.Name,
+
+                IsActive =
+                    vendor.IsActive
+            });
+    }
+
     private static bool CanManageEvents(
         ApplicationUser user)
     {
