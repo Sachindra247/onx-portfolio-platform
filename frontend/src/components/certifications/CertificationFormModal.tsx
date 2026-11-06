@@ -1009,42 +1009,69 @@ export default function CertificationFormModal({
 
             <div className="form-field">
               <label htmlFor="cert-category">Category</label>
-              <input
+              <select
                 id="cert-category"
-                type="text"
-                maxLength={100}
                 value={values.category}
-                placeholder="Example: Certification"
                 onChange={(event) =>
                   updateField("category", event.target.value)
                 }
-              />
+              >
+                <option value="">Select category</option>
+                {values.category &&
+                  !["Certification", "Accreditation"].includes(
+                    values.category,
+                  ) && (
+                    <option value={values.category}>
+                      {values.category} (Existing value)
+                    </option>
+                  )}
+                <option value="Certification">Certification</option>
+                <option value="Accreditation">Accreditation</option>
+              </select>
             </div>
 
             <div className="form-field">
               <label htmlFor="cert-location">Location</label>
-              <input
+              <select
                 id="cert-location"
-                type="text"
-                maxLength={100}
                 value={values.location}
-                placeholder="Example: Online"
                 onChange={(event) =>
                   updateField("location", event.target.value)
                 }
-              />
+              >
+                <option value="">Select location</option>
+                {values.location &&
+                  ![
+                    "Online Proctored",
+                    "Online Unproctored",
+                    "In-Person",
+                  ].includes(values.location) && (
+                    <option value={values.location}>
+                      {values.location} (Existing value)
+                    </option>
+                  )}
+                <option value="Online Proctored">Online Proctored</option>
+                <option value="Online Unproctored">Online Unproctored</option>
+                <option value="In-Person">In-Person</option>
+              </select>
             </div>
 
             <div className="form-field">
               <label htmlFor="cert-fee">Fee</label>
-              <input
+              <select
                 id="cert-fee"
-                type="text"
-                maxLength={100}
                 value={values.fee}
-                placeholder="Example: Free"
                 onChange={(event) => updateField("fee", event.target.value)}
-              />
+              >
+                <option value="">Select fee</option>
+                {values.fee && !["Free", "Paid"].includes(values.fee) && (
+                  <option value={values.fee}>
+                    {values.fee} (Existing value)
+                  </option>
+                )}
+                <option value="Free">Free</option>
+                <option value="Paid">Paid</option>
+              </select>
             </div>
           </div>
 

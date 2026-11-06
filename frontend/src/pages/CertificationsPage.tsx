@@ -85,6 +85,12 @@ export default function CertificationsPage() {
     isCertificationsSection(requestedSection) ? requestedSection : "overview",
   );
 
+  const [selectedPersonId, setSelectedPersonId] = useState<string | null>(null);
+
+  const [selectedVendorName, setSelectedVendorName] = useState<string | null>(
+    null,
+  );
+
   // =========================================================
   // DATA
   // =========================================================
@@ -864,6 +870,24 @@ export default function CertificationsPage() {
     });
   }
 
+  function handlePersonClick(certification: CertificationDto) {
+    if (!certification.certificationPersonId) {
+      return;
+    }
+
+    setSelectedPersonId(certification.certificationPersonId);
+    setSelectedVendorName(null);
+
+    handleSectionChange("people");
+  }
+
+  function handleVendorClick(certification: CertificationDto) {
+    setSelectedVendorName(certification.vendorName);
+    setSelectedPersonId(null);
+
+    handleSectionChange("vendors");
+  }
+
   // =========================================================
   // RENDER
   // =========================================================
@@ -1080,6 +1104,8 @@ export default function CertificationsPage() {
                     onSort={handleSort}
                     canManage={canManageCertifications}
                     onView={setViewingCertification}
+                    onPersonClick={handlePersonClick}
+                    onVendorClick={handleVendorClick}
                     onEdit={openEditCertification}
                     onDelete={requestDeleteCertification}
                   />
@@ -1101,7 +1127,10 @@ export default function CertificationsPage() {
 
             {activeSection === "people" && (
               <section className="certifications-section">
-                <PeopleCoverageGrid people={peopleCoverage} />
+                <PeopleCoverageGrid
+                  people={peopleCoverage}
+                  selectedPersonId={selectedPersonId}
+                />
               </section>
             )}
 
@@ -1141,6 +1170,7 @@ export default function CertificationsPage() {
               <section className="certifications-section">
                 <VendorIntelligenceView
                   certifications={activeCertificationRecords}
+                  selectedVendorName={selectedVendorName}
                   canManage={canManageCertifications}
                   onEdit={openEditCertification}
                   onRenameVendor={handleRenameVendor}

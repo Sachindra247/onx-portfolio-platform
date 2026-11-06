@@ -15,6 +15,8 @@ interface CertificationTableProps {
   onSort: (field: CertificationSortField) => void;
   canManage: boolean;
   onView: (certification: CertificationDto) => void;
+  onPersonClick: (certification: CertificationDto) => void;
+  onVendorClick: (certification: CertificationDto) => void;
   onEdit: (certification: CertificationDto) => void;
   onDelete: (certification: CertificationDto) => void;
 }
@@ -34,6 +36,8 @@ export default function CertificationTable({
   onSort,
   canManage,
   onView,
+  onPersonClick,
+  onVendorClick,
   onEdit,
 
   onDelete,
@@ -76,10 +80,37 @@ export default function CertificationTable({
               onSort={onSort}
             />
 
-            <th>Program</th>
-            <th>Category</th>
-            <th>Location</th>
-            <th>Fee</th>
+            <SortableHeading
+              field="program"
+              label="Program"
+              activeField={sortField}
+              direction={sortDirection}
+              onSort={onSort}
+            />
+
+            <SortableHeading
+              field="category"
+              label="Category"
+              activeField={sortField}
+              direction={sortDirection}
+              onSort={onSort}
+            />
+
+            <SortableHeading
+              field="location"
+              label="Location"
+              activeField={sortField}
+              direction={sortDirection}
+              onSort={onSort}
+            />
+
+            <SortableHeading
+              field="fee"
+              label="Fee"
+              activeField={sortField}
+              direction={sortDirection}
+              onSort={onSort}
+            />
 
             <SortableHeading
               field="status"
@@ -89,7 +120,13 @@ export default function CertificationTable({
               onSort={onSort}
             />
 
-            <th>Assigned</th>
+            <SortableHeading
+              field="assignedDate"
+              label="Assigned"
+              activeField={sortField}
+              direction={sortDirection}
+              onSort={onSort}
+            />
 
             <SortableHeading
               field="dateCompleted"
@@ -124,18 +161,39 @@ export default function CertificationTable({
         <tbody>
           {certifications.map((certification) => (
             <tr key={certification.id}>
+              {/* PERSON */}
               <td>
-                <strong className="certification-table__person">
-                  {certification.personName}
-                </strong>
+                {certification.certificationPersonId ? (
+                  <button
+                    type="button"
+                    className="certification-table__details-link"
+                    onClick={() => onPersonClick(certification)}
+                    title={`View ${certification.personName}'s certifications`}
+                    aria-label={`View certifications for ${certification.personName}`}
+                  >
+                    {certification.personName}
+                  </button>
+                ) : (
+                  <strong className="certification-table__person">
+                    {certification.personName}
+                  </strong>
+                )}
               </td>
 
+              {/* VENDOR */}
               <td>
-                <span className="certification-table__vendor">
+                <button
+                  type="button"
+                  className="certification-table__details-link"
+                  onClick={() => onVendorClick(certification)}
+                  title={`View ${certification.vendorName} certifications`}
+                  aria-label={`View certifications for ${certification.vendorName}`}
+                >
                   {certification.vendorName}
-                </span>
+                </button>
               </td>
 
+              {/* CERTIFICATION */}
               <td>
                 <div className="certification-table__certification">
                   <button
@@ -159,6 +217,7 @@ export default function CertificationTable({
               <td>{certification.location ?? "—"}</td>
               <td>{certification.fee ?? "—"}</td>
 
+              {/* STATUS */}
               <td>
                 <span
                   className={[
@@ -176,6 +235,7 @@ export default function CertificationTable({
 
               <td>{formatDate(certification.dateCompleted)}</td>
 
+              {/* EXPIRY */}
               <td>
                 <span className={getExpiryClass(certification.expiryDate)}>
                   {formatDate(certification.expiryDate)}
@@ -184,6 +244,7 @@ export default function CertificationTable({
 
               <td>{certification.practiceLead ?? "—"}</td>
 
+              {/* ACTIONS */}
               <td>
                 {canManage && (
                   <div className="certification-table__actions">

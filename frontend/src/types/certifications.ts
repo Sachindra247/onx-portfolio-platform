@@ -150,7 +150,12 @@ export type CertificationSortField =
   | "personName"
   | "vendorName"
   | "certificationName"
+  | "program"
+  | "category"
+  | "location"
+  | "fee"
   | "status"
+  | "assignedDate"
   | "dateCompleted"
   | "expiryDate"
   | "practiceLead";

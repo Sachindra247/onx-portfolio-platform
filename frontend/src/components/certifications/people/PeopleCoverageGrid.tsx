@@ -13,6 +13,7 @@ import PeopleCoverageSummary from "./PeopleCoverageSummary";
 
 interface PeopleCoverageGridProps {
   people: PersonCoverage[];
+  selectedPersonId?: string | null;
 }
 
 type PeopleSort =
@@ -24,6 +25,7 @@ type PeopleSort =
 
 export default function PeopleCoverageGrid({
   people,
+  selectedPersonId,
 }: PeopleCoverageGridProps) {
   const [search, setSearch] = useState("");
 
@@ -33,7 +35,9 @@ export default function PeopleCoverageGrid({
 
   const [sortBy, setSortBy] = useState<PeopleSort>("name");
 
-  const [expandedPerson, setExpandedPerson] = useState<string | null>(null);
+  const [expandedPerson, setExpandedPerson] = useState<string | null>(
+    selectedPersonId ?? null,
+  );
 
   const vendorOptions = useMemo(
     () =>

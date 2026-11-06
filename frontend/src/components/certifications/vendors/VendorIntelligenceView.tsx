@@ -17,6 +17,7 @@ import { formatCertificationStatus } from "../../../utils/certificationAnalytics
 interface VendorIntelligenceViewProps {
   canManage: boolean;
   certifications: CertificationDto[];
+  selectedVendorName?: string | null;
   onEdit: (certification: CertificationDto) => void;
   onRenameVendor: (vendorName: string) => void;
 }
@@ -24,12 +25,15 @@ interface VendorIntelligenceViewProps {
 export default function VendorIntelligenceView({
   certifications,
   canManage,
+  selectedVendorName,
   onEdit,
   onRenameVendor,
 }: VendorIntelligenceViewProps) {
   const [search, setSearch] = useState("");
   const [riskFilter, setRiskFilter] = useState("");
-  const [expandedVendor, setExpandedVendor] = useState<string | null>(null);
+  const [expandedVendor, setExpandedVendor] = useState<string | null>(
+    selectedVendorName ?? null,
+  );
 
   const vendors = useMemo(
     () => buildVendorAnalytics(certifications),
