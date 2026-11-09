@@ -165,6 +165,20 @@ export default function CertificationFormModal({
 
   const [managerDropdownOpen, setManagerDropdownOpen] = useState(false);
 
+  const [practiceLeadMatches, setPracticeLeadMatches] = useState<
+    CertificationPersonLookupDto[]
+  >([]);
+
+  const [practiceLeadLookupLoading, setPracticeLeadLookupLoading] =
+    useState(false);
+
+  const [practiceLeadDropdownOpen, setPracticeLeadDropdownOpen] =
+    useState(false);
+
+  const [selectedPracticeLeadName, setSelectedPracticeLeadName] = useState<
+    string | null
+  >(null);
+
   // =========================================================
   // PERSON LOOKUP
   // =========================================================
@@ -284,6 +298,55 @@ export default function CertificationFormModal({
   ]);
 
   // =========================================================
+  // PRACTICE LEAD LOOKUP
+  // =========================================================
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    const query = values.practiceLead.trim();
+
+    if (query.length < 2 || query === selectedPracticeLeadName) {
+      setPracticeLeadMatches([]);
+      setPracticeLeadLookupLoading(false);
+      return;
+    }
+
+    const controller = new AbortController();
+
+    const timer = window.setTimeout(async () => {
+      setPracticeLeadLookupLoading(true);
+
+      try {
+        const matches = await searchCertificationPeople(
+          query,
+          controller.signal,
+        );
+
+        if (!controller.signal.aborted) {
+          setPracticeLeadMatches(matches);
+          setPracticeLeadDropdownOpen(true);
+        }
+      } catch {
+        if (!controller.signal.aborted) {
+          setPracticeLeadMatches([]);
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setPracticeLeadLookupLoading(false);
+        }
+      }
+    }, 250);
+
+    return () => {
+      window.clearTimeout(timer);
+      controller.abort();
+    };
+  }, [isOpen, values.practiceLead, selectedPracticeLeadName]);
+
+  // =========================================================
   // OPEN / RESET
   // =========================================================
 
@@ -305,9 +368,14 @@ export default function CertificationFormModal({
 
     setPersonMatches([]);
     setManagerMatches([]);
+    setPracticeLeadMatches([]);
 
     setPersonDropdownOpen(false);
     setManagerDropdownOpen(false);
+    setPracticeLeadDropdownOpen(false);
+
+    setPracticeLeadLookupLoading(false);
+    setSelectedPracticeLeadName(null);
 
     setShowVendorCreator(false);
     setNewVendorName("");
@@ -328,10 +396,14 @@ export default function CertificationFormModal({
         /*
          * Close lookup menus first.
          */
-        if (personDropdownOpen || managerDropdownOpen) {
+        if (
+          personDropdownOpen ||
+          managerDropdownOpen ||
+          practiceLeadDropdownOpen
+        ) {
           setPersonDropdownOpen(false);
-
           setManagerDropdownOpen(false);
+          setPracticeLeadDropdownOpen(false);
 
           return;
         }
@@ -349,7 +421,14 @@ export default function CertificationFormModal({
 
       document.body.style.overflow = "";
     };
-  }, [isOpen, isSaving, managerDropdownOpen, onClose, personDropdownOpen]);
+  }, [
+    isOpen,
+    isSaving,
+    managerDropdownOpen,
+    onClose,
+    personDropdownOpen,
+    practiceLeadDropdownOpen,
+  ]);
 
   if (!isOpen) {
     return null;
@@ -466,6 +545,23 @@ export default function CertificationFormModal({
       managerName: undefined,
       managerEmail: undefined,
     }));
+  }
+
+  // =========================================================
+  // SELECT PRACTICE LEAD
+  // =========================================================
+
+  function selectPracticeLead(lead: CertificationPersonLookupDto) {
+    setValues((current) => ({
+      ...current,
+      practiceLead: lead.name,
+    }));
+
+    setSelectedPracticeLeadName(lead.name);
+
+    setPracticeLeadMatches([]);
+    setPracticeLeadDropdownOpen(false);
+    setPracticeLeadLookupLoading(false);
   }
 
   // =========================================================
@@ -1156,16 +1252,61 @@ export default function CertificationFormModal({
             <div className="form-field">
               <label htmlFor="cert-lead">Practice lead</label>
 
-              <input
-                id="cert-lead"
-                type="text"
-                maxLength={300}
-                value={values.practiceLead}
-                placeholder="Example: Raed Jabak"
-                onChange={(event) =>
-                  updateField("practiceLead", event.target.value)
-                }
-              />
+              <div className="certification-person-autocomplete">
+                <input
+                  id="cert-lead"
+                  type="text"
+                  maxLength={300}
+                  value={values.practiceLead}
+                  placeholder="Start typing a practice lead's name..."
+                  autoComplete="off"
+                  onFocus={() => setPracticeLeadDropdownOpen(true)}
+                  onChange={(event) => {
+                    setSelectedPracticeLeadName(null);
+                    setPracticeLeadMatches([]);
+                    updateField("practiceLead", event.target.value);
+                  }}
+                  onBlur={() => {
+                    window.setTimeout(
+                      () => setPracticeLeadDropdownOpen(false),
+                      150,
+                    );
+                  }}
+                />
+
+                {practiceLeadLookupLoading && (
+                  <span className="certification-person-autocomplete__loading">
+                    Searching...
+                  </span>
+                )}
+
+                {practiceLeadDropdownOpen && practiceLeadMatches.length > 0 && (
+                  <div className="certification-person-autocomplete__menu">
+                    {practiceLeadMatches.map((lead) => (
+                      <button
+                        key={
+                          lead.certificationPersonId ??
+                          lead.applicationUserId ??
+                          `${lead.name}-${lead.email ?? ""}`
+                        }
+                        type="button"
+                        onMouseDown={(event) => event.preventDefault()}
+                        onClick={() => selectPracticeLead(lead)}
+                      >
+                        <strong>{lead.name}</strong>
+
+                        {lead.email && <span>{lead.email}</span>}
+
+                        {lead.isApplicationUser && (
+                          <small className="certification-person-autocomplete__source">
+                            Existing platform user
+                          </small>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="form-field">
