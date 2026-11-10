@@ -11,6 +11,11 @@ public sealed class Vendor : AuditableEntity
 
     public bool IsActive { get; set; } = true;
 
+
+public ICollection<VendorContact> Contacts { get; set; } =
+    new List<VendorContact>();
+
+
     public ICollection<Event> Events { get; set; } =
         new List<Event>();
 

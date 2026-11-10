@@ -25,6 +25,11 @@ public sealed class AppDbContext : DbContext
     public DbSet<Vendor> Vendors =>
         Set<Vendor>();
 
+
+    public DbSet<VendorContact> VendorContacts =>
+        Set<VendorContact>();
+
+
     public DbSet<Certification> Certifications =>
         Set<Certification>();
 

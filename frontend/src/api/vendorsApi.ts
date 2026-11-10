@@ -4,10 +4,12 @@ import type { CertificationVendorDto } from "../types/certifications";
 
 export async function getVendors(
   signal?: AbortSignal,
+  activeOnly = true,
 ): Promise<CertificationVendorDto[]> {
   const response = await httpClient.get<CertificationVendorDto[]>(
     "/api/vendors",
     {
+      params: { activeOnly },
       signal,
     },
   );

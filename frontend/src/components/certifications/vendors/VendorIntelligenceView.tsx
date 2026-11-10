@@ -8,11 +8,16 @@ import {
   Search,
   Users,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import type { CertificationDto } from "../../../types/certifications";
 import { buildVendorAnalytics } from "../../../utils/vendorAnalytics";
 import { formatCertificationStatus } from "../../../utils/certificationAnalytics";
+
+import { getVendors } from "../../../api/vendorsApi";
+import type { CertificationVendorDto } from "../../../types/certifications";
+
+import VendorContactsSection from "./VendorContactsSection";
 
 interface VendorIntelligenceViewProps {
   canManage: boolean;
@@ -35,10 +40,51 @@ export default function VendorIntelligenceView({
     selectedVendorName ?? null,
   );
 
+  const [vendorDirectory, setVendorDirectory] = useState<
+    CertificationVendorDto[]
+  >([]);
+  const [vendorDirectoryError, setVendorDirectoryError] = useState<
+    string | null
+  >(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function loadVendorDirectory() {
+      try {
+        setVendorDirectoryError(null);
+
+        const result = await getVendors(controller.signal, false);
+
+        if (!controller.signal.aborted) {
+          setVendorDirectory(result);
+        }
+      } catch {
+        if (!controller.signal.aborted) {
+          setVendorDirectoryError("Unable to load vendor directory.");
+        }
+      }
+    }
+
+    void loadVendorDirectory();
+
+    return () => controller.abort();
+  }, []);
+
   const vendors = useMemo(
     () => buildVendorAnalytics(certifications),
     [certifications],
   );
+
+  const vendorIdByName = useMemo(() => {
+    const lookup = new Map<string, string>();
+
+    for (const vendor of vendorDirectory) {
+      lookup.set(vendor.name.trim().toLocaleLowerCase(), vendor.id);
+    }
+
+    return lookup;
+  }, [vendorDirectory]);
 
   const filteredVendors = useMemo(() => {
     const normalizedSearch = search.trim().toLocaleLowerCase();
@@ -184,6 +230,10 @@ export default function VendorIntelligenceView({
           {filteredVendors.map((vendor) => {
             const isExpanded = expandedVendor === vendor.vendorName;
 
+            const vendorId = vendorIdByName.get(
+              vendor.vendorName.trim().toLocaleLowerCase(),
+            );
+
             const health =
               vendor.expired > 0
                 ? "critical"
@@ -284,6 +334,16 @@ export default function VendorIntelligenceView({
 
                 {isExpanded && (
                   <div className="vendor-intelligence-card__records">
+                    {vendorDirectoryError ? (
+                      <p role="alert">{vendorDirectoryError}</p>
+                    ) : vendorId ? (
+                      <VendorContactsSection
+                        vendorId={vendorId}
+                        canManage={canManage}
+                      />
+                    ) : (
+                      <p>Vendor record not found in the directory.</p>
+                    )}
                     {vendor.records.map((record) => (
                       <div
                         key={record.id}

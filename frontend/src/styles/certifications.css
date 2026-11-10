@@ -2101,6 +2101,211 @@
     background: var(--color-background);
 }
 
+
+/* Vendor Contact Management */
+
+.vendor-contacts {
+    padding: 16px;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-surface);
+}
+
+.vendor-contacts__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.vendor-contacts__header h4 {
+    margin: 0;
+    color: var(--color-teal-900);
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.vendor-contacts__header button {
+    padding: 8px 12px;
+    border: 1px solid var(--color-teal-700);
+    border-radius: 8px;
+    background: var(--color-teal-900);
+    color: white;
+    font: inherit;
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.vendor-contacts__header button:hover,
+.vendor-contacts__header button:focus-visible {
+    background-color: #28785d;
+    border-color: #28785d;
+    color: #ffffff;
+}
+
+.vendor-contacts__form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+    padding: 16px;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    background: var(--color-background);
+}
+
+.vendor-contacts__form label {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 6px;
+    color: var(--color-teal-900);
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.vendor-contacts__form input {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    height: 36px;
+    padding: 8px 10px;
+    border: 1px solid var(--color-border);
+    border-radius: 7px;
+    background: var(--color-surface);
+    color: inherit;
+    font: inherit;
+    font-size: 11px;
+}
+
+.vendor-contacts__form input:focus {
+    outline: 2px solid var(--color-teal-700);
+    outline-offset: 1px;
+}
+
+.vendor-contacts__form>[role="alert"] {
+    grid-column: 1 / -1;
+    margin: 0;
+    color: #c0392b;
+    font-size: 11px;
+}
+
+.vendor-contacts__actions {
+    display: flex;
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.vendor-contacts__actions button {
+    padding: 9px 13px;
+    border: 1px solid var(--color-border);
+    border-radius: 7px;
+    background: var(--color-surface);
+    color: var(--color-teal-900);
+    font: inherit;
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.vendor-contacts__actions button[type="submit"] {
+    border-color: var(--color-teal-900);
+    background: var(--color-teal-900);
+    color: white;
+}
+
+.vendor-contacts__actions button:hover:not(:disabled) {
+    border-color: var(--color-teal-700);
+    background: var(--color-teal-100);
+    color: var(--color-teal-900);
+}
+
+.vendor-contacts button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.vendor-contacts__list {
+    display: grid;
+    gap: 10px;
+}
+
+.vendor-contacts__item {
+    min-width: 0;
+    padding: 13px;
+    border: 1px solid var(--color-border);
+    border-radius: 9px;
+    background: var(--color-background);
+}
+
+.vendor-contacts__item>strong {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--color-teal-900);
+    font-size: 12px;
+}
+
+.vendor-contacts__item p {
+    margin: 4px 0;
+    overflow-wrap: anywhere;
+    color: var(--color-muted);
+    font-size: 10px;
+    line-height: 1.5;
+}
+
+.vendor-contacts__item a {
+    color: var(--color-teal-700);
+    text-decoration: none;
+}
+
+.vendor-contacts__item a:hover {
+    text-decoration: underline;
+}
+
+.vendor-contacts__item-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.vendor-contacts__item-actions button {
+    padding: 7px 11px;
+    border: 1px solid var(--color-border);
+    border-radius: 7px;
+    background: var(--color-surface);
+    color: var(--color-teal-900);
+    font: inherit;
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.vendor-contacts__item-actions button:hover:not(:disabled) {
+    border-color: var(--color-teal-700);
+    background: var(--color-teal-100);
+}
+
+.vendor-contacts__item-actions button:last-child {
+    color: #c0392b;
+}
+
+.vendor-contacts__item-actions button:last-child:hover:not(:disabled) {
+    border-color: #c0392b;
+    background: #fdf0ef;
+}
+
+@media (max-width: 480px) {
+    .vendor-contacts__form {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+
 .vendor-certification-record {
     display: grid;
     grid-template-columns:

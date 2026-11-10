@@ -633,6 +633,59 @@ namespace OnXPortfolio.Infrastructure.Persistence.Migrations
                     b.ToTable("Vendors", (string)null);
                 });
 
+
+            modelBuilder.Entity("OnXPortfolio.Domain.Vendors.VendorContact", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(254)
+                        .HasColumnType("character varying(254)");
+
+                    b.Property<string>("JobTitle")
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("VendorId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VendorId");
+
+                    b.ToTable("VendorContacts", (string)null);
+                });
+
+
+            modelBuilder.Entity("OnXPortfolio.Domain.Vendors.VendorContact", b =>
+                {
+                    b.HasOne("OnXPortfolio.Domain.Vendors.Vendor", "Vendor")
+                        .WithMany("Contacts")
+                        .HasForeignKey("VendorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Vendor");
+                });
+
+
             modelBuilder.Entity("OnXPortfolio.Domain.Certifications.Certification", b =>
                 {
                     b.HasOne("OnXPortfolio.Domain.Certifications.CertificationPerson", "CertificationPerson")
@@ -785,14 +838,18 @@ namespace OnXPortfolio.Infrastructure.Persistence.Migrations
                     b.Navigation("DirectReports");
                 });
 
+
             modelBuilder.Entity("OnXPortfolio.Domain.Vendors.Vendor", b =>
                 {
                     b.Navigation("Certifications");
+
+                    b.Navigation("Contacts");
 
                     b.Navigation("Events");
 
                     b.Navigation("Rebates");
                 });
+
 #pragma warning restore 612, 618
         }
     }
