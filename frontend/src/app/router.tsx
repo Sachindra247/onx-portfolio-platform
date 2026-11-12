@@ -11,6 +11,7 @@ import PublicEventRegistrationPage from "../pages/PublicEventRegistrationPage";
 import RequireAuth from "../auth/RequireAuth";
 import ProfilePage from "../pages/ProfilePage";
 import RebatesPage from "../pages/RebatesPage";
+import VendorManagementPage from "../pages/VendorManagementPage";
 
 const baseName = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -49,6 +50,10 @@ export const router = createBrowserRouter(
             {
               path: "certifications",
               element: <CertificationsPage />,
+            },
+            {
+              path: "vendors",
+              element: <VendorManagementPage />,
             },
             {
               path: "rebates",

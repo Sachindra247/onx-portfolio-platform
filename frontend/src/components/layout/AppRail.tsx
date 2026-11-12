@@ -1,5 +1,6 @@
 import {
   BadgeDollarSign,
+  Building2,
   CalendarDays,
   GraduationCap,
   House,
@@ -24,6 +25,12 @@ const navigationItems = [
     label: "Certifications",
     path: "/certifications",
     icon: GraduationCap,
+    available: true,
+  },
+  {
+    label: "Vendor Management",
+    path: "/vendors",
+    icon: Building2,
     available: true,
   },
   {
