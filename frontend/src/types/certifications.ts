@@ -122,6 +122,20 @@ export interface CertificationVendorDto {
   id: string;
   name: string;
   isActive: boolean;
+
+  // Partnership information
+  partnershipTier?: string | null;
+  partnershipStatus?: string | null;
+  primaryPartnerManagerId?: string | null;
+  partnershipBenefits?: string | null;
+  partnerPrograms?: string | null;
+
+  // Structured vendor benefits
+  discountPercentage?: number | null;
+  rebatePercentage?: number | null;
+  dealRegistrationAvailable?: boolean | null;
+  dealRegistrationConditions?: string | null;
+  spiffAvailable?: boolean | null;
 }
 
 export interface CertificationSummary {

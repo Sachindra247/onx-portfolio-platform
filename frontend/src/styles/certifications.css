@@ -4332,3 +4332,248 @@
         padding: 18px;
     }
 }
+
+
+/* =========================================
+   VENDOR CONTACTS - COMPACT TABLE
+   ========================================= */
+
+.vendor-contacts__table-wrapper {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: auto;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+}
+
+.vendor-contacts__table {
+    width: 100%;
+    min-width: 720px;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 11px;
+}
+
+.vendor-contacts__table th {
+    padding: 11px 10px;
+    background: var(--color-background);
+    color: var(--color-teal-900);
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.vendor-contacts__table td {
+    padding: 10px;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--color-border);
+    overflow-wrap: anywhere;
+    line-height: 1.5;
+}
+
+.vendor-contacts__table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.vendor-contacts__table tbody tr:hover {
+    background: var(--color-background);
+}
+
+.vendor-contacts__table td strong {
+    color: var(--color-teal-900);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.vendor-contacts__table a {
+    color: var(--color-teal-700);
+    text-decoration: none;
+}
+
+.vendor-contacts__table a:hover {
+    text-decoration: underline;
+}
+
+.vendor-contacts__table .vendor-contacts__phone,
+.vendor-contacts__table .vendor-contacts__updated {
+    white-space: nowrap;
+}
+
+.vendor-contacts__table .vendor-contacts__updated {
+    color: var(--color-muted);
+    font-size: 10px;
+}
+
+.vendor-contacts__table .vendor-contacts__item-actions {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 5px;
+    margin: 0;
+}
+
+.vendor-contacts__table .vendor-contacts__item-actions button {
+    padding: 5px 8px;
+    font-size: 10px;
+    white-space: nowrap;
+}
+
+
+/* ========================================
+   Vendor Partnership Overview
+   ======================================== */
+
+.vendor-partnership {
+    padding: 16px;
+    min-width: 0;
+    background: var(--color-surface, #ffffff);
+}
+
+.vendor-partnership__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.vendor-partnership__header h4 {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: #176b73;
+}
+
+.vendor-partnership__header button,
+.vendor-partnership__actions button {
+    padding: 7px 12px;
+    border: 1px solid #176b73;
+    border-radius: 6px;
+    background: transparent;
+    color: #176b73;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.vendor-partnership__header button:hover,
+.vendor-partnership__actions button:hover {
+    background: #e8f4f2;
+}
+
+.vendor-partnership__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.vendor-partnership__grid>div {
+    min-width: 0;
+}
+
+.vendor-partnership__full {
+    grid-column: 1 / -1;
+}
+
+.vendor-partnership__grid span {
+    display: block;
+    margin-bottom: 5px;
+    color: #64748b;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.vendor-partnership__grid p {
+    margin: 0;
+    color: var(--color-text, #334155);
+    font-size: 12px;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+}
+
+.vendor-partnership__form {
+    padding: 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+}
+
+.vendor-partnership__form label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #176b73;
+}
+
+.vendor-partnership__form input,
+.vendor-partnership__form select,
+.vendor-partnership__form textarea {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    padding: 9px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background: var(--color-surface, #ffffff);
+    color: var(--color-text, #334155);
+    font-family: inherit;
+    font-size: 12px;
+}
+
+.vendor-partnership__form input:focus,
+.vendor-partnership__form select:focus,
+.vendor-partnership__form textarea:focus {
+    border-color: #176b73;
+    outline: 2px solid rgba(23, 107, 115, 0.15);
+}
+
+.vendor-partnership__form textarea {
+    resize: vertical;
+    min-height: 70px;
+}
+
+.vendor-partnership__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.vendor-partnership__actions button[type="submit"] {
+    background: #28785d;
+    border-color: #28785d;
+    color: #ffffff;
+}
+
+.vendor-partnership__actions button[type="submit"]:hover {
+    background: #21654f;
+}
+
+.vendor-partnership button:disabled,
+.vendor-partnership input:disabled,
+.vendor-partnership select:disabled,
+.vendor-partnership textarea:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.vendor-partnership p[role="alert"] {
+    margin-top: 12px;
+    color: #b91c1c;
+    font-size: 11px;
+}
+
+@media (max-width: 600px) {
+    .vendor-partnership__grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .vendor-partnership__header {
+        flex-wrap: wrap;
+    }
+}

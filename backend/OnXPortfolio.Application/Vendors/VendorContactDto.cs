@@ -14,4 +14,6 @@ public sealed class VendorContactDto
     public string? Email { get; set; }
 
     public string? Phone { get; set; }
+
+    public DateTimeOffset UpdatedAtUtc { get; set; }
 }

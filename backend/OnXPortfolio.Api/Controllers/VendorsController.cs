@@ -6,6 +6,7 @@ using OnXPortfolio.Application.Vendors;
 using OnXPortfolio.Domain.Users;
 using OnXPortfolio.Domain.Vendors;
 using OnXPortfolio.Infrastructure.Persistence;
+using System.Linq.Expressions;
 
 namespace OnXPortfolio.Api.Controllers;
 
@@ -20,6 +21,33 @@ public sealed class VendorsController :
 
     private readonly CurrentUserService
         _currentUserService;
+
+
+    private static readonly Expression<Func<Vendor, VendorDto>>
+        VendorProjection = vendor => new VendorDto
+        {
+            Id = vendor.Id,
+            Name = vendor.Name,
+            IsActive = vendor.IsActive,
+
+            // Partnership information
+            PartnershipTier = vendor.PartnershipTier,
+            PartnershipStatus = vendor.PartnershipStatus,
+            PrimaryPartnerManagerId = vendor.PrimaryPartnerManagerId,
+            PartnershipBenefits = vendor.PartnershipBenefits,
+            PartnerPrograms = vendor.PartnerPrograms,
+
+            // Structured vendor benefits
+            DiscountPercentage = vendor.DiscountPercentage,
+            RebatePercentage = vendor.RebatePercentage,
+            DealRegistrationAvailable = vendor.DealRegistrationAvailable,
+            DealRegistrationConditions = vendor.DealRegistrationConditions,
+            SpiffAvailable = vendor.SpiffAvailable
+        };
+
+    private static readonly Func<Vendor, VendorDto>
+        MapVendor = VendorProjection.Compile();
+
 
     public VendorsController(
         AppDbContext dbContext,
@@ -61,24 +89,57 @@ public sealed class VendorsController :
                 .OrderBy(
                     vendor =>
                         vendor.Name)
-                .Select(
-                    vendor =>
-                        new VendorDto
-                        {
-                            Id =
-                                vendor.Id,
-
-                            Name =
-                                vendor.Name,
-
-                            IsActive =
-                                vendor.IsActive
-                        })
+                .Select(VendorProjection)
                 .ToListAsync(
                     cancellationToken);
 
         return Ok(vendors);
     }
+
+
+    // =========================================================
+    // GET ACTIVE INTERNAL PARTNER MANAGERS
+    // Vendor Management administrators only.
+    // =========================================================
+
+    [HttpGet("partner-managers")]
+    [ProducesResponseType(
+        typeof(IReadOnlyList<VendorPartnerManagerDto>),
+        StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<ActionResult<IReadOnlyList<VendorPartnerManagerDto>>>
+        GetPartnerManagers(CancellationToken cancellationToken)
+    {
+        var currentUser = await _currentUserService
+            .GetUserAsync(cancellationToken);
+
+        if (currentUser is null)
+        {
+            return Unauthorized();
+        }
+
+        if (!CanManageVendors(currentUser))
+        {
+            return Forbid();
+        }
+
+        var managers = await _dbContext.ApplicationUsers
+            .AsNoTracking()
+            .Where(user => user.IsActive)
+            .OrderBy(user => user.FirstName)
+            .ThenBy(user => user.LastName)
+            .Select(user => new VendorPartnerManagerDto
+            {
+                Id = user.Id,
+                Name = user.FirstName + " " + user.LastName,
+                Email = user.Email
+            })
+            .ToListAsync(cancellationToken);
+
+        return Ok(managers);
+    }
+
 
     [HttpGet("{id:guid}")]
     [ProducesResponseType(
@@ -91,27 +152,11 @@ public sealed class VendorsController :
             Guid id,
             CancellationToken cancellationToken)
     {
-        var vendor =
-            await _dbContext.Vendors
-                .AsNoTracking()
-                .Where(
-                    vendor =>
-                        vendor.Id == id)
-                .Select(
-                    vendor =>
-                        new VendorDto
-                        {
-                            Id =
-                                vendor.Id,
-
-                            Name =
-                                vendor.Name,
-
-                            IsActive =
-                                vendor.IsActive
-                        })
-                .SingleOrDefaultAsync(
-                    cancellationToken);
+        var vendor = await _dbContext.Vendors
+    .AsNoTracking()
+    .Where(vendor => vendor.Id == id)
+    .Select(VendorProjection)
+    .SingleOrDefaultAsync(cancellationToken);
 
         if (vendor is null)
         {
@@ -209,18 +254,7 @@ public sealed class VendorsController :
             .SaveChangesAsync(
                 cancellationToken);
 
-        var result =
-            new VendorDto
-            {
-                Id =
-                    vendor.Id,
-
-                Name =
-                    vendor.Name,
-
-                IsActive =
-                    vendor.IsActive
-            };
+       var result = MapVendor(vendor);
 
         return CreatedAtAction(
             nameof(GetVendor),
@@ -322,19 +356,181 @@ public async Task<ActionResult<VendorDto>>
         .SaveChangesAsync(
             cancellationToken);
 
-    return Ok(
-        new VendorDto
-        {
-            Id =
-                vendor.Id,
-
-            Name =
-                vendor.Name,
-
-            IsActive =
-                vendor.IsActive
-        });
+    return Ok(MapVendor(vendor));
 }
+
+
+    // =========================================================
+    // UPDATE VENDOR PARTNERSHIP
+    // Global, Events, and Certifications Admins only.
+    // =========================================================
+
+    [HttpPut("{id:guid}/partnership")]
+    [ProducesResponseType(typeof(VendorDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<VendorDto>> UpdateVendorPartnership(
+        Guid id,
+        [FromBody] UpdateVendorPartnershipRequest request,
+        CancellationToken cancellationToken)
+    {
+        var currentUser = await _currentUserService
+            .GetUserAsync(cancellationToken);
+
+        if (currentUser is null)
+        {
+            return Unauthorized();
+        }
+
+        if (!CanManageVendors(currentUser))
+        {
+            return Forbid();
+        }
+
+        var vendor = await _dbContext.Vendors
+            .SingleOrDefaultAsync(
+                v => v.Id == id,
+                cancellationToken);
+
+        if (vendor is null)
+        {
+            return NotFound();
+        }
+
+        if (request.PrimaryPartnerManagerId.HasValue)
+        {
+            var managerExists = await _dbContext.ApplicationUsers
+                .AsNoTracking()
+                .AnyAsync(
+                    user =>
+                        user.Id == request.PrimaryPartnerManagerId.Value &&
+                        user.IsActive,
+                    cancellationToken);
+
+            if (!managerExists)
+            {
+                ModelState.AddModelError(
+                    nameof(request.PrimaryPartnerManagerId),
+                    "The selected partner manager must be an active internal user.");
+
+                return ValidationProblem(ModelState);
+            }
+        }
+
+        vendor.PartnershipTier =
+            request.PartnershipTier?.Trim();
+
+        vendor.PartnershipStatus =
+            request.PartnershipStatus?.Trim();
+
+        vendor.PrimaryPartnerManagerId =
+            request.PrimaryPartnerManagerId;
+
+        vendor.PartnershipBenefits =
+            request.PartnershipBenefits?.Trim();
+
+        vendor.PartnerPrograms =
+            request.PartnerPrograms?.Trim();
+
+        vendor.UpdatedAtUtc = DateTimeOffset.UtcNow;
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        return Ok(MapVendor(vendor));
+    }
+
+
+    // =========================================================
+    // UPDATE STRUCTURED VENDOR BENEFITS
+    // Global, Events, and Certifications Admins only.
+    // =========================================================
+
+    [HttpPut("{id:guid}/benefits")]
+    [ProducesResponseType(typeof(VendorDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<VendorDto>> UpdateVendorBenefits(
+        Guid id,
+        [FromBody] UpdateVendorBenefitsRequest request,
+        CancellationToken cancellationToken)
+    {
+        var currentUser = await _currentUserService
+            .GetUserAsync(cancellationToken);
+
+        if (currentUser is null)
+        {
+            return Unauthorized();
+        }
+
+        if (!CanManageVendors(currentUser))
+        {
+            return Forbid();
+        }
+
+        var vendor = await _dbContext.Vendors
+            .SingleOrDefaultAsync(
+                v => v.Id == id,
+                cancellationToken);
+
+        if (vendor is null)
+        {
+            return NotFound();
+        }
+
+        // Validate percentage precision.
+        if (request.DiscountPercentage.HasValue &&
+            decimal.Round(request.DiscountPercentage.Value, 2) !=
+            request.DiscountPercentage.Value)
+        {
+            ModelState.AddModelError(
+                nameof(request.DiscountPercentage),
+                "Discount percentage cannot have more than two decimal places.");
+        }
+
+        if (request.RebatePercentage.HasValue &&
+            decimal.Round(request.RebatePercentage.Value, 2) !=
+            request.RebatePercentage.Value)
+        {
+            ModelState.AddModelError(
+                nameof(request.RebatePercentage),
+                "Rebate percentage cannot have more than two decimal places.");
+        }
+
+        if (!ModelState.IsValid)
+        {
+            return ValidationProblem(ModelState);
+        }
+
+        // Update structured benefits only.
+        vendor.DiscountPercentage =
+            request.DiscountPercentage;
+
+        vendor.RebatePercentage =
+            request.RebatePercentage;
+
+        vendor.DealRegistrationAvailable =
+            request.DealRegistrationAvailable;
+
+        vendor.DealRegistrationConditions =
+            string.IsNullOrWhiteSpace(request.DealRegistrationConditions)
+                ? null
+                : request.DealRegistrationConditions.Trim();
+
+        vendor.SpiffAvailable =
+            request.SpiffAvailable;
+
+        vendor.UpdatedAtUtc = DateTimeOffset.UtcNow;
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        return Ok(MapVendor(vendor));
+    }
+
+
 
         // =========================================================
     // UPDATE VENDOR ACTIVE STATUS
@@ -395,18 +591,7 @@ public async Task<ActionResult<VendorDto>>
             .SaveChangesAsync(
                 cancellationToken);
 
-        return Ok(
-            new VendorDto
-            {
-                Id =
-                    vendor.Id,
-
-                Name =
-                    vendor.Name,
-
-                IsActive =
-                    vendor.IsActive
-            });
+        return Ok(MapVendor(vendor));
     }
 
 
@@ -507,6 +692,19 @@ public async Task<ActionResult<VendorDto>>
             return ValidationProblem(ModelState);
         }
 
+
+if (!VendorPhoneNumber.TryNormalize(
+    request.Phone,
+    out var normalizedPhone))
+{
+    ModelState.AddModelError(
+        nameof(request.Phone),
+        "Enter a valid 10-digit North American phone number with an optional +1 country code.");
+
+    return ValidationProblem(ModelState);
+}
+
+
         var contact = await _dbContext.VendorContacts
             .SingleOrDefaultAsync(
                 contact =>
@@ -522,21 +720,24 @@ public async Task<ActionResult<VendorDto>>
         contact.Name = name;
         contact.JobTitle = request.JobTitle?.Trim();
         contact.Email = request.Email?.Trim();
-        contact.Phone = request.Phone?.Trim();
+        contact.Phone = normalizedPhone;
         contact.UpdatedAtUtc = DateTimeOffset.UtcNow;
 
         await _dbContext.SaveChangesAsync(
             cancellationToken);
 
-        return Ok(new VendorContactDto
-        {
-            Id = contact.Id,
-            VendorId = contact.VendorId,
-            Name = contact.Name,
-            JobTitle = contact.JobTitle,
-            Email = contact.Email,
-            Phone = contact.Phone
-        });
+
+return Ok(new VendorContactDto
+{
+    Id = contact.Id,
+    VendorId = contact.VendorId,
+    Name = contact.Name,
+    JobTitle = contact.JobTitle,
+    Email = contact.Email,
+    Phone = contact.Phone,
+    UpdatedAtUtc = contact.UpdatedAtUtc
+});
+
     }
 
 
@@ -587,6 +788,19 @@ public async Task<ActionResult<VendorDto>>
             return ValidationProblem(ModelState);
         }
 
+
+if (!VendorPhoneNumber.TryNormalize(
+    request.Phone,
+    out var normalizedPhone))
+{
+    ModelState.AddModelError(
+        nameof(request.Phone),
+        "Enter a valid 10-digit North American phone number with an optional +1 country code.");
+
+    return ValidationProblem(ModelState);
+}
+
+
         var vendorExists = await _dbContext.Vendors
             .AnyAsync(
                 vendor => vendor.Id == id,
@@ -606,7 +820,7 @@ public async Task<ActionResult<VendorDto>>
             Name = name,
             JobTitle = request.JobTitle?.Trim(),
             Email = request.Email?.Trim(),
-            Phone = request.Phone?.Trim(),
+            Phone = normalizedPhone,
             CreatedAtUtc = now,
             UpdatedAtUtc = now
         };
@@ -616,15 +830,18 @@ public async Task<ActionResult<VendorDto>>
         await _dbContext.SaveChangesAsync(
             cancellationToken);
 
-        var result = new VendorContactDto
-        {
-            Id = contact.Id,
-            VendorId = contact.VendorId,
-            Name = contact.Name,
-            JobTitle = contact.JobTitle,
-            Email = contact.Email,
-            Phone = contact.Phone
-        };
+
+var result = new VendorContactDto
+{
+    Id = contact.Id,
+    VendorId = contact.VendorId,
+    Name = contact.Name,
+    JobTitle = contact.JobTitle,
+    Email = contact.Email,
+    Phone = contact.Phone,
+    UpdatedAtUtc = contact.UpdatedAtUtc
+};
+
 
         return StatusCode(
             StatusCodes.Status201Created,
@@ -666,15 +883,18 @@ public async Task<ActionResult<VendorDto>>
                 .Where(contact => contact.VendorId == id)
                 .OrderBy(contact => contact.Name)
                 .ThenBy(contact => contact.Id)
-                .Select(contact => new VendorContactDto
-                {
-                    Id = contact.Id,
-                    VendorId = contact.VendorId,
-                    Name = contact.Name,
-                    JobTitle = contact.JobTitle,
-                    Email = contact.Email,
-                    Phone = contact.Phone
-                })
+
+.Select(contact => new VendorContactDto
+{
+    Id = contact.Id,
+    VendorId = contact.VendorId,
+    Name = contact.Name,
+    JobTitle = contact.JobTitle,
+    Email = contact.Email,
+    Phone = contact.Phone,
+    UpdatedAtUtc = contact.UpdatedAtUtc
+})
+
                 .ToListAsync(cancellationToken);
 
         return Ok(contacts);

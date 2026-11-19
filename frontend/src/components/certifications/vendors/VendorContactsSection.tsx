@@ -1,3 +1,8 @@
+import {
+  normalizeVendorPhone,
+  VENDOR_PHONE_ERROR,
+} from "../../../utils/vendorPhoneNumber";
+
 import { useEffect, useState } from "react";
 
 import {
@@ -130,6 +135,15 @@ export default function VendorContactsSection({
       return;
     }
 
+    let normalizedPhone: string | null;
+
+    try {
+      normalizedPhone = normalizeVendorPhone(phone);
+    } catch {
+      setFormError(VENDOR_PHONE_ERROR);
+      return;
+    }
+
     setSaving(true);
     setFormError(null);
 
@@ -138,7 +152,7 @@ export default function VendorContactsSection({
         name: name.trim(),
         jobTitle: jobTitle.trim() || null,
         email: email.trim() || null,
-        phone: phone.trim() || null,
+        phone: normalizedPhone,
       };
 
       if (editingContactId) {
@@ -220,7 +234,15 @@ export default function VendorContactsSection({
               type="tel"
               value={phone}
               maxLength={50}
-              onChange={(event) => setPhone(event.target.value)}
+              placeholder="+1 (416) 555-0123"
+              autoComplete="tel"
+              onChange={(event) => {
+                setPhone(event.target.value);
+
+                if (formError === VENDOR_PHONE_ERROR) {
+                  setFormError(null);
+                }
+              }}
             />
           </label>
 
@@ -249,50 +271,83 @@ export default function VendorContactsSection({
       ) : contacts.length === 0 ? (
         <p>No contacts have been added for this vendor.</p>
       ) : (
-        <div className="vendor-contacts__list">
-          {contacts.map((contact) => (
-            <article key={contact.id} className="vendor-contacts__item">
-              <strong>{contact.name}</strong>
+        <div className="vendor-contacts__table-wrapper">
+          <table className="vendor-contacts__table">
+            <thead>
+              <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Job Title</th>
+                <th scope="col">Email</th>
+                <th scope="col">Phone</th>
+                <th scope="col">Last Updated</th>
+                {canManage && <th scope="col">Actions</th>}
+              </tr>
+            </thead>
 
-              {contact.jobTitle && <p>{contact.jobTitle}</p>}
+            <tbody>
+              {contacts.map((contact) => (
+                <tr key={contact.id}>
+                  <td>
+                    <strong>{contact.name}</strong>
+                  </td>
 
-              {contact.email && (
-                <p>
-                  <a href={`mailto:${contact.email}`}>{contact.email}</a>
-                </p>
-              )}
+                  <td>{contact.jobTitle || "—"}</td>
 
-              {contact.phone && (
-                <p>
-                  <a href={`tel:${contact.phone}`}>{contact.phone}</a>
-                </p>
-              )}
+                  <td>
+                    {contact.email ? (
+                      <a href={`mailto:${contact.email}`}>{contact.email}</a>
+                    ) : (
+                      "—"
+                    )}
+                  </td>
 
-              {canManage && (
-                <div className="vendor-contacts__item-actions">
-                  <button
-                    type="button"
-                    disabled={saving || deletingContactId !== null}
-                    onClick={() => handleEditContact(contact)}
-                    aria-label={`Edit ${contact.name}`}
-                  >
-                    Edit Contact
-                  </button>
+                  <td className="vendor-contacts__phone">
+                    {contact.phone ? (
+                      <a href={`tel:${contact.phone}`}>{contact.phone}</a>
+                    ) : (
+                      "—"
+                    )}
+                  </td>
 
-                  <button
-                    type="button"
-                    disabled={saving || deletingContactId !== null}
-                    onClick={() => void handleDeleteContact(contact)}
-                    aria-label={`Delete ${contact.name}`}
-                  >
-                    {deletingContactId === contact.id
-                      ? "Deleting..."
-                      : "Delete Contact"}
-                  </button>
-                </div>
-              )}
-            </article>
-          ))}
+                  <td className="vendor-contacts__updated">
+                    {contact.updatedAtUtc
+                      ? new Date(contact.updatedAtUtc).toLocaleDateString(
+                          "en-CA",
+                        )
+                      : "—"}
+                  </td>
+
+                  {canManage && (
+                    <td>
+                      <div className="vendor-contacts__item-actions">
+                        <button
+                          type="button"
+                          disabled={saving || deletingContactId !== null}
+                          onClick={() => handleEditContact(contact)}
+                          aria-label={`Edit ${contact.name}`}
+                          title="Edit contact"
+                        >
+                          Edit
+                        </button>
+
+                        <button
+                          type="button"
+                          disabled={saving || deletingContactId !== null}
+                          onClick={() => void handleDeleteContact(contact)}
+                          aria-label={`Delete ${contact.name}`}
+                          title="Delete contact"
+                        >
+                          {deletingContactId === contact.id
+                            ? "Deleting..."
+                            : "Delete"}
+                        </button>
+                      </div>
+                    </td>
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
     </section>

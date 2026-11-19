@@ -229,11 +229,11 @@ namespace OnXPortfolio.Infrastructure.Persistence.Migrations
                         .HasMaxLength(300)
                         .HasColumnType("character varying(300)");
 
-                    b.Property<DateOnly?>("EventDate")
-                        .HasColumnType("date");
-
                     b.Property<TimeOnly?>("EndTime")
                         .HasColumnType("time without time zone");
+
+                    b.Property<DateOnly?>("EventDate")
+                        .HasColumnType("date");
 
                     b.Property<string>("Notes")
                         .HasMaxLength(4000)
@@ -614,6 +614,17 @@ namespace OnXPortfolio.Infrastructure.Persistence.Migrations
                     b.Property<DateTimeOffset>("CreatedAtUtc")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<bool?>("DealRegistrationAvailable")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("DealRegistrationConditions")
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<decimal?>("DiscountPercentage")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("numeric(5,2)");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
 
@@ -621,6 +632,32 @@ namespace OnXPortfolio.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasMaxLength(150)
                         .HasColumnType("character varying(150)");
+
+                    b.Property<string>("PartnerPrograms")
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<string>("PartnershipBenefits")
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<string>("PartnershipStatus")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("PartnershipTier")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<Guid?>("PrimaryPartnerManagerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal?>("RebatePercentage")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("numeric(5,2)");
+
+                    b.Property<bool?>("SpiffAvailable")
+                        .HasColumnType("boolean");
 
                     b.Property<DateTimeOffset>("UpdatedAtUtc")
                         .HasColumnType("timestamp with time zone");
@@ -630,9 +667,10 @@ namespace OnXPortfolio.Infrastructure.Persistence.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
+                    b.HasIndex("PrimaryPartnerManagerId");
+
                     b.ToTable("Vendors", (string)null);
                 });
-
 
             modelBuilder.Entity("OnXPortfolio.Domain.Vendors.VendorContact", b =>
                 {
@@ -672,19 +710,6 @@ namespace OnXPortfolio.Infrastructure.Persistence.Migrations
 
                     b.ToTable("VendorContacts", (string)null);
                 });
-
-
-            modelBuilder.Entity("OnXPortfolio.Domain.Vendors.VendorContact", b =>
-                {
-                    b.HasOne("OnXPortfolio.Domain.Vendors.Vendor", "Vendor")
-                        .WithMany("Contacts")
-                        .HasForeignKey("VendorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Vendor");
-                });
-
 
             modelBuilder.Entity("OnXPortfolio.Domain.Certifications.Certification", b =>
                 {
@@ -821,6 +846,27 @@ namespace OnXPortfolio.Infrastructure.Persistence.Migrations
                     b.Navigation("ReviewedByUser");
                 });
 
+            modelBuilder.Entity("OnXPortfolio.Domain.Vendors.Vendor", b =>
+                {
+                    b.HasOne("OnXPortfolio.Domain.Users.ApplicationUser", "PrimaryPartnerManager")
+                        .WithMany()
+                        .HasForeignKey("PrimaryPartnerManagerId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("PrimaryPartnerManager");
+                });
+
+            modelBuilder.Entity("OnXPortfolio.Domain.Vendors.VendorContact", b =>
+                {
+                    b.HasOne("OnXPortfolio.Domain.Vendors.Vendor", "Vendor")
+                        .WithMany("Contacts")
+                        .HasForeignKey("VendorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Vendor");
+                });
+
             modelBuilder.Entity("OnXPortfolio.Domain.Certifications.CertificationPerson", b =>
                 {
                     b.Navigation("Certifications");
@@ -838,7 +884,6 @@ namespace OnXPortfolio.Infrastructure.Persistence.Migrations
                     b.Navigation("DirectReports");
                 });
 
-
             modelBuilder.Entity("OnXPortfolio.Domain.Vendors.Vendor", b =>
                 {
                     b.Navigation("Certifications");
@@ -849,7 +894,6 @@ namespace OnXPortfolio.Infrastructure.Persistence.Migrations
 
                     b.Navigation("Rebates");
                 });
-
 #pragma warning restore 612, 618
         }
     }

@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
-import { Building2, Search } from "lucide-react";
+import { Building2, Plus, Search } from "lucide-react";
+import axios from "axios";
 
-import { getVendors } from "../../api/vendorsApi";
+import { createVendor, getVendors } from "../../api/vendorsApi";
 import type { CertificationVendorDto } from "../../types/certifications";
 
 import { useAuth } from "../../auth/AuthContext";
 import VendorContactsSection from "../certifications/vendors/VendorContactsSection";
 import VendorCertificationsSection from "./VendorCertificationsSection";
 import VendorEventsSection from "./VendorEventsSection";
+import VendorPartnershipSection from "./VendorPartnershipSection";
+import VendorBenefitsSection from "./VendorBenefitsSection";
 import type { VendorManagementSection } from "./VendorManagementNav";
 
 interface VendorDirectoryProps {
@@ -42,11 +45,17 @@ export default function VendorDirectory({
     useState<CertificationVendorDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [showAddVendor, setShowAddVendor] = useState(false);
+  const [newVendorName, setNewVendorName] = useState("");
+  const [createError, setCreateError] = useState("");
+  const [creatingVendor, setCreatingVendor] = useState(false);
 
   const { user } = useAuth();
 
   const canManageVendors = Boolean(
-    user?.isGlobalAdministrator || user?.certificationsAccess === "Admin",
+    user?.isGlobalAdministrator ||
+    user?.eventsAccess === "Admin" ||
+    user?.certificationsAccess === "Admin",
   );
 
   useEffect(() => {
@@ -60,7 +69,12 @@ export default function VendorDirectory({
         const data = await getVendors(controller.signal);
 
         if (!controller.signal.aborted) {
-          setVendors(data);
+          const sortedVendors = [...data].sort((a, b) =>
+            a.name.localeCompare(b.name),
+          );
+
+          setVendors(sortedVendors);
+          setSelectedVendor(sortedVendors[0] ?? null);
         }
       } catch {
         if (!controller.signal.aborted) {
@@ -78,6 +92,67 @@ export default function VendorDirectory({
     return () => controller.abort();
   }, []);
 
+  async function handleCreateVendor(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!canManageVendors || creatingVendor) {
+      return;
+    }
+
+    const name = newVendorName.trim();
+
+    if (name.length < 2 || name.length > 150) {
+      setCreateError("Vendor name must be between 2 and 150 characters.");
+      return;
+    }
+
+    try {
+      setCreatingVendor(true);
+      setCreateError("");
+
+      const createdVendor = await createVendor(name);
+
+      setVendors((current) =>
+        [...current, createdVendor].sort((a, b) =>
+          a.name.localeCompare(b.name),
+        ),
+      );
+
+      setSelectedVendor(createdVendor);
+      setSearch("");
+      setNewVendorName("");
+      setShowAddVendor(false);
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 403) {
+          setCreateError("You do not have permission to create vendors.");
+        } else if (error.response?.status === 400) {
+          setCreateError(
+            "Unable to create vendor. Check whether the name already exists.",
+          );
+        } else {
+          setCreateError("Unable to create vendor. Please try again.");
+        }
+      } else {
+        setCreateError("Unable to create vendor. Please try again.");
+      }
+    } finally {
+      setCreatingVendor(false);
+    }
+  }
+
+  function handleVendorUpdated(updatedVendor: CertificationVendorDto) {
+    setVendors((current) =>
+      current.map((vendor) =>
+        vendor.id === updatedVendor.id ? updatedVendor : vendor,
+      ),
+    );
+
+    setSelectedVendor((current) =>
+      current?.id === updatedVendor.id ? updatedVendor : current,
+    );
+  }
+
   const filteredVendors = vendors.filter((vendor) =>
     vendor.name.toLowerCase().includes(search.trim().toLowerCase()),
   );
@@ -89,8 +164,103 @@ export default function VendorDirectory({
   return (
     <div style={{ padding: "24px" }}>
       <header style={{ marginBottom: "24px" }}>
-        <h2>{currentContent.title}</h2>
-        <p>{currentContent.description}</p>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: "16px",
+          }}
+        >
+          <div>
+            <h2>{currentContent.title}</h2>
+            <p>{currentContent.description}</p>
+          </div>
+
+          {currentSection === "vendors" && canManageVendors && (
+            <button
+              type="button"
+              onClick={() => {
+                setShowAddVendor((current) => !current);
+                setCreateError("");
+              }}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "10px 16px",
+                border: "none",
+                borderRadius: "8px",
+                background: "#28785d",
+                color: "#ffffff",
+                cursor: "pointer",
+              }}
+            >
+              <Plus size={18} />
+              Add Vendor
+            </button>
+          )}
+        </div>
+
+        {showAddVendor && canManageVendors && (
+          <form
+            onSubmit={handleCreateVendor}
+            style={{
+              marginTop: "20px",
+              padding: "20px",
+              border: "1px solid #e2e8f0",
+              borderRadius: "10px",
+              background: "#ffffff",
+            }}
+          >
+            <label
+              htmlFor="new-vendor-name"
+              style={{ display: "block", marginBottom: "8px" }}
+            >
+              Vendor Name
+            </label>
+
+            <input
+              id="new-vendor-name"
+              type="text"
+              value={newVendorName}
+              onChange={(event) => setNewVendorName(event.target.value)}
+              placeholder="Enter vendor name"
+              minLength={2}
+              maxLength={150}
+              required
+              disabled={creatingVendor}
+              style={{
+                width: "100%",
+                padding: "10px",
+                border: "1px solid #cbd5e1",
+                borderRadius: "8px",
+                marginBottom: "12px",
+              }}
+            />
+
+            {createError && (
+              <p role="alert" style={{ color: "#b91c1c" }}>
+                {createError}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              disabled={creatingVendor}
+              style={{
+                padding: "10px 16px",
+                border: "none",
+                borderRadius: "8px",
+                background: "#28785d",
+                color: "#ffffff",
+                cursor: creatingVendor ? "not-allowed" : "pointer",
+              }}
+            >
+              {creatingVendor ? "Creating..." : "Save Vendor"}
+            </button>
+          </form>
+        )}
       </header>
 
       <div style={{ position: "relative", marginBottom: "20px" }}>
@@ -176,18 +346,32 @@ export default function VendorDirectory({
               <>
                 <h3>{selectedVendor.name}</h3>
 
-                <p>Status: {selectedVendor.isActive ? "Active" : "Inactive"}</p>
+                <p>
+                  Partnership Tier:{" "}
+                  <strong>
+                    {selectedVendor.partnershipTier || "Not specified"}
+                  </strong>
+                </p>
 
                 {currentSection === "vendors" && (
                   <>
                     <hr style={{ margin: "20px 0" }} />
 
-                    <h4>Partnership Overview</h4>
+                    <VendorPartnershipSection
+                      key={`partnership-${selectedVendor.id}`}
+                      vendor={selectedVendor}
+                      canManageVendors={canManageVendors}
+                      onVendorUpdated={handleVendorUpdated}
+                    />
 
-                    <p>
-                      Partnership details will be added after requirements are
-                      confirmed.
-                    </p>
+                    <hr style={{ margin: "24px 0" }} />
+
+                    <VendorBenefitsSection
+                      key={`benefits-${selectedVendor.id}`}
+                      vendor={selectedVendor}
+                      canManageVendors={canManageVendors}
+                      onVendorUpdated={handleVendorUpdated}
+                    />
                   </>
                 )}
 

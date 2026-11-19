@@ -7,6 +7,7 @@ export interface VendorContactDto {
   jobTitle: string | null;
   email: string | null;
   phone: string | null;
+  updatedAtUtc: string;
 }
 
 export interface VendorContactInput {
