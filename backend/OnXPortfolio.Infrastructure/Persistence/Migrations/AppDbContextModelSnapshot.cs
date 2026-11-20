@@ -672,6 +672,46 @@ namespace OnXPortfolio.Infrastructure.Persistence.Migrations
                     b.ToTable("Vendors", (string)null);
                 });
 
+            modelBuilder.Entity("OnXPortfolio.Domain.Vendors.VendorActivity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateOnly>("ActivityDate")
+                        .HasColumnType("date");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasMaxLength(10000)
+                        .HasColumnType("character varying(10000)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("VendorId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("VendorId", "ActivityDate");
+
+                    b.ToTable("VendorActivities", (string)null);
+                });
+
             modelBuilder.Entity("OnXPortfolio.Domain.Vendors.VendorContact", b =>
                 {
                     b.Property<Guid>("Id")
@@ -856,6 +896,25 @@ namespace OnXPortfolio.Infrastructure.Persistence.Migrations
                     b.Navigation("PrimaryPartnerManager");
                 });
 
+            modelBuilder.Entity("OnXPortfolio.Domain.Vendors.VendorActivity", b =>
+                {
+                    b.HasOne("OnXPortfolio.Domain.Users.ApplicationUser", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("OnXPortfolio.Domain.Vendors.Vendor", "Vendor")
+                        .WithMany("Activities")
+                        .HasForeignKey("VendorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("Vendor");
+                });
+
             modelBuilder.Entity("OnXPortfolio.Domain.Vendors.VendorContact", b =>
                 {
                     b.HasOne("OnXPortfolio.Domain.Vendors.Vendor", "Vendor")
@@ -886,6 +945,8 @@ namespace OnXPortfolio.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("OnXPortfolio.Domain.Vendors.Vendor", b =>
                 {
+                    b.Navigation("Activities");
+
                     b.Navigation("Certifications");
 
                     b.Navigation("Contacts");

@@ -41,6 +41,9 @@ public bool? SpiffAvailable { get; set; }
 public ICollection<VendorContact> Contacts { get; set; } =
     new List<VendorContact>();
 
+public ICollection<VendorActivity> Activities { get; set; } =
+    new List<VendorActivity>();
+
 
     public ICollection<Event> Events { get; set; } =
         new List<Event>();

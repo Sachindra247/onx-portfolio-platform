@@ -900,6 +900,257 @@ var result = new VendorContactDto
         return Ok(contacts);
     }
 
+        // =========================================================
+    // VENDOR ACTIVITY PROJECTION
+    // =========================================================
+
+    private static readonly Expression<Func<VendorActivity, VendorActivityDto>>
+        VendorActivityProjection = activity => new VendorActivityDto
+        {
+            Id = activity.Id,
+            VendorId = activity.VendorId,
+            Title = activity.Title,
+            ActivityDate = activity.ActivityDate,
+            Notes = activity.Notes,
+            CreatedByUserId = activity.CreatedByUserId,
+            CreatedByName =
+                activity.CreatedByUser.FirstName + " " +
+                activity.CreatedByUser.LastName,
+            CreatedAtUtc = activity.CreatedAtUtc,
+            UpdatedAtUtc = activity.UpdatedAtUtc
+        };
+
+
+    // =========================================================
+    // GET VENDOR ACTIVITIES
+    // =========================================================
+
+    [HttpGet("{id:guid}/activities")]
+    [ProducesResponseType(
+        typeof(IReadOnlyList<VendorActivityDto>),
+        StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<IReadOnlyList<VendorActivityDto>>>
+        GetVendorActivities(
+            Guid id,
+            CancellationToken cancellationToken)
+    {
+        var currentUser = await _currentUserService
+            .GetUserAsync(cancellationToken);
+
+        if (currentUser is null || !currentUser.IsActive)
+        {
+            return Unauthorized();
+        }
+
+        var vendorExists = await _dbContext.Vendors
+            .AsNoTracking()
+            .AnyAsync(
+                vendor => vendor.Id == id,
+                cancellationToken);
+
+        if (!vendorExists)
+        {
+            return NotFound();
+        }
+
+        var activities = await _dbContext.VendorActivities
+            .AsNoTracking()
+            .Where(activity => activity.VendorId == id)
+            .OrderByDescending(activity => activity.ActivityDate)
+            .ThenByDescending(activity => activity.Id)
+            .Select(VendorActivityProjection)
+            .ToListAsync(cancellationToken);
+
+        return Ok(activities
+            .OrderByDescending(activity => activity.ActivityDate)
+            .ThenByDescending(activity => activity.CreatedAtUtc)
+            .ThenByDescending(activity => activity.Id)
+            .ToList());
+    }
+
+        // =========================================================
+    // CREATE VENDOR ACTIVITY
+    // =========================================================
+
+    [HttpPost("{id:guid}/activities")]
+    [ProducesResponseType(
+        typeof(VendorActivityDto),
+        StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<VendorActivityDto>>
+        CreateVendorActivity(
+            Guid id,
+            [FromBody] SaveVendorActivityRequest request,
+            CancellationToken cancellationToken)
+    {
+        var currentUser = await _currentUserService
+            .GetUserAsync(cancellationToken);
+
+        if (currentUser is null || !currentUser.IsActive)
+        {
+            return Unauthorized();
+        }
+
+        if (!CanManageVendors(currentUser))
+        {
+            return Forbid();
+        }
+
+        if (string.IsNullOrWhiteSpace(request.Title))
+        {
+            ModelState.AddModelError(
+                nameof(request.Title),
+                "Activity title is required.");
+        }
+
+        if (string.IsNullOrWhiteSpace(request.Notes))
+        {
+            ModelState.AddModelError(
+                nameof(request.Notes),
+                "Activity notes are required.");
+        }
+
+        if (!request.ActivityDate.HasValue)
+        {
+            ModelState.AddModelError(
+                nameof(request.ActivityDate),
+                "Activity date is required.");
+        }
+
+        if (!ModelState.IsValid)
+        {
+            return ValidationProblem(ModelState);
+        }
+
+        var vendorExists = await _dbContext.Vendors
+            .AnyAsync(
+                vendor => vendor.Id == id,
+                cancellationToken);
+
+        if (!vendorExists)
+        {
+            return NotFound();
+        }
+
+        var now = DateTimeOffset.UtcNow;
+
+        var activity = new VendorActivity
+        {
+            Id = Guid.NewGuid(),
+            VendorId = id,
+            Title = request.Title.Trim(),
+            ActivityDate = request.ActivityDate!.Value,
+            Notes = request.Notes.Trim(),
+            CreatedByUserId = currentUser.Id,
+            CreatedAtUtc = now,
+            UpdatedAtUtc = now
+        };
+
+        _dbContext.VendorActivities.Add(activity);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        var result = await _dbContext.VendorActivities
+            .AsNoTracking()
+            .Where(item => item.Id == activity.Id)
+            .Select(VendorActivityProjection)
+            .SingleAsync(cancellationToken);
+
+        return StatusCode(
+            StatusCodes.Status201Created,
+            result);
+    }
+
+        // =========================================================
+    // UPDATE VENDOR ACTIVITY
+    // =========================================================
+
+    [HttpPut("{id:guid}/activities/{activityId:guid}")]
+    [ProducesResponseType(
+        typeof(VendorActivityDto),
+        StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<VendorActivityDto>>
+        UpdateVendorActivity(
+            Guid id,
+            Guid activityId,
+            [FromBody] SaveVendorActivityRequest request,
+            CancellationToken cancellationToken)
+    {
+        var currentUser = await _currentUserService
+            .GetUserAsync(cancellationToken);
+
+        if (currentUser is null || !currentUser.IsActive)
+        {
+            return Unauthorized();
+        }
+
+        if (!CanManageVendors(currentUser))
+        {
+            return Forbid();
+        }
+
+        if (string.IsNullOrWhiteSpace(request.Title))
+        {
+            ModelState.AddModelError(
+                nameof(request.Title),
+                "Activity title is required.");
+        }
+
+        if (string.IsNullOrWhiteSpace(request.Notes))
+        {
+            ModelState.AddModelError(
+                nameof(request.Notes),
+                "Activity notes are required.");
+        }
+
+        if (!request.ActivityDate.HasValue)
+        {
+            ModelState.AddModelError(
+                nameof(request.ActivityDate),
+                "Activity date is required.");
+        }
+
+        if (!ModelState.IsValid)
+        {
+            return ValidationProblem(ModelState);
+        }
+
+        var activity = await _dbContext.VendorActivities
+            .SingleOrDefaultAsync(
+                item => item.Id == activityId &&
+                        item.VendorId == id,
+                cancellationToken);
+
+        if (activity is null)
+        {
+            return NotFound();
+        }
+
+        activity.Title = request.Title.Trim();
+        activity.ActivityDate = request.ActivityDate!.Value;
+        activity.Notes = request.Notes.Trim();
+        activity.UpdatedAtUtc = DateTimeOffset.UtcNow;
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        var result = await _dbContext.VendorActivities
+            .AsNoTracking()
+            .Where(item => item.Id == activity.Id)
+            .Select(VendorActivityProjection)
+            .SingleAsync(cancellationToken);
+
+        return Ok(result);
+    }
+
 
     private static bool CanManageEvents(
         ApplicationUser user)

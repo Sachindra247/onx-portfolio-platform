@@ -11,6 +11,7 @@ import VendorCertificationsSection from "./VendorCertificationsSection";
 import VendorEventsSection from "./VendorEventsSection";
 import VendorPartnershipSection from "./VendorPartnershipSection";
 import VendorBenefitsSection from "./VendorBenefitsSection";
+import VendorActivitiesSection from "./VendorActivitiesSection";
 import type { VendorManagementSection } from "./VendorManagementNav";
 
 interface VendorDirectoryProps {
@@ -371,6 +372,14 @@ export default function VendorDirectory({
                       vendor={selectedVendor}
                       canManageVendors={canManageVendors}
                       onVendorUpdated={handleVendorUpdated}
+                    />
+
+                    <hr style={{ margin: "24px 0" }} />
+
+                    <VendorActivitiesSection
+                      key={`activities-${selectedVendor.id}`}
+                      vendorId={selectedVendor.id}
+                      canManageVendors={canManageVendors}
                     />
                   </>
                 )}
