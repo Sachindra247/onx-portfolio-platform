@@ -374,13 +374,17 @@ export default function VendorDirectory({
                       onVendorUpdated={handleVendorUpdated}
                     />
 
-                    <hr style={{ margin: "24px 0" }} />
+                    {canManageVendors && (
+                      <>
+                        <hr style={{ margin: "24px 0" }} />
 
-                    <VendorActivitiesSection
-                      key={`activities-${selectedVendor.id}`}
-                      vendorId={selectedVendor.id}
-                      canManageVendors={canManageVendors}
-                    />
+                        <VendorActivitiesSection
+                          key={`activities-${selectedVendor.id}`}
+                          vendorId={selectedVendor.id}
+                          canManageVendors={canManageVendors}
+                        />
+                      </>
+                    )}
                   </>
                 )}
 
