@@ -1157,6 +1157,322 @@ var result = new VendorContactDto
         return Ok(result);
     }
 
+    // ======================================================
+// VENDOR COMPLIANCE REQUIREMENTS
+// ======================================================
+
+[HttpGet("{id:guid}/compliance-requirements")]
+[ProducesResponseType(
+    typeof(IReadOnlyList<VendorComplianceRequirementDto>),
+    StatusCodes.Status200OK)]
+[ProducesResponseType(StatusCodes.Status401Unauthorized)]
+[ProducesResponseType(StatusCodes.Status403Forbidden)]
+[ProducesResponseType(StatusCodes.Status404NotFound)]
+public async Task<ActionResult<IReadOnlyList<VendorComplianceRequirementDto>>>
+    GetVendorComplianceRequirements(
+        Guid id,
+        CancellationToken cancellationToken)
+{
+    var currentUser = await _currentUserService
+        .GetUserAsync(cancellationToken);
+
+    if (currentUser is null || !currentUser.IsActive)
+    {
+        return Unauthorized();
+    }
+
+    if (!CanManageVendors(currentUser))
+    {
+        return Forbid();
+    }
+
+    var vendorExists = await _dbContext.Vendors
+        .AsNoTracking()
+        .AnyAsync(vendor => vendor.Id == id, cancellationToken);
+
+    if (!vendorExists)
+    {
+        return NotFound();
+    }
+
+    var requirements = await _dbContext
+        .VendorComplianceRequirements
+        .AsNoTracking()
+        .Where(item => item.VendorId == id)
+        .OrderByDescending(item => item.PeriodStart)
+        .ThenBy(item => item.RequirementType)
+        .ThenBy(item => item.Name)
+        .ToListAsync(cancellationToken);
+
+    return Ok(requirements
+        .Select(MapComplianceRequirement)
+        .ToList());
+}
+
+
+[HttpPost("{id:guid}/compliance-requirements")]
+[ProducesResponseType(
+    typeof(VendorComplianceRequirementDto),
+    StatusCodes.Status201Created)]
+[ProducesResponseType(StatusCodes.Status400BadRequest)]
+[ProducesResponseType(StatusCodes.Status401Unauthorized)]
+[ProducesResponseType(StatusCodes.Status403Forbidden)]
+[ProducesResponseType(StatusCodes.Status404NotFound)]
+public async Task<ActionResult<VendorComplianceRequirementDto>>
+    CreateVendorComplianceRequirement(
+        Guid id,
+        [FromBody] SaveVendorComplianceRequirementRequest request,
+        CancellationToken cancellationToken)
+{
+    var currentUser = await _currentUserService
+        .GetUserAsync(cancellationToken);
+
+    if (currentUser is null || !currentUser.IsActive)
+    {
+        return Unauthorized();
+    }
+
+    if (!CanManageVendors(currentUser))
+    {
+        return Forbid();
+    }
+
+    ValidateComplianceRequirement(request);
+
+    if (!ModelState.IsValid)
+    {
+        return ValidationProblem(ModelState);
+    }
+
+    var vendorExists = await _dbContext.Vendors
+        .AnyAsync(vendor => vendor.Id == id, cancellationToken);
+
+    if (!vendorExists)
+    {
+        return NotFound();
+    }
+
+    var requirement = new VendorComplianceRequirement
+    {
+        VendorId = id
+    };
+
+    ApplyComplianceRequirementValues(requirement, request);
+
+    _dbContext.VendorComplianceRequirements.Add(requirement);
+
+    await _dbContext.SaveChangesAsync(cancellationToken);
+
+    return CreatedAtAction(
+        nameof(GetVendorComplianceRequirements),
+        new { id },
+        MapComplianceRequirement(requirement));
+}
+
+
+[HttpPut("{id:guid}/compliance-requirements/{requirementId:guid}")]
+[ProducesResponseType(
+    typeof(VendorComplianceRequirementDto),
+    StatusCodes.Status200OK)]
+[ProducesResponseType(StatusCodes.Status400BadRequest)]
+[ProducesResponseType(StatusCodes.Status401Unauthorized)]
+[ProducesResponseType(StatusCodes.Status403Forbidden)]
+[ProducesResponseType(StatusCodes.Status404NotFound)]
+public async Task<ActionResult<VendorComplianceRequirementDto>>
+    UpdateVendorComplianceRequirement(
+        Guid id,
+        Guid requirementId,
+        [FromBody] SaveVendorComplianceRequirementRequest request,
+        CancellationToken cancellationToken)
+{
+    var currentUser = await _currentUserService
+        .GetUserAsync(cancellationToken);
+
+    if (currentUser is null || !currentUser.IsActive)
+    {
+        return Unauthorized();
+    }
+
+    if (!CanManageVendors(currentUser))
+    {
+        return Forbid();
+    }
+
+    ValidateComplianceRequirement(request);
+
+    if (!ModelState.IsValid)
+    {
+        return ValidationProblem(ModelState);
+    }
+
+    var requirement = await _dbContext
+        .VendorComplianceRequirements
+        .SingleOrDefaultAsync(
+            item => item.Id == requirementId &&
+                    item.VendorId == id,
+            cancellationToken);
+
+    if (requirement is null)
+    {
+        return NotFound();
+    }
+
+    ApplyComplianceRequirementValues(requirement, request);
+
+    await _dbContext.SaveChangesAsync(cancellationToken);
+
+    return Ok(MapComplianceRequirement(requirement));
+}
+
+
+// ======================================================
+// VENDOR COMPLIANCE VALIDATION
+// ======================================================
+
+private void ValidateComplianceRequirement(
+    SaveVendorComplianceRequirementRequest request)
+{
+    if (string.IsNullOrWhiteSpace(request.Name))
+    {
+        ModelState.AddModelError(
+            nameof(request.Name),
+            "Requirement name is required.");
+    }
+
+    if (!request.RequirementType.HasValue ||
+        !Enum.IsDefined(
+            typeof(VendorComplianceRequirementType),
+            request.RequirementType.Value))
+    {
+        ModelState.AddModelError(
+            nameof(request.RequirementType),
+            "A valid requirement type is required.");
+    }
+
+    if (string.IsNullOrWhiteSpace(request.Unit))
+    {
+        ModelState.AddModelError(
+            nameof(request.Unit),
+            "Measurement unit is required.");
+    }
+
+    if (!request.TargetValue.HasValue ||
+        request.TargetValue.Value <= 0)
+    {
+        ModelState.AddModelError(
+            nameof(request.TargetValue),
+            "Target value must be greater than zero.");
+    }
+
+    if (request.ActualValue.HasValue &&
+        request.ActualValue.Value < 0)
+    {
+        ModelState.AddModelError(
+            nameof(request.ActualValue),
+            "Actual value cannot be negative.");
+    }
+
+    if (request.TargetValue.HasValue &&
+        decimal.Round(request.TargetValue.Value, 2) !=
+        request.TargetValue.Value)
+    {
+        ModelState.AddModelError(
+            nameof(request.TargetValue),
+            "Target value supports up to two decimal places.");
+    }
+
+    if (request.ActualValue.HasValue &&
+        decimal.Round(request.ActualValue.Value, 2) !=
+        request.ActualValue.Value)
+    {
+        ModelState.AddModelError(
+            nameof(request.ActualValue),
+            "Actual value supports up to two decimal places.");
+    }
+
+    if (!request.PeriodStart.HasValue)
+    {
+        ModelState.AddModelError(
+            nameof(request.PeriodStart),
+            "Period start date is required.");
+    }
+
+    if (!request.PeriodEnd.HasValue)
+    {
+        ModelState.AddModelError(
+            nameof(request.PeriodEnd),
+            "Period end date is required.");
+    }
+
+    if (request.PeriodStart.HasValue &&
+        request.PeriodEnd.HasValue &&
+        request.PeriodEnd.Value < request.PeriodStart.Value)
+    {
+        ModelState.AddModelError(
+            nameof(request.PeriodEnd),
+            "Period end cannot be earlier than period start.");
+    }
+}
+
+
+// ======================================================
+// VENDOR COMPLIANCE MAPPING
+// ======================================================
+
+private static void ApplyComplianceRequirementValues(
+    VendorComplianceRequirement requirement,
+    SaveVendorComplianceRequirementRequest request)
+{
+    requirement.Name = request.Name.Trim();
+    requirement.RequirementType = request.RequirementType!.Value;
+    requirement.TargetValue = request.TargetValue!.Value;
+    requirement.ActualValue = request.ActualValue;
+    requirement.Unit = request.Unit.Trim();
+    requirement.PeriodStart = request.PeriodStart!.Value;
+    requirement.PeriodEnd = request.PeriodEnd!.Value;
+
+    requirement.Notes = string.IsNullOrWhiteSpace(request.Notes)
+        ? null
+        : request.Notes.Trim();
+
+    requirement.UpdatedAtUtc = DateTimeOffset.UtcNow;
+}
+
+
+private static VendorComplianceRequirementDto
+    MapComplianceRequirement(
+        VendorComplianceRequirement requirement)
+{
+    decimal? achievementPercentage = null;
+
+    if (requirement.ActualValue.HasValue &&
+        requirement.TargetValue > 0)
+    {
+        achievementPercentage = decimal.Round(
+            requirement.ActualValue.Value /
+            requirement.TargetValue * 100m,
+            2,
+            MidpointRounding.AwayFromZero);
+    }
+
+    return new VendorComplianceRequirementDto
+    {
+        Id = requirement.Id,
+        VendorId = requirement.VendorId,
+        Name = requirement.Name,
+        RequirementType = requirement.RequirementType,
+        TargetValue = requirement.TargetValue,
+        ActualValue = requirement.ActualValue,
+        Unit = requirement.Unit,
+        PeriodStart = requirement.PeriodStart,
+        PeriodEnd = requirement.PeriodEnd,
+        Notes = requirement.Notes,
+        AchievementPercentage = achievementPercentage,
+        CreatedAtUtc = requirement.CreatedAtUtc,
+        UpdatedAtUtc = requirement.UpdatedAtUtc
+    };
+}
+
 
     private static bool CanManageEvents(
         ApplicationUser user)

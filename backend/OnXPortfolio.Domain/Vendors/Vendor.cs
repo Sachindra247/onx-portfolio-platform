@@ -44,6 +44,10 @@ public ICollection<VendorContact> Contacts { get; set; } =
 public ICollection<VendorActivity> Activities { get; set; } =
     new List<VendorActivity>();
 
+public ICollection<VendorComplianceRequirement> ComplianceRequirements
+    { get; set; } =
+    new List<VendorComplianceRequirement>();
+
 
     public ICollection<Event> Events { get; set; } =
         new List<Event>();

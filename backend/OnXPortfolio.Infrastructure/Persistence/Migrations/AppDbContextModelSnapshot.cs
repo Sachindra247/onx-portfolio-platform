@@ -712,6 +712,59 @@ namespace OnXPortfolio.Infrastructure.Persistence.Migrations
                     b.ToTable("VendorActivities", (string)null);
                 });
 
+            modelBuilder.Entity("OnXPortfolio.Domain.Vendors.VendorComplianceRequirement", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal?>("ActualValue")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(10000)
+                        .HasColumnType("character varying(10000)");
+
+                    b.Property<DateOnly>("PeriodEnd")
+                        .HasColumnType("date");
+
+                    b.Property<DateOnly>("PeriodStart")
+                        .HasColumnType("date");
+
+                    b.Property<int>("RequirementType")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("TargetValue")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<string>("Unit")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("VendorId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VendorId", "PeriodStart", "PeriodEnd");
+
+                    b.ToTable("VendorComplianceRequirements", (string)null);
+                });
+
             modelBuilder.Entity("OnXPortfolio.Domain.Vendors.VendorContact", b =>
                 {
                     b.Property<Guid>("Id")
@@ -915,6 +968,17 @@ namespace OnXPortfolio.Infrastructure.Persistence.Migrations
                     b.Navigation("Vendor");
                 });
 
+            modelBuilder.Entity("OnXPortfolio.Domain.Vendors.VendorComplianceRequirement", b =>
+                {
+                    b.HasOne("OnXPortfolio.Domain.Vendors.Vendor", "Vendor")
+                        .WithMany("ComplianceRequirements")
+                        .HasForeignKey("VendorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Vendor");
+                });
+
             modelBuilder.Entity("OnXPortfolio.Domain.Vendors.VendorContact", b =>
                 {
                     b.HasOne("OnXPortfolio.Domain.Vendors.Vendor", "Vendor")
@@ -948,6 +1012,8 @@ namespace OnXPortfolio.Infrastructure.Persistence.Migrations
                     b.Navigation("Activities");
 
                     b.Navigation("Certifications");
+
+                    b.Navigation("ComplianceRequirements");
 
                     b.Navigation("Contacts");
 

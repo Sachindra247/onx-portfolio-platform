@@ -32,6 +32,9 @@ public sealed class AppDbContext : DbContext
     public DbSet<VendorActivity> VendorActivities =>
         Set<VendorActivity>();
 
+    public DbSet<VendorComplianceRequirement> VendorComplianceRequirements =>
+        Set<VendorComplianceRequirement>();
+
 
     public DbSet<Certification> Certifications =>
         Set<Certification>();
