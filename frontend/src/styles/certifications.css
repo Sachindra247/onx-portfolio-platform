@@ -4694,3 +4694,139 @@
         padding: 12px;
     }
 }
+
+
+/* =========================================
+   VENDOR COMPLIANCE REQUIREMENTS
+   ========================================= */
+
+.vendor-compliance__summary {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin: 16px 0 20px;
+}
+
+.vendor-compliance__metric {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 14px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+}
+
+.vendor-compliance__metric span {
+    font-size: 12px;
+    font-weight: 500;
+    color: #64748b;
+}
+
+.vendor-compliance__metric strong {
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #1e293b;
+}
+
+.vendor-compliance__period {
+    margin: 8px 0 14px;
+    font-size: 12px;
+    color: #64748b;
+}
+
+.vendor-compliance__values {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin: 12px 0;
+}
+
+.vendor-compliance__values>div {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    min-width: 0;
+}
+
+.vendor-compliance__values span {
+    font-size: 12px;
+    color: #64748b;
+}
+
+.vendor-compliance__values strong {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1e293b;
+    overflow-wrap: anywhere;
+}
+
+.vendor-compliance__progress {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin: 16px 0;
+}
+
+.vendor-compliance__progress-track {
+    width: 100%;
+    height: 8px;
+    overflow: hidden;
+    background: #e2e8f0;
+    border-radius: 999px;
+}
+
+.vendor-compliance__progress-fill {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.25s ease;
+}
+
+.vendor-compliance__progress>span {
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.vendor-compliance .vendor-partnership__form h5 {
+    margin: 0 0 16px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.vendor-compliance .vendor-partnership__form [role="alert"] {
+    color: #b91c1c;
+    font-size: 13px;
+    margin: 12px 0;
+}
+
+@media (max-width: 900px) {
+    .vendor-compliance__summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    .vendor-compliance__values {
+        grid-template-columns: 1fr;
+    }
+
+    .vendor-compliance__metric {
+        padding: 12px;
+    }
+
+    .vendor-compliance__metric strong {
+        font-size: 20px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .vendor-compliance__progress-fill {
+        transition: none;
+    }
+}
